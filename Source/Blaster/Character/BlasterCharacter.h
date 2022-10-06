@@ -15,15 +15,24 @@ public:
 	// Sets default values for this character's properties
 	ABlasterCharacter();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+private:
+	// 添加弹簧臂和摄像机
+
+	// 属性宏，让其在任何地方可见，想将相机，吊杆归为一类，叫做相机
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+		class USpringArmComponent* CameraBoom;
+
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+		class UCameraComponent* FollowCamera;
+public:
 };
