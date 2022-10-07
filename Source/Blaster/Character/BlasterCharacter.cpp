@@ -3,6 +3,7 @@
 #include "BlasterCharacter.h"
 
 #include "Camera/CameraComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
 // Sets default values
@@ -25,6 +26,12 @@ ABlasterCharacter::ABlasterCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	// 因为有相机臂控制旋转，所以不需要设置旋转为true
 	FollowCamera->bUsePawnControlRotation = false;
+
+	// 不希望角色与控制器一起旋转
+	bUseControllerRotationYaw = false;
+
+	// 获取角色移动来访问角色移动组件
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 // Called when the game starts or when spawned
