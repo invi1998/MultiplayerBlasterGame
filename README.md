@@ -1,1 +1,1 @@
-# MultiplayerCourseBlasterGame
+# MultiplayerBlasterGame
