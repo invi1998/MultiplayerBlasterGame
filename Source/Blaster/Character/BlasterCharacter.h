@@ -21,6 +21,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -47,5 +49,15 @@ private:
 	// 如果将私有变量设置蓝图只读，那么就需要允许私人访问，这意味着将这个变量暴露给蓝图
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		class UWidgetComponent* OverheadWidget;
+
+	// 武器类的前向声明
+	// 我们想要复制这个变量，这意味着当它在服务器上发生变化时，我们想要同步在客户端上也进行更改，我们可以复制指向武器的指针
+	UPROPERTY(ReplicatedUsing = OnRep_OverlappingWeapon)
+		class AWeapon* OverlappingWeapon;
+
+	UFUNCTION()
+		void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
+
 public:
+	void SetOverlappingWeapon(AWeapon* Weapon);
 };

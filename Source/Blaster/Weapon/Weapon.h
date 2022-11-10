@@ -41,6 +41,14 @@ protected:
 			const FHitResult& SweepResult
 		);
 
+	UFUNCTION()
+		void OnSphereEndOverlap(
+			UPrimitiveComponent* OverlappedComponent,	// 原始组件
+			AActor* OtherActor,
+			UPrimitiveComponent* OtherComp,
+			int32 OtherBodyIndex
+		);
+
 private:
 	// 武器骨架网格
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
@@ -58,4 +66,5 @@ private:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	void ShowPickupWidget(bool bShowWidget);
 };
