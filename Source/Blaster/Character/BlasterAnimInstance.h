@@ -40,4 +40,8 @@ private:
 	// 检测是否有当前装备的武器
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 		bool bWeaponEquipped;
+
+	// 检测是否蹲下
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+		bool bIsCrouched;
 };

@@ -29,6 +29,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	// 各种操作映射函数
+
 	void MoveForward(float Value);
 
 	void MoveRight(float Value);
@@ -38,6 +40,8 @@ protected:
 	void LookUp(float Value);
 
 	void EquipButtonPressed();
+
+	void CrouchButtonPressed();
 
 private:
 	// 添加弹簧臂和摄像机

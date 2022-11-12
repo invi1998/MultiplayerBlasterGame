@@ -39,4 +39,6 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	// 判断当前角色是否装备了武器，将状态赋值给 bWeaponEquipped
 	bWeaponEquipped = BlasterCharacter->IsWeaponEquipped();
+
+	bIsCrouched = BlasterCharacter->bIsCrouched;
 }
