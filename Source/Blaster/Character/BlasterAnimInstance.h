@@ -36,4 +36,8 @@ private:
 	// 是否加速, 用于驱动动画
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 		bool bIsAccelerating;
+
+	// 检测是否有当前装备的武器
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+		bool bWeaponEquipped;
 };
