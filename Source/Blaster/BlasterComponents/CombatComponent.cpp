@@ -26,6 +26,25 @@ void UCombatComponent::BeginPlay()
 	// ...
 }
 
+void UCombatComponent::SetAiming(bool bIsAiming)
+{
+	bAiming = bIsAiming;
+	// 如果是客户端，那么客户端需要通过RPC网络复制调用服务端的函数进行瞄准
+	// 当然，因为RPC只会在客户端进行调用，所以，这里不用判断是客户端还是服务端
+	ServerSetAiming(bIsAiming);
+	//if (!Character->HasAuthority())
+	//{
+	//	// 如果是客户端，那么客户端需要通过RPC网络复制调用服务端的函数进行瞄准
+	//	// 当然，因为RPC只会在客户端进行调用，所以，这里不用判断是客户端还是服务端
+	//	ServerSetAiming(bIsAiming);
+	//}
+}
+
+void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
+{
+	bAiming = bIsAiming;
+}
+
 // Called every frame
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
@@ -40,6 +59,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 	// 注册装备的武器
 	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
+	DOREPLIFETIME(UCombatComponent, bAiming);
 }
 
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)

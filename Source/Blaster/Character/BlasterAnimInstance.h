@@ -44,4 +44,8 @@ private:
 	// ¼ì²âÊÇ·ñ¶×ÏÂ
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 		bool bIsCrouched;
+
+	// ¼ì²âÃé×¼
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+		bool bAiming;
 };

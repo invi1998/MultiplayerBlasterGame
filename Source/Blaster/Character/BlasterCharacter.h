@@ -39,9 +39,17 @@ protected:
 
 	void LookUp(float Value);
 
+	// 按E装备武器
 	void EquipButtonPressed();
 
+	// 按ctrl蹲伏和起身
 	void CrouchButtonPressed();
+
+	// 鼠标右键瞄准
+	void AimButtonPressed();
+
+	// 松开右键瞄准
+	void AimButtonReleased();
 
 private:
 	// 添加弹簧臂和摄像机
@@ -76,4 +84,5 @@ public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	// 是否装备武器
 	bool IsWeaponEquipped();
+	bool IsAiming();
 };
