@@ -26,6 +26,9 @@ class BLASTER_API AWeapon : public AActor
 public:
 	// Sets default values for this actor's properties
 	AWeapon();
+	virtual void Tick(float DeltaTime) override;
+	void ShowPickupWidget(bool bShowWidget);
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 	// Called when the game starts or when spawned
@@ -57,18 +60,19 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 		class USphereComponent* AreaSphere;
 
-	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
+	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "Weapon Properties")
 		EWeaponState WeaponState;
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 		class UWidgetComponent* PickupWidget;
 
+	UFUNCTION()
+		void OnRep_WeaponState();
+
 public:
 	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-	void ShowPickupWidget(bool bShowWidget);
-	FORCEINLINE void SetWeaponState(EWeaponState State)
-	{
-		WeaponState = State;
-	}
+
+	void SetWeaponState(EWeaponState State);
+
+	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
 };
