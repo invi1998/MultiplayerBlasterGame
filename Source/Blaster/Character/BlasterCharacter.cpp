@@ -10,6 +10,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -80,6 +81,7 @@ void ABlasterCharacter::BeginPlay()
 void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	AimOffset(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -173,6 +175,43 @@ void ABlasterCharacter::AimButtonReleased()
 	{
 		Combat->SetAiming(false);
 	}
+}
+
+// 当我移动鼠标时，我希望角色的上半部分在站立状态下能按鼠标移动偏移量进行环顾四周的动作，
+// 当偏移量超过一定限度（90°），我希望角色进行转向
+void ABlasterCharacter::AimOffset(float DeltaTime)
+{
+	// 如果角色没有装备武器，那么就退出
+	if (Combat && Combat->EquippedWeapon == nullptr) return;
+	// 获取角色速度矢量
+	FVector Velocity = GetVelocity();
+	Velocity.Z = 0.f;
+	float Spead = Velocity.Size();
+	bool bIsInAir = GetCharacterMovement()->IsFalling();
+
+	// 当角色处于站立状态，并且没有跳跃（离地）
+	if (Spead == 0.0f && !bIsInAir)
+	{
+		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
+		AO_Yaw = DeltaAimRotation.Yaw;
+		bUseControllerRotationYaw = false;
+	}
+
+	// 跑动或者跳跃（离地）
+	if (Spead > 0.f || bIsInAir)
+	{
+		// 当我们的角色跑步或者在空中时（当装备了武器的前提下），他会保存每一帧的旋转信息
+		// 这个旋转信息将作为一个增量信息传递给上一个if使用
+		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		// 同时也应该将AO_Yaw置空清0，因为我们会在上面进行计算
+		AO_Yaw = 0.f;
+		// 同时一旦我们开始运动，我们就需要继续使用控制器旋转
+		bUseControllerRotationYaw = true;
+	}
+
+	// 获取仰角并设置
+	AO_Pitch = GetBaseAimRotation().Pitch;
 }
 
 void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)

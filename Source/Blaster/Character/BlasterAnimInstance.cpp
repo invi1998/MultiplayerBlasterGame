@@ -73,4 +73,7 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	// DeltaTime 实际是距离上一帧调用过去了多久,如果帧率是稳定的,那么此数值为 1/fps ,例fps=100时,则DeltaTime=1/100=0.01
 	// 实际运行帧率一定是不稳定的, 则可以用每秒需要的变化量, 乘以DeltaTime来平衡掉帧率的影响
 	// 在UE5中，它被更名为 DeltaSeconds
+
+	AO_Yaw = BlasterCharacter->GetAO_Yaw();
+	AO_Pitch = BlasterCharacter->GetAO_Pitch();
 }

@@ -51,6 +51,9 @@ protected:
 	// 松开右键瞄准
 	void AimButtonReleased();
 
+	// 设置目标偏移量
+	void AimOffset(float DeltaTime);
+
 private:
 	// 添加弹簧臂和摄像机
 
@@ -80,9 +83,18 @@ private:
 	UFUNCTION(Server, Reliable)
 		void ServerEquipButtonPressed();
 
+	float AO_Yaw;
+
+	float AO_Pitch;
+
+	// 起始旋转信息
+	FRotator StartingAimRotation;
+
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	// 是否装备武器
 	bool IsWeaponEquipped();
 	bool IsAiming();
+	FORCEINLINE float GetAO_Yaw() { return AO_Yaw; }
+	FORCEINLINE float GetAO_Pitch() { return AO_Pitch; }
 };
