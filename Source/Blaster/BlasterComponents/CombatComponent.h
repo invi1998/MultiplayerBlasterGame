@@ -38,8 +38,17 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 		class AWeapon* EquippedWeapon;
 
+	// 瞄准
 	UPROPERTY(Replicated)
 		bool bAiming;
+
+	// 行进速率
+	UPROPERTY(EditAnywhere)
+		float BaseWalkSpeed;
+
+	// 瞄准行径速率
+	UPROPERTY(EditAnywhere)
+		float AimWalkSpeed;
 
 public:
 	// Called every frame
