@@ -215,7 +215,7 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 	//if (HasAuthority() && !IsLocallyControlled())
 	//{
 	//	// 利用UE_LOG查看在服务端出现仰角错误bug的数据
-	//	UE_LOG(LogTemp, Warning, TEXT("AO_Pitch : %f"), AO_Pitch);
+	//	UE_LOG(LogTemp, Warning, TEXT("AO_Yaw : %f"), AO_Yaw);
 	//	// 可以看到，我们的俯视角低头看地板的时候，我们服务端收到的数据确实270-360之间的数据，这不是我们设定中的我们的【-90,0）
 	//}
 	// !IsLocallyControlled() 这个判断就是确保不是在本机器上，非本机器就代表经过了RPC，数据被压缩过，需要进行还原映射
