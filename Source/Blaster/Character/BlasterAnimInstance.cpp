@@ -3,6 +3,7 @@
 #include "BlasterAnimInstance.h"
 
 #include "BlasterCharacter.h"
+#include "Blaster/Weapon/Weapon.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -40,7 +41,7 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	// 判断当前角色是否装备了武器，将状态赋值给 bWeaponEquipped
 	bWeaponEquipped = BlasterCharacter->IsWeaponEquipped();
-
+	EquippedWeapon = BlasterCharacter->GetEquippedWeapon();
 	bIsCrouched = BlasterCharacter->bIsCrouched;
 
 	bAiming = BlasterCharacter->IsAiming();
@@ -76,4 +77,21 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	AO_Yaw = BlasterCharacter->GetAO_Yaw();
 	AO_Pitch = BlasterCharacter->GetAO_Pitch();
+
+	if (bWeaponEquipped && EquippedWeapon && EquippedWeapon->GetWeaponMesh() && BlasterCharacter->GetMesh())
+	{
+		// 我们需要从我们装备的武器上的插槽中获取插槽转换
+		// 将武器插槽的世界空间变换赋值给我们的成员变量 LeftHandTransform
+		LeftHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("LeftHandSocket"), ERelativeTransformSpace::RTS_World);
+		// 现在是在世界坐标中，但是我们实际要转换的是我们骨骼上的坐标
+		FVector OutPosition;
+		FRotator OutRotation;
+		// TransformFromBoneSpace这个函数需要传入骨骼名称
+		BlasterCharacter->GetMesh()->TransformToBoneSpace(FName("hand_r"), LeftHandTransform.GetLocation(), FRotator::ZeroRotator, OutPosition, OutRotation);
+		// 在调用完这个函数后，变换到骨骼空间，这个向量和旋转器将会存储左手握在武器插槽在上的正确位置和旋转数据，
+		// 然后将这两个数据设置给我们的左手变换
+		LeftHandTransform.SetLocation(OutPosition);
+		LeftHandTransform.SetRotation(FQuat(OutRotation));
+		// 自此，我们就可以在蓝图中使用这个 LeftHandTransform
+	}
 }
