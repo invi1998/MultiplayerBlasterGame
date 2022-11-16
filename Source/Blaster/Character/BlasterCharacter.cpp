@@ -198,7 +198,14 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
 		AO_Yaw = DeltaAimRotation.Yaw;
-		bUseControllerRotationYaw = false;
+		// 如果角色没有原地转身动作，那么这个值就直接赋值为 AO_Yaw
+		if (TurningInPlace == ETurningInPlace::ETIP_NotTurning)
+		{
+			InterpAO_Yaw = AO_Yaw;
+		}
+		// 如果角色有做转身动作，那么就需要对该值进行差值处理，这一步可以放在 TurnInPlace 中去做
+
+		bUseControllerRotationYaw = true;
 		// 原地转弯检测
 		TurnInPlace(DeltaTime);
 	}
@@ -300,6 +307,18 @@ void ABlasterCharacter::TurnInPlace(float DeltaTime)
 	else if (AO_Yaw < -90.f)
 	{
 		TurningInPlace = ETurningInPlace::ETIP_Left;
+	}
+	if (TurningInPlace != ETurningInPlace::ETIP_NotTurning)
+	{
+		// 差值处理，最后一个参数决定了你的转身动作有多快(值越小，动作越灵敏越快）
+		InterpAO_Yaw = FMath::FInterpTo(InterpAO_Yaw, 0.0f, DeltaTime, 4.f);
+		AO_Yaw = InterpAO_Yaw;
+		if (FMath::Abs(AO_Yaw) < 15.f)
+		{
+			// 如果原地转弯低于15°,那么就不再进行转弯
+			TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+			StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.0f);
+		}
 	}
 }
 
