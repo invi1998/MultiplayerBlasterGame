@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Blaster/BlasterTypes/TurningInPlace.h"
 #include "BlasterCharacter.generated.h"
 
 UCLASS()
@@ -90,6 +91,10 @@ private:
 	// 起始旋转信息
 	FRotator StartingAimRotation;
 
+	ETurningInPlace TurningInPlace;
+
+	void TurnInPlace(float DeltaTime);
+
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	// 是否装备武器
@@ -98,4 +103,5 @@ public:
 	FORCEINLINE float GetAO_Yaw() { return AO_Yaw; }
 	FORCEINLINE float GetAO_Pitch() { return AO_Pitch; }
 	AWeapon* GetEquippedWeapon();
+	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 };

@@ -45,6 +45,7 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	bIsCrouched = BlasterCharacter->bIsCrouched;
 
 	bAiming = BlasterCharacter->IsAiming();
+	TurningInPlace = BlasterCharacter->GetTurningInPlace();
 
 	// offset Yaw for Strafing (获取扫射动作的偏移Yaw)
 	// 为了得到倾斜角信息，我们需要知道我们正在移动的方向以及我们移动方向瞄准的控制器指向的方向

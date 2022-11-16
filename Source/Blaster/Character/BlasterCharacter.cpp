@@ -52,6 +52,9 @@ ABlasterCharacter::ABlasterCharacter()
 	// 设置角色胶囊体不会阻挡摄像机，设置骨骼不会阻挡摄像机
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
+	// 设置角色默认姿势（不转弯）
+	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 }
 
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -196,6 +199,8 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
 		AO_Yaw = DeltaAimRotation.Yaw;
 		bUseControllerRotationYaw = false;
+		// 原地转弯检测
+		TurnInPlace(DeltaTime);
 	}
 
 	// 跑动或者跳跃（离地）
@@ -208,6 +213,7 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		AO_Yaw = 0.f;
 		// 同时一旦我们开始运动，我们就需要继续使用控制器旋转
 		bUseControllerRotationYaw = true;
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	}
 
 	// 获取仰角并设置
@@ -281,6 +287,19 @@ void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 	if (Combat)
 	{
 		Combat->EquipWeapon(OverlappingWeapon);
+	}
+}
+
+void ABlasterCharacter::TurnInPlace(float DeltaTime)
+{
+	// 如果 AO_Yaw大于90，我们应该向右转。小于-90，应该向左转
+	if (AO_Yaw > 90.f)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_Right;
+	}
+	else if (AO_Yaw < -90.f)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_Left;
 	}
 }
 
