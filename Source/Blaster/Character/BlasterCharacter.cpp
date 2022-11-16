@@ -55,6 +55,10 @@ ABlasterCharacter::ABlasterCharacter()
 
 	// 设置角色默认姿势（不转弯）
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+
+	// 设置角色更新频率和最小更新频率
+	NetUpdateFrequency = 66.f;
+	MinNetUpdateFrequency = 33.f;
 }
 
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
