@@ -55,6 +55,9 @@ protected:
 	// 设置目标偏移量
 	void AimOffset(float DeltaTime);
 
+	// 原本Actor的jump逻辑是，在蹲下的时候是不可以跳跃的，为了实现蹲下的时候，按空格可以取消蹲伏，这里需要重写jump
+	virtual void Jump() override;
+
 private:
 	// 添加弹簧臂和摄像机
 
