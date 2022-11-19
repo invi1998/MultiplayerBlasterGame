@@ -32,6 +32,8 @@ protected:
 	UFUNCTION()
 		void OnRep_EquippedWeapon();
 
+	void FireButtonPressed(bool bPressed);
+
 private:
 	class ABlasterCharacter* Character;
 
@@ -49,6 +51,9 @@ private:
 	// 瞄准行径速率
 	UPROPERTY(EditAnywhere)
 		float AimWalkSpeed;
+
+	// 开火按钮是否按下
+	bool bFireButtonPressed;
 
 public:
 	// Called every frame

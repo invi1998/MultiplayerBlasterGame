@@ -26,6 +26,9 @@ public:
 
 	virtual void PostInitializeComponents() override;
 
+	// 播放开火蒙太奇动画
+	void PlayFireMontage(bool bAiming);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -57,6 +60,11 @@ protected:
 
 	// 原本Actor的jump逻辑是，在蹲下的时候是不可以跳跃的，为了实现蹲下的时候，按空格可以取消蹲伏，这里需要重写jump
 	virtual void Jump() override;
+
+	// 点击开火（鼠标左键按下）
+	void FireButtonPressed();
+	// 点击开火（鼠标左键抬起）
+	void FireButtonReleased();
 
 private:
 	// 添加弹簧臂和摄像机
@@ -98,6 +106,10 @@ private:
 	ETurningInPlace TurningInPlace;
 
 	void TurnInPlace(float DeltaTime);
+
+	// 定义一个开火武器的动画蒙太奇指针
+	UPROPERTY(EditAnywhere, Category = Combat)
+		class UAnimMontage* FireWeaponMontage;
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);

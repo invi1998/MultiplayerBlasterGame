@@ -25,7 +25,7 @@ protected:
 private:
 	// 添加一个碰撞箱
 	// 设置可编辑
-	UFUNCTION(EditAnywhere)
+	UPROPERTY(EditAnywhere)
 		class UBoxComponent* CollisionBox;
 
 public:
