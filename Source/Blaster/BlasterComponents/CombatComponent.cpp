@@ -67,9 +67,12 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 	// 战斗组件需要知道按下和抬起开火按钮的时间
 	bFireButtonPressed = bPressed;
 
+	if (EquippedWeapon == nullptr) return;
+
 	if (Character && bFireButtonPressed)
 	{
 		Character->PlayFireMontage(bAiming);
+		EquippedWeapon->Fire();
 	}
 }
 

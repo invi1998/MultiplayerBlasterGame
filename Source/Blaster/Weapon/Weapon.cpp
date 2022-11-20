@@ -68,6 +68,15 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	DOREPLIFETIME(AWeapon, WeaponState);
 }
 
+void AWeapon::Fire()
+{
+	if (FireAnimation)
+	{
+		// 传入开火动画，设置取消循环播放
+		WeaponMesh->PlayAnimation(FireAnimation, false);
+	}
+}
+
 void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
