@@ -9,16 +9,17 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
+#include "DrawDebugHelpers.h"
 
 // 定义走线长度
-#define TRACE_LENGTH = 80000.f
+#define TRACE_LENGTH 80000.f
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
 	BaseWalkSpeed = 600.f;
@@ -104,8 +105,8 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(
 		UGameplayStatics::GetPlayerController(this, 0),
 		CrosshairLocation,
-		CrosshairWorldDirection,
-		CrosshairWorldPosition
+		CrosshairWorldPosition,
+		CrosshairWorldDirection
 	);
 
 	// 判断坐标是否转化成功
@@ -121,6 +122,24 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 			End,
 			ECollisionChannel::ECC_Visibility
 		);
+
+		// 如果没有跟踪到任何结果（比如瞄准天空，瞄准的物品超出80000等)
+		// 这种情况下，我们就将这个结果设置为End向量
+		if (!TraceHitResult.bBlockingHit)
+		{
+			TraceHitResult.ImpactPoint = End;
+		}
+		else
+		{
+			// 使用线性轨迹绘制调试球体
+			DrawDebugSphere(
+				GetWorld(),
+				TraceHitResult.ImpactPoint,
+				12.f,
+				12,
+				FColor::Red
+			);
+		}
 	}
 }
 
@@ -156,6 +175,8 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+	FHitResult HitResult;
+	TraceUnderCrosshairs(HitResult);
 }
 
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
