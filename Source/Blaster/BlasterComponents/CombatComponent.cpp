@@ -8,6 +8,10 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Kismet/GameplayStatics.h"
+
+// 定义走线长度
+#define TRACE_LENGTH = 80000.f
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -79,6 +83,44 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 	if (bFireButtonPressed)
 	{
 		ServerFire();
+	}
+}
+
+void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
+{
+	// 获取视口大小
+	FVector2D ViewportSize;
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+	}
+
+	// 射击准心位置
+	FVector2D CrosshairLocation(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+
+	// 将屏幕坐标转化为世界坐标
+	FVector CrosshairWorldPosition;		// 准心世界坐标向量
+	FVector CrosshairWorldDirection;	// 准心世界方向向量
+	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(
+		UGameplayStatics::GetPlayerController(this, 0),
+		CrosshairLocation,
+		CrosshairWorldDirection,
+		CrosshairWorldPosition
+	);
+
+	// 判断坐标是否转化成功
+	if (bScreenToWorld)
+	{
+		const FVector Start = CrosshairWorldPosition;
+
+		FVector End = Start + CrosshairWorldDirection * TRACE_LENGTH;
+
+		GetWorld()->LineTraceSingleByChannel(
+			TraceHitResult,
+			Start,
+			End,
+			ECollisionChannel::ECC_Visibility
+		);
 	}
 }
 

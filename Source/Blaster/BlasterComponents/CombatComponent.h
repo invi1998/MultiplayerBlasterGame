@@ -42,6 +42,8 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 		void MuticastFire();
 
+	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
+
 private:
 	class ABlasterCharacter* Character;
 
