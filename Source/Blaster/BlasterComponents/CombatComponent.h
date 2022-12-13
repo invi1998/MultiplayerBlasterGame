@@ -65,6 +65,9 @@ private:
 	// 开火按钮是否按下
 	bool bFireButtonPressed;
 
+	// 保存准心瞄准的目标
+	FVector HitTarget;
+
 public:
 	// Called every frame
 };

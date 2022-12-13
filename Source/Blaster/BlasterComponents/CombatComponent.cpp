@@ -128,10 +128,13 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		if (!TraceHitResult.bBlockingHit)
 		{
 			TraceHitResult.ImpactPoint = End;
+			// 如果目标没有命中
+			HitTarget = End;
 		}
 		else
 		{
 			// 使用线性轨迹绘制调试球体
+			HitTarget = TraceHitResult.ImpactPoint;
 			DrawDebugSphere(
 				GetWorld(),
 				TraceHitResult.ImpactPoint,
@@ -156,7 +159,7 @@ void UCombatComponent::MuticastFire_Implementation()
 	if (Character)
 	{
 		Character->PlayFireMontage(bAiming);
-		EquippedWeapon->Fire();
+		EquippedWeapon->Fire(HitTarget);
 	}
 }
 
