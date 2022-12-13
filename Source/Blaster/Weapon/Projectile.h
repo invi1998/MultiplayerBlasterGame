@@ -22,6 +22,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(VisibleAnywhere)
+		class UProjectileMovementComponent* ProjectileMovementComponent;
+
 private:
 	// 添加一个碰撞箱
 	// 设置可编辑
