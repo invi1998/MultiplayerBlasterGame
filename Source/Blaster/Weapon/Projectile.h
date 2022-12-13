@@ -25,6 +25,13 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 		class UProjectileMovementComponent* ProjectileMovementComponent;
 
+	// 示踪器 （显示子弹运动轨迹的粒子特效）
+	UPROPERTY(EditAnywhere)
+		class UParticleSystem* Tracer;
+
+	// 存储tracer的粒子系统组件
+	class UParticleSystemComponent* TracerComponent;
+
 private:
 	// 添加一个碰撞箱
 	// 设置可编辑
