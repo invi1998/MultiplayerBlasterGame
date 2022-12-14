@@ -18,9 +18,21 @@ public:
 	AProjectile();
 	virtual void Tick(float DeltaTime) override;
 
+	virtual void Destroyed() override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	// 子弹命中逻辑处理函数
+	UFUNCTION()
+		virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+private:
+	// 添加一个碰撞箱
+	// 设置可编辑
+	UPROPERTY(EditAnywhere)
+		class UBoxComponent* CollisionBox;
 
 	UPROPERTY(VisibleAnywhere)
 		class UProjectileMovementComponent* ProjectileMovementComponent;
@@ -32,11 +44,13 @@ protected:
 	// 存储tracer的粒子系统组件
 	class UParticleSystemComponent* TracerComponent;
 
-private:
-	// 添加一个碰撞箱
-	// 设置可编辑
+	// 子弹命中的粒子特效
 	UPROPERTY(EditAnywhere)
-		class UBoxComponent* CollisionBox;
+		UParticleSystem* ImpactParticles;
+
+	// 子弹命中的提示音
+	UPROPERTY(EditAnywhere)
+		class USoundCue* ImpactSound;
 
 public:
 	// Called every frame
