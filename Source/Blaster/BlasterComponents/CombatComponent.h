@@ -37,10 +37,10 @@ protected:
 	// 创建server RPC
 	// 这个函数被设计为从客户端调用，然后再服务端进行执行
 	UFUNCTION(Server, Reliable)
-		void ServerFire();
+		void ServerFire(const FVector_NetQuantize& TracerHitTarget);
 
 	UFUNCTION(NetMulticast, Reliable)
-		void MuticastFire();
+		void MuticastFire(const FVector_NetQuantize& TracerHitTarget);
 
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
@@ -66,7 +66,7 @@ private:
 	bool bFireButtonPressed;
 
 	// 保存准心瞄准的目标
-	FVector HitTarget;
+	//FVector HitTarget;
 
 public:
 	// Called every frame

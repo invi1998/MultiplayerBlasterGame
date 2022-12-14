@@ -47,6 +47,14 @@ void UCombatComponent::BeginPlay()
 	}
 }
 
+// Called every frame
+void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	// ...
+}
+
 void UCombatComponent::SetAiming(bool bIsAiming)
 {
 	bAiming = bIsAiming;
@@ -83,7 +91,9 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 
 	if (bFireButtonPressed)
 	{
-		ServerFire();
+		FHitResult HitResult;
+		TraceUnderCrosshairs(HitResult);
+		ServerFire(HitResult.ImpactPoint);
 	}
 }
 
@@ -127,31 +137,18 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		// 这种情况下，我们就将这个结果设置为End向量
 		if (!TraceHitResult.bBlockingHit)
 		{
-			TraceHitResult.ImpactPoint = End;
 			// 如果目标没有命中
-			HitTarget = End;
-		}
-		else
-		{
-			// 使用线性轨迹绘制调试球体
-			HitTarget = TraceHitResult.ImpactPoint;
-			DrawDebugSphere(
-				GetWorld(),
-				TraceHitResult.ImpactPoint,
-				12.f,
-				12,
-				FColor::Red
-			);
+			TraceHitResult.ImpactPoint = End;
 		}
 	}
 }
 
-void UCombatComponent::ServerFire_Implementation()
+void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TracerHitTarget)
 {
-	MuticastFire();
+	MuticastFire(TracerHitTarget);
 }
 
-void UCombatComponent::MuticastFire_Implementation()
+void UCombatComponent::MuticastFire_Implementation(const FVector_NetQuantize& TracerHitTarget)
 {
 	// 目前为止，这个函数要做的就是播放开火蒙太奇动画和播放开火特效
 	if (EquippedWeapon == nullptr) return;
@@ -159,7 +156,7 @@ void UCombatComponent::MuticastFire_Implementation()
 	if (Character)
 	{
 		Character->PlayFireMontage(bAiming);
-		EquippedWeapon->Fire(HitTarget);
+		EquippedWeapon->Fire(TracerHitTarget);
 	}
 }
 
@@ -170,16 +167,6 @@ void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 	{
 		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
 	}
-}
-
-// Called every frame
-void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
-	FHitResult HitResult;
-	TraceUnderCrosshairs(HitResult);
 }
 
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
