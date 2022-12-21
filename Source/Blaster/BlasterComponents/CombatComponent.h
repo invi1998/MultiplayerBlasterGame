@@ -72,6 +72,14 @@ private:
 	// 保存准心瞄准的目标
 	//FVector HitTarget;
 
+	/*
+	 * HUD 和 十字准心
+	 * 这个控制因子作用就是基于角色移动速度来控制我们的十字准心的伸展速率
+	 * 基于角色是否浮空
+	 */
+	float CrosshairVelocityFacor;
+	float CrosshairInAirFactor;
+
 public:
 	// Called every frame
 };

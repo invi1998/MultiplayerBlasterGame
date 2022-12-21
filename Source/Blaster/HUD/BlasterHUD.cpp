@@ -14,37 +14,43 @@ void ABlasterHUD::DrawHUD()
 
 		const FVector2D ViewPortCenter(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
 
+		float SpreaScaled = CrosshairSpreadMax * HUDPackage.CrosshairSpread;
 		if (HUDPackage.CrosshairsCenter)
 		{
-			DrawCrosshair(HUDPackage.CrosshairsCenter, ViewPortCenter);
+			FVector2D Spread(0.f, 0.f);
+			DrawCrosshair(HUDPackage.CrosshairsCenter, ViewPortCenter, Spread);
 		}
 		if (HUDPackage.CrosshairsLeft)
 		{
-			DrawCrosshair(HUDPackage.CrosshairsLeft, ViewPortCenter);
+			FVector2D Spread(-SpreaScaled, 0.f);
+			DrawCrosshair(HUDPackage.CrosshairsLeft, ViewPortCenter, Spread);
 		}
 		if (HUDPackage.CrosshairsRight)
 		{
-			DrawCrosshair(HUDPackage.CrosshairsRight, ViewPortCenter);
+			FVector2D Spread(SpreaScaled, 0.f);
+			DrawCrosshair(HUDPackage.CrosshairsRight, ViewPortCenter, Spread);
 		}
 		if (HUDPackage.CrosshairsBottom)
 		{
-			DrawCrosshair(HUDPackage.CrosshairsBottom, ViewPortCenter);
+			FVector2D Spread(0.f, SpreaScaled);
+			DrawCrosshair(HUDPackage.CrosshairsBottom, ViewPortCenter, Spread);
 		}
 		if (HUDPackage.CrosshairsTop)
 		{
-			DrawCrosshair(HUDPackage.CrosshairsTop, ViewPortCenter);
+			FVector2D Spread(0.f, -SpreaScaled);
+			DrawCrosshair(HUDPackage.CrosshairsTop, ViewPortCenter, Spread);
 		}
 	}
 }
 
-void ABlasterHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter)
+void ABlasterHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread)
 {
 	const float TextureWidth = Texture->GetSizeX();
 	const float TextureHeight = Texture->GetSizeY();
 	// 绘制点中心，需要在屏幕中心，按纹理向左移动TextureWidth/2, 纹理高度/2
 	const FVector2D TextureDrawPoint(
-		ViewportCenter.X - (TextureWidth / 2.f),
-		ViewportCenter.Y - (TextureHeight / 2.f)
+		ViewportCenter.X - (TextureWidth / 2.f) + Spread.X,
+		ViewportCenter.Y - (TextureHeight / 2.f) + Spread.Y
 	);
 
 	DrawTexture(
