@@ -43,6 +43,13 @@ public:
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
 		class UTexture2D* CrosshairsBottom;
 
+	// 瞄准时的武器缩放 FOV
+	UPROPERTY(EditAnywhere)
+		float ZoomedFOV = 30.f;
+
+	UPROPERTY(EditAnywhere)
+		float ZoomInterpSpeed = 20.f;
+
 public:
 	// Sets default values for this actor's properties
 	AWeapon();
@@ -104,4 +111,7 @@ public:
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
 
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
+
+	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
+	FORCEINLINE float GetZoomedInterpSpeed() const { return ZoomInterpSpeed; }
 };

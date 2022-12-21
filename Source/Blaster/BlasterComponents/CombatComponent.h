@@ -82,6 +82,23 @@ private:
 
 	FVector HitTarget;
 
+	/*
+	 * Aiming and FOV
+	 */
+
+	 // 不瞄准时的视野。设置为相机的基本视野或FMV并开始播放。
+	float DefaultFOV;
+
+	float CurrentFOV;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+		float ZoomedFOV = 30.f;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+		float ZoomInterpSpeed = 20.f;
+
+	void InterpFOV(float DeltaTime);
+
 public:
 	// Called every frame
 };
