@@ -80,6 +80,8 @@ private:
 	float CrosshairVelocityFacor;
 	float CrosshairInAirFactor;
 
+	FVector HitTarget;
+
 public:
 	// Called every frame
 };
