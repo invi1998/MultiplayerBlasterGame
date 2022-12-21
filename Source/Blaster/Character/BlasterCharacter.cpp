@@ -52,6 +52,7 @@ ABlasterCharacter::ABlasterCharacter()
 	// 设置角色胶囊体不会阻挡摄像机，设置骨骼不会阻挡摄像机
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 	// 设置角色旋转速率，让其转身更自然
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 0.f, 850.f);
 

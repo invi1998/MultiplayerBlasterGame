@@ -21,6 +21,7 @@ public:
 	class UTexture2D* CrosshairsTop;
 	class UTexture2D* CrosshairsBottom;
 	float CrosshairSpread;		// 该值用于控制十字准心应该分散多少
+	FLinearColor CrosshairsColor;	// 十字准心的颜色
 };
 
 /**
@@ -37,7 +38,7 @@ public:
 private:
 	FHUDPackage HUDPackage;
 
-	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread);
+	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor Color);
 
 	UPROPERTY(EditAnywhere)
 		float CrosshairSpreadMax = 16.f;
