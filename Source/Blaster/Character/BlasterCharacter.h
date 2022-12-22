@@ -30,6 +30,10 @@ public:
 	// 播放开火蒙太奇动画
 	void PlayFireMontage(bool bAiming);
 
+	// 人物受击rpc函数（多播）
+	UFUNCTION(NetMulticast, Unreliable)
+		void MuticastHit();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -66,6 +70,9 @@ protected:
 	void FireButtonPressed();
 	// 点击开火（鼠标左键抬起）
 	void FireButtonReleased();
+
+	// 播放人物受击的蒙太奇动画
+	void PlayHitReactMontage();
 
 private:
 	// 添加弹簧臂和摄像机
@@ -108,9 +115,13 @@ private:
 
 	void TurnInPlace(float DeltaTime);
 
-	// 定义一个开火武器的动画蒙太奇指针
+	// 武器开火的动画蒙太奇
 	UPROPERTY(EditAnywhere, Category = Combat)
 		class UAnimMontage* FireWeaponMontage;
+
+	// 人物受击动作的动画蒙太奇
+	UPROPERTY(EditAnywhere, Category = Combat)
+		class UAnimMontage* HitReactMontage;
 
 	// 如果角色靠太近就隐藏摄像头
 	void HidCameraIfCharacterClose();
