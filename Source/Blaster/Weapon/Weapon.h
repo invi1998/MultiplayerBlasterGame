@@ -50,6 +50,17 @@ public:
 	UPROPERTY(EditAnywhere)
 		float ZoomInterpSpeed = 20.f;
 
+	/*
+	 * 自动开火
+	 */
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+		float FireDelay = 0.15f;
+
+	// 标志是否是自动武器（自动开火的武器）
+	UPROPERTY(EditAnywhere, Category = Combat)
+		bool bAutomatic = true;
+
 public:
 	// Sets default values for this actor's properties
 	AWeapon();

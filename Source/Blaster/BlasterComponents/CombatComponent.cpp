@@ -13,6 +13,7 @@
 #include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Blaster/HUD/BlasterHUD.h"
 #include "Camera/CameraComponent.h"
+#include "TimerManager.h"
 
 // 定义走线长度
 #define TRACE_LENGTH 80000.f
@@ -73,6 +74,32 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	}
 }
 
+void UCombatComponent::FireButtonPressed(bool bPressed)
+{
+	// 战斗组件需要知道按下和抬起开火按钮的时间
+	bFireButtonPressed = bPressed;
+
+	if (bFireButtonPressed)
+	{
+		Fire();
+	}
+}
+
+void UCombatComponent::Fire()
+{
+	if (bCanFire)
+	{
+		bCanFire = false;
+		ServerFire(HitTarget);
+
+		if (EquippedWeapon)
+		{
+			CrosshairShootingFactor = 0.75f;
+		}
+		StartFireTimer();
+	}
+}
+
 void UCombatComponent::SetAiming(bool bIsAiming)
 {
 	bAiming = bIsAiming;
@@ -91,6 +118,77 @@ void UCombatComponent::SetAiming(bool bIsAiming)
 	}
 }
 
+void UCombatComponent::StartFireTimer()
+{
+	if (EquippedWeapon == nullptr && Character == nullptr) return;
+	Character->GetWorldTimerManager().SetTimer(
+		FireTimer,
+		this,
+		&UCombatComponent::FireTimerFinished,
+		EquippedWeapon->FireDelay);
+}
+
+void UCombatComponent::FireTimerFinished()
+{
+	if (EquippedWeapon == nullptr) return;
+
+	bCanFire = true;
+	if (bFireButtonPressed && EquippedWeapon->bAutomatic)
+	{
+		Fire();
+	}
+}
+
+void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TracerHitTarget)
+{
+	MuticastFire(TracerHitTarget);
+}
+
+void UCombatComponent::MuticastFire_Implementation(const FVector_NetQuantize& TracerHitTarget)
+{
+	// 目前为止，这个函数要做的就是播放开火蒙太奇动画和播放开火特效
+	if (EquippedWeapon == nullptr) return;
+
+	if (Character)
+	{
+		Character->PlayFireMontage(bAiming);
+		EquippedWeapon->Fire(TracerHitTarget);
+	}
+}
+
+void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
+{
+	bAiming = bIsAiming;
+	if (Character)
+	{
+		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
+	}
+}
+
+void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
+{
+	if (Character == nullptr || WeaponToEquip == nullptr) return;
+
+	EquippedWeapon = WeaponToEquip;
+	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+
+	const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
+
+	if (HandSocket)
+	{
+		HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
+	}
+
+	EquippedWeapon->SetOwner(Character);
+
+	// 一旦bOrientRotationToMovement设置为True后，角色的朝向会转向移动的方向
+	// 一旦bOrientRotationToMovement 为False，但是bUseControllerDesiredRotation设置为True。
+	// 那么在角色移动中，如果Controller的朝向和角色朝向不一致，
+	// 角色朝向就会平滑的按照RotationRate里配置的各个轴的旋转速率来旋转角色的Rotation到Controller的朝向。
+	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+	Character->bUseControllerRotationYaw = true;
+}
+
 void UCombatComponent::OnRep_EquippedWeapon()
 {
 	if (EquippedWeapon && Character)
@@ -99,24 +197,6 @@ void UCombatComponent::OnRep_EquippedWeapon()
 		// （通过是否装备武器来解决客户端定向移动设置问题，避免添加额外的RPC变量的开销）
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
-	}
-}
-
-void UCombatComponent::FireButtonPressed(bool bPressed)
-{
-	// 战斗组件需要知道按下和抬起开火按钮的时间
-	bFireButtonPressed = bPressed;
-
-	if (bFireButtonPressed)
-	{
-		FHitResult HitResult;
-		TraceUnderCrosshairs(HitResult);
-		ServerFire(HitResult.ImpactPoint);
-
-		if (EquippedWeapon)
-		{
-			CrosshairShootingFactor = 0.75f;
-		}
 	}
 }
 
@@ -264,54 +344,4 @@ void UCombatComponent::InterpFOV(float DeltaTime)
 	{
 		Character->GetFollowCamera()->SetFieldOfView(CurrentFOV);
 	}
-}
-
-void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TracerHitTarget)
-{
-	MuticastFire(TracerHitTarget);
-}
-
-void UCombatComponent::MuticastFire_Implementation(const FVector_NetQuantize& TracerHitTarget)
-{
-	// 目前为止，这个函数要做的就是播放开火蒙太奇动画和播放开火特效
-	if (EquippedWeapon == nullptr) return;
-
-	if (Character)
-	{
-		Character->PlayFireMontage(bAiming);
-		EquippedWeapon->Fire(TracerHitTarget);
-	}
-}
-
-void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
-{
-	bAiming = bIsAiming;
-	if (Character)
-	{
-		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
-	}
-}
-
-void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
-{
-	if (Character == nullptr || WeaponToEquip == nullptr) return;
-
-	EquippedWeapon = WeaponToEquip;
-	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
-
-	const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
-
-	if (HandSocket)
-	{
-		HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
-	}
-
-	EquippedWeapon->SetOwner(Character);
-
-	// 一旦bOrientRotationToMovement设置为True后，角色的朝向会转向移动的方向
-	// 一旦bOrientRotationToMovement 为False，但是bUseControllerDesiredRotation设置为True。
-	// 那么在角色移动中，如果Controller的朝向和角色朝向不一致，
-	// 角色朝向就会平滑的按照RotationRate里配置的各个轴的旋转速率来旋转角色的Rotation到Controller的朝向。
-	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
-	Character->bUseControllerRotationYaw = true;
 }
