@@ -34,6 +34,8 @@ public:
 	UFUNCTION(NetMulticast, Unreliable)
 		void MuticastHit();
 
+	virtual void OnRep_ReplicatedMovement() override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -59,9 +61,13 @@ protected:
 
 	// 松开右键瞄准
 	void AimButtonReleased();
+	void CalculateAO_Pitch();
 
 	// 设置目标偏移量
 	void AimOffset(float DeltaTime);
+
+	// 模拟代理
+	void SimProxiesTurn();
 
 	// 原本Actor的jump逻辑是，在蹲下的时候是不可以跳跃的，为了实现蹲下的时候，按空格可以取消蹲伏，这里需要重写jump
 	virtual void Jump() override;
@@ -129,6 +135,16 @@ private:
 	UPROPERTY(EditAnywhere)
 		float CameraThreshold = 200.f;
 
+	// 是否旋转根骨骼
+	bool bRotateRootBone;
+
+	float TurnThreshold = 0.5f;
+	FRotator ProxyRotationLastFrame;
+	FRotator ProxyRotation;
+	float ProxyYaw;
+	float TimeSinceLastMovementReplication;
+	float CalculateSpeed();
+
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	// 是否装备武器
@@ -140,4 +156,5 @@ public:
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 	FVector GetHitTarget() const;
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
 };
