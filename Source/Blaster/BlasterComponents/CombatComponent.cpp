@@ -120,7 +120,7 @@ void UCombatComponent::SetAiming(bool bIsAiming)
 
 void UCombatComponent::StartFireTimer()
 {
-	if (EquippedWeapon == nullptr && Character == nullptr) return;
+	if (EquippedWeapon == nullptr || Character == nullptr) return;
 	Character->GetWorldTimerManager().SetTimer(
 		FireTimer,
 		this,
@@ -195,6 +195,7 @@ void UCombatComponent::OnRep_EquippedWeapon()
 	{
 		// 如果我们装备了武器，那么我们就不应该继续定向移动
 		// （通过是否装备武器来解决客户端定向移动设置问题，避免添加额外的RPC变量的开销）
+		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
 	}

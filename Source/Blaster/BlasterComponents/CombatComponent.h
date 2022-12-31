@@ -32,6 +32,7 @@ protected:
 
 	UFUNCTION()
 		void OnRep_EquippedWeapon();
+
 	void Fire();
 
 	void FireButtonPressed(bool bPressed);
@@ -49,9 +50,12 @@ protected:
 	void SetHUDCrosshairs(float DeltaTime);
 
 private:
-	class ABlasterCharacter* Character;
-	class ABlasterPlayerController* Controller;
-	class ABlasterHUD* HUD;
+	UPROPERTY()
+		class ABlasterCharacter* Character;
+	UPROPERTY()
+		class ABlasterPlayerController* Controller;
+	UPROPERTY()
+		class ABlasterHUD* HUD;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 		class AWeapon* EquippedWeapon;
