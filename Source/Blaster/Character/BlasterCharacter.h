@@ -30,9 +30,9 @@ public:
 	// 播放开火蒙太奇动画
 	void PlayFireMontage(bool bAiming);
 
-	// 人物受击rpc函数（多播）
-	UFUNCTION(NetMulticast, Unreliable)
-		void MuticastHit();
+	//// 人物受击rpc函数（多播）
+	//UFUNCTION(NetMulticast, Unreliable)
+	//	void MuticastHit();
 
 	virtual void OnRep_ReplicatedMovement() override;
 
@@ -80,6 +80,11 @@ protected:
 	// 播放人物受击的蒙太奇动画
 	void PlayHitReactMontage();
 
+	// 角色受到伤害处理函数
+	UFUNCTION()
+		void ReceiveDamage(AActor* DamageActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
+
+	void UpdateHUDHealth();
 private:
 	// 添加弹簧臂和摄像机
 
