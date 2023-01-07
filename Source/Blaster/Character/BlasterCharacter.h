@@ -30,13 +30,17 @@ public:
 	// 播放开火蒙太奇动画
 	void PlayFireMontage(bool bAiming);
 
+	// 播放死亡飞升蒙太奇动画
+	void PlayElimMontage();
+
 	//// 人物受击rpc函数（多播）
 	//UFUNCTION(NetMulticast, Unreliable)
 	//	void MuticastHit();
 
 	virtual void OnRep_ReplicatedMovement() override;
 
-	void Elim();
+	UFUNCTION(NetMulticast, Reliable)
+		void Elim();
 
 protected:
 	// Called when the game starts or when spawned
@@ -136,6 +140,10 @@ private:
 	UPROPERTY(EditAnywhere, Category = Combat)
 		class UAnimMontage* HitReactMontage;
 
+	// 角色死亡飞升的动画蒙太奇
+	UPROPERTY(EditAnywhere, Category = Combat)
+		class UAnimMontage* ElimMontage;
+
 	// 如果角色靠太近就隐藏摄像头
 	void HidCameraIfCharacterClose();
 
@@ -169,6 +177,9 @@ private:
 
 	class ABlasterPlayerController* BlasterPlayerController;
 
+	// 玩家是否被击败（死亡）
+	bool bElimmed = false;
+
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	// 是否装备武器
@@ -181,4 +192,5 @@ public:
 	FVector GetHitTarget() const;
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
+	FORCEINLINE bool IsElimmed() const { return bElimmed; }
 };
