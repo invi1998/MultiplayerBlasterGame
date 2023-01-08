@@ -39,8 +39,10 @@ public:
 
 	virtual void OnRep_ReplicatedMovement() override;
 
+	void Elim();
+
 	UFUNCTION(NetMulticast, Reliable)
-		void Elim();
+		void MulticastElim();
 
 protected:
 	// Called when the game starts or when spawned
@@ -179,6 +181,16 @@ private:
 
 	// 玩家是否被击败（死亡）
 	bool bElimmed = false;
+
+	// 玩家死亡复活倒计时时钟
+	FTimerHandle ElimTimer;
+
+	// 当复活倒计时结束时的处理逻辑
+	void ElimTimerFinished();
+
+	// 复活时间
+	UPROPERTY(EditDefaultsOnly)
+		float ElimDelay = 3.f;
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
