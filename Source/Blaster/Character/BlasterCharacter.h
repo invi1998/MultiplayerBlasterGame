@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Blaster/BlasterTypes/TurningInPlace.h"
 #include "Blaster/Interface/InteractWithCrosshairsInterface.h"
+#include "Components/TimelineComponent.h"
 #include "BlasterCharacter.generated.h"
 
 UCLASS()
@@ -191,6 +192,31 @@ private:
 	// 复活时间
 	UPROPERTY(EditDefaultsOnly)
 		float ElimDelay = 3.f;
+
+	/*
+	 * 角色溶解效果
+	 */
+	UPROPERTY(VisibleAnywhere)
+		UTimelineComponent* DissolveTimeline;
+
+	FOnTimelineFloat DissolveTrack;
+
+	UFUNCTION()
+		void UpdateDissolveMaterial(float DissolveValue);
+
+	void StartDissolve();
+
+	UPROPERTY(EditAnywhere)
+		UCurveFloat* DissolveCurve;
+
+	// 在游戏运行时更改的动态实例，这个实例在这里将会是材质实例
+	// 动态溶解材质，用于存储动态创建的材质实例
+	UPROPERTY(VisibleAnywhere, Category = Elim)
+		UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
+
+	// 将分配给角色蓝图的材质实例
+	UPROPERTY(EditAnywhere, Category = Elim)
+		UMaterialInstance* DissolveMaterialInstance;
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
