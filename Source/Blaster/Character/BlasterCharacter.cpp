@@ -553,6 +553,10 @@ void ABlasterCharacter::OnRep_Health()
 
 void ABlasterCharacter::Elim()
 {
+	if (Combat && Combat->EquippedWeapon)
+	{
+		Combat->EquippedWeapon->Dropped();
+	}
 	MulticastElim();
 	// 设置复活倒计时
 	GetWorldTimerManager().SetTimer(
@@ -577,6 +581,7 @@ void ABlasterCharacter::MulticastElim_Implementation()
 	bElimmed = true;
 	PlayElimMontage();
 
+	// 开始角色溶解效果
 	if (DissolveMaterialInstance)
 	{
 		DynamicDissolveMaterialInstance = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);
@@ -586,6 +591,19 @@ void ABlasterCharacter::MulticastElim_Implementation()
 		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Glow"), 200.f);
 	}
 	StartDissolve();
+
+	// 禁用角色移动（阻止WASD按键移动）
+	GetCharacterMovement()->DisableMovement();
+	// 立即停止移动 (阻止旋转鼠标带来的人物转体等）
+	GetCharacterMovement()->StopMovementImmediately();
+	// 禁用开火
+	if (BlasterPlayerController)
+	{
+		DisableInput(BlasterPlayerController);
+	}
+	// 禁用碰撞
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ABlasterCharacter::UpdateDissolveMaterial(float DissolveValue)

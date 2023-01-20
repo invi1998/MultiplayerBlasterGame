@@ -193,6 +193,14 @@ void UCombatComponent::OnRep_EquippedWeapon()
 {
 	if (EquippedWeapon && Character)
 	{
+		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+
+		const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
+
+		if (HandSocket)
+		{
+			HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
+		}
 		// 如果我们装备了武器，那么我们就不应该继续定向移动
 		// （通过是否装备武器来解决客户端定向移动设置问题，避免添加额外的RPC变量的开销）
 		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
