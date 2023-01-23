@@ -45,6 +45,8 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 		void MulticastElim();
 
+	virtual void Destroyed() override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -217,6 +219,19 @@ private:
 	// 将分配给角色蓝图的材质实例
 	UPROPERTY(EditAnywhere, Category = Elim)
 		UMaterialInstance* DissolveMaterialInstance;
+
+	/*
+	 * Elim Bot
+	 */
+
+	UPROPERTY(EditAnywhere)
+		UParticleSystem* ElimBotEffect;
+
+	UPROPERTY(EditAnywhere)
+		UParticleSystemComponent* ElimBotComponent;
+
+	UPROPERTY(EditAnywhere)
+		class USoundCue* ElimBotSound;
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
