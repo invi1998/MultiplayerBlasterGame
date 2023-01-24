@@ -96,6 +96,10 @@ protected:
 		void ReceiveDamage(AActor* DamageActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
 
 	void UpdateHUDHealth();
+
+	// 初始化HUD
+	void PollInit();
+
 private:
 	// 添加弹簧臂和摄像机
 
@@ -232,6 +236,8 @@ private:
 
 	UPROPERTY(EditAnywhere)
 		class USoundCue* ElimBotSound;
+
+	class ABlasterPlayerState* BlasterPlayerState;
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
