@@ -64,8 +64,10 @@ public:
 public:
 	// Sets default values for this actor's properties
 	AWeapon();
+	virtual void OnRep_Owner() override;
 	virtual void Tick(float DeltaTime) override;
 	void ShowPickupWidget(bool bShowWidget);
+	void SetHUDAmmo();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Fire(const FVector& HitTarget);
 	// 丢弃武器 / 死亡掉落武器
@@ -115,6 +117,24 @@ private:
 
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<class ACasing> CasingClass;
+
+	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Ammo)
+		int32 Ammo;
+
+	UFUNCTION()
+		void OnRep_Ammo();
+
+	// 扣除弹药，检测武器是否有一个有效的所有者
+	void SpendRound();
+
+	UPROPERTY(EditAnywhere)
+		int32 MagCapacity;
+
+	UPROPERTY()
+		class ABlasterCharacter* BlasterOwnerCharacter;
+
+	UPROPERTY()
+		class ABlasterPlayerController* BlasterOwnerController;
 
 public:
 	// Called every frame

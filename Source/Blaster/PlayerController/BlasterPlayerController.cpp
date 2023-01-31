@@ -49,9 +49,6 @@ void ABlasterPlayerController::SetHUDScore(float Score)
 	if (bHUDValid)
 	{
 		FString ScoreText = FString::Printf(TEXT("%d"), FMath::FloorToInt(Score));
-		if (ScoreText.Len() < 4)
-		{
-		}
 		BlasterHUD->CharacterOverlay->ScoreAmount->SetText(FText::FromString(ScoreText));
 	}
 }
@@ -65,9 +62,19 @@ void ABlasterPlayerController::SetHUDDefeats(int32 Defeats)
 	if (bHUDValid)
 	{
 		FString DefeatsText = FString::Printf(TEXT("%d"), Defeats);
-		if (DefeatsText.Len() < 4)
-		{
-		}
 		BlasterHUD->CharacterOverlay->DefeatsAmount->SetText(FText::FromString(DefeatsText));
+	}
+}
+
+void ABlasterPlayerController::SetHUDWeaponAmmo(int32 Ammo)
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+
+	bool bHUDValid = BlasterHUD && BlasterHUD->CharacterOverlay && BlasterHUD->CharacterOverlay->HealthBar && BlasterHUD->CharacterOverlay->WeaponAmmoAmount;
+
+	if (bHUDValid)
+	{
+		FString AmmoText = FString::Printf(TEXT("%d"), Ammo);
+		BlasterHUD->CharacterOverlay->WeaponAmmoAmount->SetText(FText::FromString(AmmoText));
 	}
 }
