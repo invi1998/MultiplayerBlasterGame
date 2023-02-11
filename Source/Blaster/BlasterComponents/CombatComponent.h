@@ -123,6 +123,8 @@ private:
 	void StartFireTimer();
 	void FireTimerFinished();
 
+	bool CanFire();
+
 public:
 	// Called every frame
 };

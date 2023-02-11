@@ -100,6 +100,9 @@ void UCombatComponent::Fire()
 	}
 }
 
+void UCombatComponent::CanFire() {
+}
+
 void UCombatComponent::SetAiming(bool bIsAiming)
 {
 	bAiming = bIsAiming;
