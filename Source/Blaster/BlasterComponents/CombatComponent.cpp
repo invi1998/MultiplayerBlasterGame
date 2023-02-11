@@ -34,9 +34,14 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	// 注册装备的武器
+	// 这些变量都是需要通过rpc网络复制到各个客户单进行同步的数据
+	// 注册装备的武器,是否瞄准，携带的弹药数量
 	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
 	DOREPLIFETIME(UCombatComponent, bAiming);
+	// 携带的弹药数量只对客户单来说是有重要意义，因为他和客户端是一对一的关系，只有一个客户端需要将这个值设置在HUD中显示
+	// 所以这里可以使用适当的生命周期条件,并指定条件对象 COND_OwnerOnly
+	// 这样，该变量就只会复制到拥有该弹药的客户端，而不会广播给所有客户端，谁拿到，复制给谁，就这样，这将会节省带宽提高性能
+	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);
 }
 
 // Called when the game starts
@@ -105,6 +110,10 @@ bool UCombatComponent::CanFire()
 	if (EquippedWeapon == nullptr) return false;
 
 	return !EquippedWeapon->IsEmpty() || !bCanFire;
+}
+
+void UCombatComponent::OnRep_CarriedAmmo()
+{
 }
 
 void UCombatComponent::SetAiming(bool bIsAiming)
