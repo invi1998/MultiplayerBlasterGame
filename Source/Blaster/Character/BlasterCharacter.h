@@ -31,6 +31,9 @@ public:
 	// 播放开火蒙太奇动画
 	void PlayFireMontage(bool bAiming);
 
+	// 播放开火蒙太奇动画
+	void PlayReloadMontage();
+
 	// 播放死亡飞升蒙太奇动画
 	void PlayElimMontage();
 
@@ -66,6 +69,8 @@ protected:
 
 	// 按ctrl蹲伏和起身
 	void CrouchButtonPressed();
+
+	void ReloadButtonPressed();
 
 	// 鼠标右键瞄准
 	void AimButtonPressed();
@@ -144,6 +149,10 @@ private:
 	// 武器开火的动画蒙太奇
 	UPROPERTY(EditAnywhere, Category = Combat)
 		class UAnimMontage* FireWeaponMontage;
+
+	// 换弹动作蒙太奇动画
+	UPROPERTY(EditAnywhere, Category = Combat)
+		class UAnimMontage* ReloadMontage;
 
 	// 人物受击动作的动画蒙太奇
 	UPROPERTY(EditAnywhere, Category = Combat)
