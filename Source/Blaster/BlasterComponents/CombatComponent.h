@@ -133,7 +133,12 @@ private:
 	UFUNCTION()
 		void OnRep_CarriedAmmo();
 
-	TMap<EWeaponType, int32> CarredAmmoMap;
+	TMap<EWeaponType, int32> CarriedAmmoMap;
+
+	UPROPERTY(EditAnywhere)
+		int32 StartingARAmmo = 30;
+
+	void InitializeCarriedAmmo();
 
 public:
 	// Called every frame

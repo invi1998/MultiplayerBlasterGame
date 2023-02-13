@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "WeaponTypes.h"
 #include "Weapon.generated.h"
 
 // 武器状态枚举，其枚举常量是无符号八位整数，同时这个也是一个蓝图类型
@@ -136,6 +137,9 @@ private:
 	UPROPERTY()
 		class ABlasterPlayerController* BlasterOwnerController;
 
+	UPROPERTY(EditAnywhere)
+		EWeaponType WeaponType;
+
 public:
 	// Called every frame
 
@@ -149,4 +153,6 @@ public:
 	FORCEINLINE float GetZoomedInterpSpeed() const { return ZoomInterpSpeed; }
 
 	bool IsEmpty();
+
+	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 };
