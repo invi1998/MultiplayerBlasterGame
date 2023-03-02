@@ -42,6 +42,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	// 所以这里可以使用适当的生命周期条件,并指定条件对象 COND_OwnerOnly
 	// 这样，该变量就只会复制到拥有该弹药的客户端，而不会广播给所有客户端，谁拿到，复制给谁，就这样，这将会节省带宽提高性能
 	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);
+	DOREPLIFETIME(UCombatComponent, CombatState);
 }
 
 // Called when the game starts
@@ -246,7 +247,25 @@ void UCombatComponent::ServerReload_Implementation()
 {
 	if (Character == nullptr) return;
 
+	CombatState = ECombatState::ECS_Reloading;
+	HandleReload();
+}
+
+void UCombatComponent::HandleReload()
+{
 	Character->PlayReloadMontage();
+}
+
+void UCombatComponent::OnRep_CombatState()
+{
+	switch (CombatState)
+	{
+	case ECombatState::ECS_Reloading:
+		HandleReload();
+		break;
+	default:
+		break;
+	}
 }
 
 void UCombatComponent::OnRep_EquippedWeapon()
