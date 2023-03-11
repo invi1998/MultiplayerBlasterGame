@@ -25,6 +25,9 @@ public:
 	void EquipWeapon(class AWeapon* WeaponToEquip);
 	void Reload();
 
+	UFUNCTION(BlueprintCallable)
+	void FinishReloading();
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
