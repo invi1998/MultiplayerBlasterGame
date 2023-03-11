@@ -73,6 +73,7 @@ public:
 	virtual void Fire(const FVector& HitTarget);
 	// ¶ªÆúÎäÆ÷ / ËÀÍöµôÂäÎäÆ÷
 	void Dropped();
+	void AddAmmo(int32 AmmoToAdd);
 
 protected:
 	// Called when the game starts or when spawned
@@ -155,4 +156,7 @@ public:
 	bool IsEmpty();
 
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
+
+	FORCEINLINE int32 GetAmmo() const { return Ammo; }
+	FORCEINLINE int32 GetMagCapacity() const { return MagCapacity; }
 };
