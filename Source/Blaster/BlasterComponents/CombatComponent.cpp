@@ -15,6 +15,7 @@
 #include "Camera/CameraComponent.h"
 #include "TimerManager.h"
 #include "Blaster/PlayerState/BlasterPlayerState.h"
+#include "Sound/SoundCue.h"
 
 // 定义走线长度
 #define TRACE_LENGTH 80000.f
@@ -225,6 +226,15 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
 	if (Controller) {
 		Controller->SetHUDCarriedAmmo(CarriedAmmo);
+	}
+
+	if (EquippedWeapon->EquipSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			EquippedWeapon->EquipSound,
+			EquippedWeapon->GetActorLocation()
+		);
 	}
 
 	// 一旦bOrientRotationToMovement设置为True后，角色的朝向会转向移动的方向
