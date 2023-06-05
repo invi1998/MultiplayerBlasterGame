@@ -23,10 +23,36 @@ public:
 	void SetHUDMatchCountdown(float CountdownTime);
 	virtual void Tick(float DeltaSeconds) override;
 
+	virtual float GetServerTime();
+
+	virtual void ReceivedPlayer() override;		// 在玩家加入的时候，尽快与与服务器进行时间同步
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void OnPossess(APawn* InPawn) override;
 	void SetHUDTime();
+
+	/*
+	 * 服务端和客户端之间的同步时间
+	 */
+	// 请求当前服务器的时间，传入客户端发送请求的时间
+	UFUNCTION(Server, Reliable)
+	void ServerRequestServerTime(float TimeOfClientRequest);
+
+	// 服务器将客户端的请求时间和服务器当前时间发回给客户端
+	UFUNCTION(Client, Reliable)
+	void ClientReportServerTime(float TimeOfClientRequest, float TimeServerReceivedClientRequest);
+
+	// 服务端和客户端之间的同步时间差
+	float ClientServerDelta = 0.0f;
+
+	// 客户端与服务器同步时间的间隔（频率）
+	UPROPERTY(EditAnywhere, Category = Time)
+		float TimeSyncFrequency = 5.f;
+
+	float TimeSyncRunningTime = 0.f;
+
+	void CheckTimeSync(float DeltaTime);
 
 private:
 	UPROPERTY()
