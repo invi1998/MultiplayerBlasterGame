@@ -7,8 +7,38 @@
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 
+ABlasterGameMode::ABlasterGameMode()
+{
+	// 将其设置为true时，游戏模式将会停留在等待开始的状态，它会为所有玩家生成一个默认设置，他们可以使用它在地图中飞行，没有网格
+	bDelayedStart = true;
+
+}
+
+void ABlasterGameMode::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (MatchState == MatchState::WaitingToStart)
+	{
+		CountdownTime = WarmupTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		if (CountdownTime <= 0.f)
+		{
+			StartMatch();
+		}
+	}
+}
+
+void ABlasterGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	LevelStartingTime = GetWorld()->GetTimeSeconds();
+
+
+}
+
 void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* ElimmedCharacter, ABlasterPlayerController* VictimController,
-	ABlasterPlayerController* AttackerController)
+                                        ABlasterPlayerController* AttackerController)
 {
 	ABlasterPlayerState* AttackPlayerState = AttackerController ? Cast<ABlasterPlayerState>(AttackerController->PlayerState) : nullptr;
 	ABlasterPlayerState* VictimPlayerState = VictimController ? Cast<ABlasterPlayerState>(VictimController->PlayerState) : nullptr;
@@ -48,3 +78,4 @@ void ABlasterGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AController*
 		RestartPlayerAtPlayerStart(ElimmedController, PlayerStarts[Selection]);
 	}
 }
+
