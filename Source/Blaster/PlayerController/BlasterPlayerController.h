@@ -22,15 +22,19 @@ public:
 	void SetHUDCarriedAmmo(int32 Ammo);
 	void SetHUDMatchCountdown(float CountdownTime);
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual float GetServerTime();
 
 	virtual void ReceivedPlayer() override;		// 在玩家加入的时候，尽快与与服务器进行时间同步
 
+	void OnMatchStateSet(FName state);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void OnPossess(APawn* InPawn) override;
 	void SetHUDTime();
+	void PollInit();
 
 	/*
 	 * 服务端和客户端之间的同步时间
@@ -60,4 +64,19 @@ private:
 
 	float MathTime = 128.f;
 	uint32 CountdownInt = 0;
+
+	UPROPERTY(ReplicatedUsing = OnRep_MatchState)
+		FName MatchState;
+
+	UFUNCTION()
+		void OnRep_MatchState();
+
+	UPROPERTY()
+		class UCharacterOverlay* CharacterOverlay;
+
+	bool bInitializeCharacterOverlay = false;
+	float HUDHealth;
+	float HUDMaxHealth;
+	float HUDScore;
+	int32 HUDDefeats;
 };
