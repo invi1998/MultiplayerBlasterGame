@@ -21,6 +21,7 @@ public:
 	void SetHUDWeaponAmmo(int32 Ammo);
 	void SetHUDCarriedAmmo(int32 Ammo);
 	void SetHUDMatchCountdown(float CountdownTime);
+	void SetHUDAnnouncementCoundown(float CountdownTime);
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -59,11 +60,19 @@ protected:
 	void CheckTimeSync(float DeltaTime);
 	void HandleMatchHasStarted();
 
+	UFUNCTION(Server, Reliable)
+		void ServerCheckMatchState();
+
+	UFUNCTION(Client, Reliable)
+		void ClientJoinMidGame(FName StateOfMatch, float Warmup, float Match, float StartingTime);	// 客户端在游戏中途加入
+
 private:
 	UPROPERTY()
 		class ABlasterHUD* BlasterHUD;
 
-	float MathTime = 128.f;
+	float LevelStartingTime = 0.f;
+	float MatchTime = 0.f;
+	float WarmupTime = 0.f;
 	uint32 CountdownInt = 0;
 
 	UPROPERTY(ReplicatedUsing = OnRep_MatchState)

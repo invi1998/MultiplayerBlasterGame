@@ -26,6 +26,9 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 		float WarmupTime = 10.f;	// 预热时间
 
+	UPROPERTY(EditDefaultsOnly)
+		float MatchTime = 120.f;		// 游戏比赛时间
+
 	float LevelStartingTime = 0.f;
 
 protected:

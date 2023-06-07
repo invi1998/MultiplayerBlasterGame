@@ -41,11 +41,6 @@ void ABlasterGameMode::OnMatchStateSet()
 {
 	Super::OnMatchStateSet();
 
-	if (MatchState == MatchState::WaitingToStart)
-	{
-
-	}
-
 	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
 	{
 		ABlasterPlayerController* BlasterPlayer = Cast<ABlasterPlayerController>(*Iterator);
