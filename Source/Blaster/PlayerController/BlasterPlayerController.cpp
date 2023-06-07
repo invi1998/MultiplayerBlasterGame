@@ -101,7 +101,7 @@ void ABlasterPlayerController::SetHUDTime()
 	{
 		if (MatchState == MatchState::WaitingToStart)
 		{
-			SetHUDAnnouncementCoundown(TimeLeft);
+			SetHUDAnnouncementCountdown(TimeLeft);
 		}
 		if (MatchState == MatchState::InProgress)
 		{
@@ -162,6 +162,12 @@ void ABlasterPlayerController::ClientJoinMidGame_Implementation(FName StateOfMat
 	MatchState = StateOfMatch;
 
 	OnMatchStateSet(MatchState);
+
+	// 只有在HUD组件构建成功，并且游戏状态处于等待开始的阶段，才进行公告UI展示
+	if (BlasterHUD && MatchState == MatchState::WaitingToStart)
+	{
+		BlasterHUD->AddAnnouncement();
+	}
 }
 
 void ABlasterPlayerController::ServerCheckMatchState_Implementation()
@@ -177,11 +183,6 @@ void ABlasterPlayerController::ServerCheckMatchState_Implementation()
 
 		ClientJoinMidGame(MatchState, WarmupTime, MatchTime, LevelStartingTime);
 
-		// 只有在HUD组件构建成功，并且游戏状态处于等待开始的阶段，才进行公告UI展示
-		if (BlasterHUD && MatchState == MatchState::WaitingToStart)
-		{
-			BlasterHUD->AddAnnouncement();
-		}
 	}
 }
 
@@ -301,7 +302,7 @@ void ABlasterPlayerController::SetHUDMatchCountdown(float CountdownTime)
 	}
 }
 
-void ABlasterPlayerController::SetHUDAnnouncementCoundown(float CountdownTime)
+void ABlasterPlayerController::SetHUDAnnouncementCountdown(float CountdownTime)
 {
 	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 
