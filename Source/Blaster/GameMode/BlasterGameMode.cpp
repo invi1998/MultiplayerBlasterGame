@@ -7,6 +7,11 @@
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 
+namespace MatchState
+{
+	const FName Cooldown = FName("Cooldown");
+}
+
 ABlasterGameMode::ABlasterGameMode()
 {
 	// 将其设置为true时，游戏模式将会停留在等待开始的状态，它会为所有玩家生成一个默认设置，他们可以使用它在地图中飞行，没有网格
@@ -24,6 +29,15 @@ void ABlasterGameMode::Tick(float DeltaSeconds)
 		if (CountdownTime <= 0.f)
 		{
 			StartMatch();
+		}
+	}
+	else if (MatchState == MatchState::InProgress)
+	{
+		CountdownTime = WarmupTime + MatchTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		if (CountdownTime <= 0.f)
+		{
+			SetMatchState(MatchState::Cooldown);
+
 		}
 	}
 }

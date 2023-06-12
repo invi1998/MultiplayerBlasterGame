@@ -6,6 +6,11 @@
 #include "GameFramework/GameMode.h"
 #include "BlasterGameMode.generated.h"
 
+namespace MatchState
+{
+	extern BLASTER_API const FName Cooldown;	// 比赛持续时间到，显示获胜者并开始冷却计时器
+}
+
 /**
  *
  */
@@ -28,6 +33,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 		float MatchTime = 120.f;		// 游戏比赛时间
+
+	UPROPERTY(EditDefaultsOnly)
+		float CooldownTime = 10.f;		// 游戏比赛冷却时间
 
 	float LevelStartingTime = 0.f;
 
