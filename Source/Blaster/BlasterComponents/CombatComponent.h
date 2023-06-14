@@ -28,6 +28,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();
 
+	void FireButtonPressed(bool bPressed);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -41,8 +43,6 @@ protected:
 		void OnRep_EquippedWeapon();
 
 	void Fire();
-
-	void FireButtonPressed(bool bPressed);
 
 	// 创建server RPC
 	// 这个函数被设计为从客户端调用，然后再服务端进行执行

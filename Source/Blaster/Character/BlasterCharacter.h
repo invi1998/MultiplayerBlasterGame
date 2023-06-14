@@ -51,6 +51,9 @@ public:
 
 	virtual void Destroyed() override;
 
+	UPROPERTY(Replicated)
+		bool bDisableGamePlay = false;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -105,6 +108,9 @@ protected:
 
 	// 初始化HUD
 	void PollInit();
+
+	// 原地旋转
+	void RotatePlace(float DeltaTime);
 
 private:
 	// 添加弹簧臂和摄像机
@@ -266,4 +272,6 @@ public:
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 	ECombatState GetCombatState() const;
+	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }
+	FORCEINLINE bool GetDisableGamePlay() const { return bDisableGamePlay; }
 };

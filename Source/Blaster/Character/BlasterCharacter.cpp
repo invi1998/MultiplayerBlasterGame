@@ -101,6 +101,32 @@ void ABlasterCharacter::PollInit()
 	}
 }
 
+void ABlasterCharacter::RotatePlace(float DeltaTime)
+{
+	if (bDisableGamePlay)
+	{
+		bUseControllerRotationYaw = false;
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+		return;
+	}
+
+	if (GetLocalRole() > ENetRole::ROLE_SimulatedProxy && IsLocallyControlled())
+	{
+		// 如果是一个本地角色（自己）
+		AimOffset(DeltaTime);
+	}
+	else
+	{
+		// 如果是代理角色（其他客户端的角色）
+		TimeSinceLastMovementReplication += DeltaTime;
+		if (TimeSinceLastMovementReplication > 0.25f)
+		{
+			OnRep_ReplicatedMovement();
+		}
+		CalculateAO_Pitch();
+	}
+}
+
 void ABlasterCharacter::Destroyed()
 {
 	Super::Destroyed();
@@ -108,6 +134,10 @@ void ABlasterCharacter::Destroyed()
 	if (ElimBotComponent)
 	{
 		ElimBotComponent->DestroyComponent();
+	}
+	if (Combat && Combat->EquippedWeapon)
+	{
+		Combat->EquippedWeapon->Destroy();
 	}
 }
 
@@ -130,21 +160,7 @@ void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (GetLocalRole() > ENetRole::ROLE_SimulatedProxy && IsLocallyControlled())
-	{
-		// 如果是一个本地角色（自己）
-		AimOffset(DeltaTime);
-	}
-	else
-	{
-		// 如果是代理角色（其他客户端的角色）
-		TimeSinceLastMovementReplication += DeltaTime;
-		if (TimeSinceLastMovementReplication > 0.25f)
-		{
-			OnRep_ReplicatedMovement();
-		}
-		CalculateAO_Pitch();
-	}
+	RotatePlace(DeltaTime);
 
 	HidCameraIfCharacterClose();
 	PollInit();
@@ -157,6 +173,7 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	// 这里就是我们需要注册要复制重叠武器变量的地方
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
 	DOREPLIFETIME(ABlasterCharacter, Health);
+	DOREPLIFETIME(ABlasterCharacter, bDisableGamePlay);
 }
 
 void ABlasterCharacter::PostInitializeComponents()
@@ -280,6 +297,7 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 void ABlasterCharacter::MoveForward(float Value)
 {
+	if (bDisableGamePlay) return;
 	if (Controller != nullptr && Value != 0.f)
 	{
 		const FRotator YawRotation(0.f, Controller->GetControlRotation().Yaw, 0.f);
@@ -290,6 +308,7 @@ void ABlasterCharacter::MoveForward(float Value)
 
 void ABlasterCharacter::MoveRight(float Value)
 {
+	if (bDisableGamePlay) return;
 	if (Controller != nullptr && Value != 0.f)
 	{
 		const FRotator YawRotation(0.f, Controller->GetControlRotation().Yaw, 0.f);
@@ -310,6 +329,8 @@ void ABlasterCharacter::LookUp(float Value)
 
 void ABlasterCharacter::EquipButtonPressed()
 {
+	if (bDisableGamePlay) return;
+
 	if (Combat)
 	{
 		if (HasAuthority())
@@ -327,6 +348,7 @@ void ABlasterCharacter::EquipButtonPressed()
 
 void ABlasterCharacter::CrouchButtonPressed()
 {
+	if (bDisableGamePlay) return;
 	if (bIsCrouched)
 	{
 		UnCrouch();
@@ -339,6 +361,7 @@ void ABlasterCharacter::CrouchButtonPressed()
 
 void ABlasterCharacter::ReloadButtonPressed()
 {
+	if (bDisableGamePlay) return;
 	if (Combat)
 	{
 		Combat->Reload();
@@ -347,6 +370,7 @@ void ABlasterCharacter::ReloadButtonPressed()
 
 void ABlasterCharacter::AimButtonPressed()
 {
+	if (bDisableGamePlay) return;
 	if (Combat)
 	{
 		Combat->SetAiming(true);
@@ -355,6 +379,7 @@ void ABlasterCharacter::AimButtonPressed()
 
 void ABlasterCharacter::AimButtonReleased()
 {
+	if (bDisableGamePlay) return;
 	if (Combat)
 	{
 		Combat->SetAiming(false);
@@ -503,6 +528,7 @@ void ABlasterCharacter::SimProxiesTurn()
 
 void ABlasterCharacter::Jump()
 {
+	if (bDisableGamePlay) return;
 	if (bIsCrouched)
 	{
 		UnCrouch();
@@ -515,6 +541,7 @@ void ABlasterCharacter::Jump()
 
 void ABlasterCharacter::FireButtonPressed()
 {
+	if (bDisableGamePlay) return;
 	if (Combat)
 	{
 		Combat->FireButtonPressed(true);
@@ -523,6 +550,7 @@ void ABlasterCharacter::FireButtonPressed()
 
 void ABlasterCharacter::FireButtonReleased()
 {
+	if (bDisableGamePlay) return;
 	if (Combat)
 	{
 		Combat->FireButtonPressed(false);
@@ -657,14 +685,11 @@ void ABlasterCharacter::MulticastElim_Implementation()
 	StartDissolve();
 
 	// 禁用角色移动（阻止WASD按键移动）
-	GetCharacterMovement()->DisableMovement();
+	// GetCharacterMovement()->DisableMovement();
 	// 立即停止移动 (阻止旋转鼠标带来的人物转体等）
-	GetCharacterMovement()->StopMovementImmediately();
+	// GetCharacterMovement()->StopMovementImmediately();
 	// 禁用开火
-	if (BlasterPlayerController)
-	{
-		DisableInput(BlasterPlayerController);
-	}
+	bDisableGamePlay = true;
 	// 禁用碰撞
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
