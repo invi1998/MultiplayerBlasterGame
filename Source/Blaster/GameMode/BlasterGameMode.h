@@ -46,4 +46,7 @@ protected:
 private:
 	float CountdownTime = 0.f;		// 倒计时时间
 
+public:
+	FORCEINLINE float GetCountdownTime() const { return CooldownTime; }
+
 };
