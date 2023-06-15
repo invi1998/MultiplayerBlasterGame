@@ -2,6 +2,7 @@
 
 #include "BlasterGameMode.h"
 #include "Blaster/Character/BlasterCharacter.h"
+#include "Blaster/GameState/BlasterGameState.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "GameFramework/PlayerStart.h"
@@ -77,12 +78,17 @@ void ABlasterGameMode::OnMatchStateSet()
 void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* ElimmedCharacter, ABlasterPlayerController* VictimController,
                                         ABlasterPlayerController* AttackerController)
 {
+	if (AttackerController == nullptr || AttackerController->PlayerState == nullptr) return;
+	if (VictimController == nullptr || VictimController->PlayerState == nullptr) return;
 	ABlasterPlayerState* AttackPlayerState = AttackerController ? Cast<ABlasterPlayerState>(AttackerController->PlayerState) : nullptr;
 	ABlasterPlayerState* VictimPlayerState = VictimController ? Cast<ABlasterPlayerState>(VictimController->PlayerState) : nullptr;
 
-	if (AttackPlayerState && AttackPlayerState != VictimPlayerState)
+	ABlasterGameState* BlasterGameState = GetGameState<ABlasterGameState>();
+
+	if (AttackPlayerState && AttackPlayerState != VictimPlayerState && BlasterGameState)
 	{
 		AttackPlayerState->AddToScore(1.f);
+		BlasterGameState->UpdateTopScore(AttackPlayerState);
 	}
 	if (VictimPlayerState)
 	{
