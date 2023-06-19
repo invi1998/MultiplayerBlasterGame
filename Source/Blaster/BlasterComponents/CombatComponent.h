@@ -149,8 +149,13 @@ private:
 
 	TMap<EWeaponType, int32> CarriedAmmoMap;
 
+	// Í»»÷²½Ç¹×Óµ¯Êý
 	UPROPERTY(EditAnywhere)
 		int32 StartingARAmmo = 30;
+
+	// »ð¼ýÍ²ÅÚµ¯Êý
+	UPROPERTY(EditAnywhere)
+		int32 StartingRocketAmmo = 0;
 
 	void InitializeCarriedAmmo();
 
