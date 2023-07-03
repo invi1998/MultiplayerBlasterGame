@@ -44,10 +44,10 @@ protected:
 	UPROPERTY(EditAnywhere)
 		class UBoxComponent* CollisionBox;
 
-private:
-
 	UPROPERTY(VisibleAnywhere)
 		class UProjectileMovementComponent* ProjectileMovementComponent;
+
+private:
 
 	// 示踪器 （显示子弹运动轨迹的粒子特效）
 	UPROPERTY(EditAnywhere)

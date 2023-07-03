@@ -3,10 +3,19 @@
 #include "ProjectileBullet.h"
 
 #include "GameFramework/Character.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "kismet/GameplayStatics.h"
 
+AProjectileBullet::AProjectileBullet()
+{
+	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
+	// 确保子弹保持其旋转与速度对其
+	ProjectileMovementComponent->bRotationFollowsVelocity = true;
+	ProjectileMovementComponent->SetIsReplicated(true);
+}
+
 void AProjectileBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-	FVector NormalImpulse, const FHitResult& Hit)
+                              FVector NormalImpulse, const FHitResult& Hit)
 {
 	ACharacter* OwnerCharater = Cast<ACharacter>(GetOwner());
 	if (OwnerCharater)
