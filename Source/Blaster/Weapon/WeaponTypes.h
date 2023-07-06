@@ -5,9 +5,10 @@
 UENUM(BlueprintType)
 enum class EWeaponType : uint8
 {
-	EWT_AssaultRifle UMETA(DisplayName = "Assault Rifle"),		// ≥Â∑Ê«π
+	EWT_AssaultRifle UMETA(DisplayName = "Assault Rifle"),		// Õªª˜≤Ω«π
 	EWT_RocketLauncher UMETA(DisplayName = "Rocket Launcher"),	// ¡ÒµØ∑¢…‰∆˜
 	EWT_Pistol UMETA(DisplayName = "Pistol"),					//  ÷«π
+	EWT_SubmachineGun UMETA(DisplayName = "Submachine Gun"),	// ≥Â∑Ê«π
 
 	EWT_MAX UMETA(DisplayName = "DefaultMAX")
 };
