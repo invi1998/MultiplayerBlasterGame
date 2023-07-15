@@ -17,9 +17,6 @@
 #include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "Sound/SoundCue.h"
 
-// 定义走线长度
-#define TRACE_LENGTH 80000.f
-
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
 {
@@ -133,6 +130,7 @@ void UCombatComponent::InitializeCarriedAmmo()
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_RocketLauncher, StartingRocketAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_Pistol, StartingPistolAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_SubmachineGun, StartingSMGAmmo);
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_Shotgun, StartingShotgunAmmo);
 }
 
 void UCombatComponent::SetAiming(bool bIsAiming)
