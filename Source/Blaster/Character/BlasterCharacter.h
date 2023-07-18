@@ -54,6 +54,10 @@ public:
 	UPROPERTY(Replicated)
 		bool bDisableGamePlay = false;
 
+	// 显示狙击步枪的瞄准镜	ui
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShowSniperScopeWidget(bool bShowScope);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

@@ -136,6 +136,8 @@ void UCombatComponent::InitializeCarriedAmmo()
 
 void UCombatComponent::SetAiming(bool bIsAiming)
 {
+	if (Character == nullptr || EquippedWeapon == nullptr) return;
+
 	bAiming = bIsAiming;
 	// 如果是客户端，那么客户端需要通过RPC网络复制调用服务端的函数进行瞄准
 	// 当然，因为RPC只会在客户端进行调用，所以，这里不用判断是客户端还是服务端
@@ -149,6 +151,11 @@ void UCombatComponent::SetAiming(bool bIsAiming)
 	if (Character)
 	{
 		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
+	}
+
+	if (Character->IsLocallyControlled() && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle)
+	{
+		Character->ShowSniperScopeWidget(bIsAiming);
 	}
 }
 
