@@ -9,7 +9,7 @@
 AProjectileBullet::AProjectileBullet()
 {
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
-	// 确保子弹保持其旋转与速度对其
+	// 确保子弹保持其旋转与速度对齐
 	ProjectileMovementComponent->bRotationFollowsVelocity = true;
 	ProjectileMovementComponent->SetIsReplicated(true);
 }

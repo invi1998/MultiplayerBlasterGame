@@ -23,6 +23,9 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	void StartDestroyTimer();
+	void DestroyTimerFinished();
+	void SpawnTrailSystem();
 
 	// 子弹命中逻辑处理函数
 	UFUNCTION()
@@ -44,8 +47,18 @@ protected:
 	UPROPERTY(EditAnywhere)
 		class UBoxComponent* CollisionBox;
 
+
+	UPROPERTY(EditAnywhere)
+		class UNiagaraSystem* TrailSystem;;
+
+	UPROPERTY()
+		class UNiagaraComponent* TrailSystemComponent;
+
 	UPROPERTY(VisibleAnywhere)
 		class UProjectileMovementComponent* ProjectileMovementComponent;
+
+	UPROPERTY(VisibleAnywhere)
+		UStaticMeshComponent* ProjectileMesh;
 
 private:
 
@@ -55,6 +68,11 @@ private:
 
 	// 存储tracer的粒子系统组件
 	class UParticleSystemComponent* TracerComponent;
+
+	FTimerHandle DestroyTimer;
+
+	UPROPERTY(EditAnywhere)
+		float DestroyTime = 3.0f;
 
 public:
 	// Called every frame
