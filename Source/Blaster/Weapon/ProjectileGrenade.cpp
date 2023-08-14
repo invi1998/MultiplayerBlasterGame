@@ -19,6 +19,13 @@ AProjectileGrenade::AProjectileGrenade()
 	ProjectileMovementComponent->bShouldBounce = true;
 }
 
+void AProjectileGrenade::Destroyed()
+{
+	ExplodeDamage();
+
+	Super::Destroyed();
+}
+
 void AProjectileGrenade::BeginPlay()
 {
 	AActor::BeginPlay();

@@ -17,6 +17,8 @@ class BLASTER_API AProjectileGrenade : public AProjectile
 public:
 	AProjectileGrenade();
 
+	virtual void Destroyed() override;
+
 protected:
 	virtual void BeginPlay() override;
 

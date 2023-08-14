@@ -26,6 +26,7 @@ protected:
 	void StartDestroyTimer();
 	void DestroyTimerFinished();
 	void SpawnTrailSystem();
+	void ExplodeDamage();
 
 	// 子弹命中逻辑处理函数
 	UFUNCTION()
@@ -59,6 +60,14 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* ProjectileMesh;
+
+	// 爆炸物的伤害范围内半径
+	UPROPERTY(EditAnywhere)
+	float DamageInnerRadius = 200.f;
+
+	// 爆炸物的伤害范围外半径
+	UPROPERTY(EditAnywhere)
+	float DamageOuterRadius = 500.f;
 
 private:
 
