@@ -16,6 +16,7 @@
 #include "TimerManager.h"
 #include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "Sound/SoundCue.h"
+#include "Blaster/Character/BlasterAnimInstance.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -94,6 +95,26 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 	}
 }
 
+void UCombatComponent::ShotgunShellReload()
+{
+	if (Character && Character->HasAuthority())
+	{
+		UpdateShotgunAmmoValue();
+	}
+	
+}
+
+void UCombatComponent::JumpToShotgunEnd()
+{
+	// 跳转到霰弹枪装弹结束动画蒙太奇部分（ShotgunEnd）
+	UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
+
+	if (AnimInstance && Character->GetReloadMontage())
+	{
+		AnimInstance->Montage_JumpToSection(FName("ShotgunEnd"));
+	}
+}
+
 void UCombatComponent::Fire()
 {
 	if (CanFire())
@@ -112,6 +133,11 @@ void UCombatComponent::Fire()
 bool UCombatComponent::CanFire()
 {
 	if (EquippedWeapon == nullptr) return false;
+	// 因为霰弹枪一次性装弹会有4次装弹动画，所以这里特写霰弹枪的开火判定逻辑，只要有一次装弹（有子弹，哪怕是在装弹状态下也可以开火）
+	if (!EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
+	{
+		return true;
+	}
 
 	return !EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Unoccupied;
 }
@@ -119,8 +145,16 @@ bool UCombatComponent::CanFire()
 void UCombatComponent::OnRep_CarriedAmmo()
 {
 	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
-	if (Controller) {
+	if (Controller) 
+	{
 		Controller->SetHUDCarriedAmmo(CarriedAmmo);
+	}
+
+	bool bJumpToShotgunEnd = CombatState == ECombatState::ECS_Reloading && EquippedWeapon != nullptr && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun && CarriedAmmo == 0;
+
+	if (bJumpToShotgunEnd)
+	{
+		JumpToShotgunEnd();
 	}
 }
 
@@ -195,6 +229,15 @@ void UCombatComponent::MuticastFire_Implementation(const FVector_NetQuantize& Tr
 {
 	// 目前为止，这个函数要做的就是播放开火蒙太奇动画和播放开火特效
 	if (EquippedWeapon == nullptr) return;
+
+	// 因为霰弹枪一次性装弹会有4次装弹动画，所以这里特写霰弹枪的开火判定逻辑，只要有一次装弹（有子弹，哪怕是在装弹状态下也可以开火）
+	if (Character && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
+	{
+		Character->PlayFireMontage(bAiming);
+		EquippedWeapon->Fire(TracerHitTarget);
+		CombatState = ECombatState::ECS_Unoccupied;
+		return;
+	}
 
 	if (Character && CombatState == ECombatState::ECS_Unoccupied)
 	{
@@ -351,6 +394,34 @@ void UCombatComponent::UpdateAmmoValue()
 		Controller->SetHUDCarriedAmmo(CarriedAmmo);
 	}
 	EquippedWeapon->AddAmmo(-ReloadAmount);
+}
+
+void UCombatComponent::UpdateShotgunAmmoValue()
+{
+	if (Character == nullptr || EquippedWeapon == nullptr) return;
+
+	if (CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
+	{
+		CarriedAmmoMap[EquippedWeapon->GetWeaponType()] -= 1;
+		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
+	}
+
+	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+	if (Controller)
+	{
+		Controller->SetHUDCarriedAmmo(CarriedAmmo);
+	}
+
+	EquippedWeapon->AddAmmo(-1);
+
+	bCanFire = true;
+
+	// 如果霰弹枪已经填充满子弹
+	if (EquippedWeapon->IsFull() || CarriedAmmo == 0)
+	{
+		JumpToShotgunEnd();
+	}
+
 }
 
 void UCombatComponent::OnRep_EquippedWeapon()
