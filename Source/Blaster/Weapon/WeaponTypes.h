@@ -4,6 +4,10 @@
 // 定义走线长度 (武器子弹的最长发射距离）
 #define TRACE_LENGTH 80000.f
 
+#define CUSTOM_DEPTH_PURPLE 250
+#define CUSTOM_DEPTH_BLUE 251
+#define CUSTOM_DEPTH_TAN 252
+
 // 武器类型枚举类
 
 UENUM(BlueprintType)

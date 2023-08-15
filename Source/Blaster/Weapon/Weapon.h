@@ -65,6 +65,11 @@ public:
 	UPROPERTY(EditAnywhere, Category = Weapon)
 	class USoundCue* EquipSound;
 
+	/*
+	 * 启用或者禁用自定义深度
+	 */
+	void EnableCustomDepth(bool bEnable);
+
 public:
 	// Sets default values for this actor's properties
 	AWeapon();
