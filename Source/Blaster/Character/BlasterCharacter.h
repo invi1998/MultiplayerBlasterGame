@@ -38,6 +38,12 @@ public:
 	// 播放死亡飞升蒙太奇动画
 	void PlayElimMontage();
 
+	// 播放人物受击的蒙太奇动画
+	void PlayHitReactMontage();
+
+	// 播放投掷手榴弹的蒙太奇动画
+	void PlayThrowGrenadeMontage();
+
 	//// 人物受击rpc函数（多播）
 	//UFUNCTION(NetMulticast, Unreliable)
 	//	void MuticastHit();
@@ -100,9 +106,10 @@ protected:
 	void FireButtonPressed();
 	// 点击开火（鼠标左键抬起）
 	void FireButtonReleased();
+	
 
-	// 播放人物受击的蒙太奇动画
-	void PlayHitReactMontage();
+	// 手榴弹投掷按钮按下（T）
+	void GrenadeButtonPressed();
 
 	// 角色受到伤害处理函数
 	UFUNCTION()
@@ -172,6 +179,10 @@ private:
 	// 角色死亡飞升的动画蒙太奇
 	UPROPERTY(EditAnywhere, Category = Combat)
 		class UAnimMontage* ElimMontage;
+
+	// 投掷手榴弹的动画蒙太奇
+	UPROPERTY(EditAnywhere, Category = Combat)
+		class UAnimMontage* ThrowGrenadeMontage;
 
 	// 如果角色靠太近就隐藏摄像头
 	void HidCameraIfCharacterClose();
