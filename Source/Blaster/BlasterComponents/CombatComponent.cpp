@@ -360,7 +360,7 @@ void UCombatComponent::ReloadEmptyWeapon()
 
 void UCombatComponent::Reload()
 {
-	if (CarriedAmmo > 0 && CombatState == ECombatState::ECS_Unoccupied)
+	if (CarriedAmmo > 0 && CombatState == ECombatState::ECS_Unoccupied && EquippedWeapon && !EquippedWeapon->IsFull())
 	{
 		// 如果当前角色携带的弹药数量小于等于0（没有子弹），那么就没必要rpc广播换弹动作，没有子弹，不需要换弹，节省网络带宽
 		ServerReload();

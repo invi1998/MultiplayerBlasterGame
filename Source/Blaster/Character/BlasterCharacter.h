@@ -269,7 +269,14 @@ private:
 	UPROPERTY(EditAnywhere)
 		class USoundCue* ElimBotSound;
 
+	UPROPERTY()
 	class ABlasterPlayerState* BlasterPlayerState;
+
+	/**
+	 *  ÷¡ÒµØ
+	 */
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* AttachedGrenade;
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);

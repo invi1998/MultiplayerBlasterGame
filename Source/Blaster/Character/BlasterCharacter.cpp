@@ -76,6 +76,13 @@ ABlasterCharacter::ABlasterCharacter()
 	MinNetUpdateFrequency = 33.f;
 
 	DissolveTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("DissolveTimelineCommponent"));
+
+	// 手榴弹组件
+	AttachedGrenade = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Attached Grenade"));
+	// 将手榴弹组件绑定到右手的GrenadeSocket插槽上
+	AttachedGrenade->SetupAttachment(GetMesh(), FName("GrenadeSocket"));
+	// 设置手榴弹的碰撞
+	AttachedGrenade->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ABlasterCharacter::UpdateHUDHealth()
