@@ -164,6 +164,11 @@ void ABlasterCharacter::BeginPlay()
 		// 将角色受到的伤害动态绑定到我们的处理函数ReceiveDamage上
 		OnTakeAnyDamage.AddDynamic(this, &ABlasterCharacter::ReceiveDamage);
 	}
+
+	if (AttachedGrenade)
+	{
+		AttachedGrenade->SetVisibility(false);
+	}
 }
 
 // Called every frame
