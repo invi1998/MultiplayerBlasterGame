@@ -125,13 +125,21 @@ void UCombatComponent::ThrowGrenadeFinished()
 void UCombatComponent::LaunchGrenade()
 {
 	ShowAttachedGrenade(false);
+	if (Character && Character->IsLocallyControlled())
+	{
+		ServerLaunchGrenade(HitTarget);
+	}
+	
+}
 
-	if (Character && Character->HasAuthority() && GrenadeClass && Character->GetAttachedGrenade())
+void UCombatComponent::ServerLaunchGrenade_Implementation(const FVector_NetQuantize& Target)
+{
+	if (Character && GrenadeClass && Character->GetAttachedGrenade())
 	{
 		// 获取手榴弹组件的位置，然后记录该位置，用于后续在该位置生成一个手榴弹
 		const FVector StartingLocation = Character->GetAttachedGrenade()->GetComponentLocation();
 
-		FVector ToTarget = HitTarget - StartingLocation;
+		FVector ToTarget = Target - StartingLocation;
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = Character;
 		SpawnParams.Instigator = Character;
