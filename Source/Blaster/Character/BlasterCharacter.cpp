@@ -501,7 +501,7 @@ void ABlasterCharacter::CalculateAO_Pitch()
 	if (AO_Pitch > 90.F && !IsLocallyControlled())
 	{
 		// 将仰角数据从 [270, 360) 映射到 [-90, 0)
-		// 这个颜色将会修复因为在 CharacterMovementComponent中，这个组件在GetPackedAngles（获取仰角数据）
+		// 这个映射将会修复因为在 CharacterMovementComponent中，这个组件在GetPackedAngles（获取仰角数据）
 		// 这个函数为了将仰角数据（旋转数据）通过RPC网络传输时，为了减少宽带占用，将数据压缩到4字节，
 		// 导致我们客户端的俯视角在服务端显示确实抬头的仰视角的bug
 		// 在我们的程序编写中，我们习惯的角度控制是例如 -90到90，但是在虚幻引擎中，这个函数在获取这些旋转角度数据时，
@@ -538,7 +538,7 @@ void ABlasterCharacter::CalculateAO_Pitch()
 		// map pitch from [270,260) to [-90,0)
 		FVector2D InRange(270.f, 360.f);
 		FVector2D OutRange(-90.f, 0.f);
-		AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
+		AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);	// 映射
 	}
 }
 
@@ -574,7 +574,7 @@ void ABlasterCharacter::SimProxiesTurn()
 		}
 		else
 		{
-			TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+			TurningInPlace = ETurningInPlace::ETIP_NotTurning;	// 不转体
 		}
 		return;
 	}

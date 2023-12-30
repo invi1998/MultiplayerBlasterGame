@@ -15,22 +15,23 @@ class BLASTER_API ABlasterPlayerState : public APlayerState
 	GENERATED_BODY()
 
 public:
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;	// 重写获取生命周期复制属性函数
 
-	virtual void OnRep_Score() override;
+	virtual void OnRep_Score() override;	// 重写得分复制属性函数
 
 	UFUNCTION()
-		virtual void OnRep_Defeats();
+		virtual void OnRep_Defeats();	// 重写击败复制属性函数
 
-	void AddToScore(float ScoreAmount);
-	void AddToDefeats(int32 DefeatsAmount);
+	void AddToScore(float ScoreAmount);		// 增加得分
+	void AddToDefeats(int32 DefeatsAmount);	// 增加击败数
 
 private:
 	UPROPERTY()
-		class ABlasterCharacter* Character;
+		class ABlasterCharacter* Character;		// 玩家角色
+
 	UPROPERTY()
-		class ABlasterPlayerController* Controller;
+		class ABlasterPlayerController* Controller;	// 玩家控制器
 
 	UPROPERTY(ReplicatedUsing = OnRep_Defeats)
-		int32 Defeats;
+		int32 Defeats;	// 击败数
 };

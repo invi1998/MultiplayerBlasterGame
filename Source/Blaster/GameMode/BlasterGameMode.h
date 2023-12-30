@@ -26,7 +26,7 @@ public:
 	// 玩家淘汰
 	virtual void PlayerEliminated(class ABlasterCharacter* ElimmedCharacter, class ABlasterPlayerController* VictimController, class ABlasterPlayerController* AttackerController);
 
-	virtual void RequestRespawn(class ACharacter* ElimmedCharacter, AController* ElimmedController);
+	virtual void RequestRespawn(class ACharacter* ElimmedCharacter, AController* ElimmedController);	// 请求重生
 
 	UPROPERTY(EditDefaultsOnly)
 		float WarmupTime = 10.f;	// 预热时间
@@ -37,7 +37,7 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 		float CooldownTime = 10.f;		// 游戏比赛冷却时间
 
-	float LevelStartingTime = 0.f;
+	float LevelStartingTime = 0.f;		// 关卡开始时间
 
 protected:
 	virtual void BeginPlay() override;
@@ -47,6 +47,6 @@ private:
 	float CountdownTime = 0.f;		// 倒计时时间
 
 public:
-	FORCEINLINE float GetCountdownTime() const { return CooldownTime; }
+	FORCEINLINE float GetCountdownTime() const { return CooldownTime; }	// 获取倒计时时间
 
 };

@@ -103,7 +103,7 @@ private:
 		class ABlasterHUD* HUD;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
-		class AWeapon* EquippedWeapon;
+		class AWeapon* EquippedWeapon;		// 当前装备的武器
 
 	// 瞄准
 	UPROPERTY(Replicated)

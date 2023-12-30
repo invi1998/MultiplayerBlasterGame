@@ -21,11 +21,11 @@ protected:
 
 private:
 	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* CasingMesh;
+		UStaticMeshComponent* CasingMesh;	// 子弹外壳网格
 
 	UPROPERTY(EditAnywhere)
-		float ShellEjectionImpulse;
+		float ShellEjectionImpulse;	// 子弹弹壳弹出冲量
 
 	UPROPERTY(EditAnywhere)
-		class USoundCue* ShellSound;
+		class USoundCue* ShellSound;	// 子弹弹壳声音
 };

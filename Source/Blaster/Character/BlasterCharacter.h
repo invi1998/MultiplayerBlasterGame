@@ -84,14 +84,14 @@ protected:
 	// 按ctrl蹲伏和起身
 	void CrouchButtonPressed();
 
-	void ReloadButtonPressed();
+	void ReloadButtonPressed();	// 按R换弹
 
 	// 鼠标右键瞄准
 	void AimButtonPressed();
 
 	// 松开右键瞄准
 	void AimButtonReleased();
-	void CalculateAO_Pitch();
+	void CalculateAO_Pitch();	// 计算目标偏移量 pitch 轴
 
 	// 设置目标偏移量
 	void AimOffset(float DeltaTime);
@@ -115,7 +115,7 @@ protected:
 	UFUNCTION()
 		void ReceiveDamage(AActor* DamageActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
 
-	void UpdateHUDHealth();
+	void UpdateHUDHealth();	// 更新HUD血量
 
 	// 初始化HUD
 	void PollInit();
@@ -128,15 +128,15 @@ private:
 
 	// 属性宏，让其在任何地方可见，想将相机，吊杆归为一类，叫做相机
 	UPROPERTY(VisibleAnywhere, Category = Camera)
-		class USpringArmComponent* CameraBoom;
+		class USpringArmComponent* CameraBoom;	// 吊杆
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
-		class UCameraComponent* FollowCamera;
+		class UCameraComponent* FollowCamera;	// 摄像机
 
 	// 既然我们要从蓝图访问我们的部件，至少需要设置蓝图只读
 	// 如果将私有变量设置蓝图只读，那么就需要允许私人访问，这意味着将这个变量暴露给蓝图
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-		class UWidgetComponent* OverheadWidget;
+		class UWidgetComponent* OverheadWidget;	// 顶部小部件
 
 	// 武器类的前向声明
 	// 我们想要复制这个变量，这意味着当它在服务器上发生变化时，我们想要同步在客户端上也进行更改，我们可以复制指向武器的指针
@@ -144,25 +144,25 @@ private:
 		class AWeapon* OverlappingWeapon;
 
 	UFUNCTION()
-		void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
+		void OnRep_OverlappingWeapon(AWeapon* LastWeapon);	// 当OverlappingWeapon发生变化时，调用该函数
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
-		class UCombatComponent* Combat;
+		class UCombatComponent* Combat;		// 战斗组件
 
 	UFUNCTION(Server, Reliable)
 		void ServerEquipButtonPressed();
 
-	float AO_Yaw;
-	float InterpAO_Yaw;
+	float AO_Yaw;	// 目标偏移量 yaw 轴
+	float InterpAO_Yaw;	// 插值目标偏移量 yaw 轴
 
-	float AO_Pitch;
+	float AO_Pitch;	// 目标偏移量 pitch 轴
 
 	// 起始旋转信息
 	FRotator StartingAimRotation;
 
-	ETurningInPlace TurningInPlace;
+	ETurningInPlace TurningInPlace;		// 旋转状态 0：不旋转 1：旋转 2：旋转完成
 
-	void TurnInPlace(float DeltaTime);
+	void TurnInPlace(float DeltaTime);		// 旋转
 
 	// 武器开火的动画蒙太奇
 	UPROPERTY(EditAnywhere, Category = Combat)
