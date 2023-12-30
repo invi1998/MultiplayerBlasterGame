@@ -22,6 +22,7 @@ public:
 	void SetHUDCarriedAmmo(int32 Ammo);
 	void SetHUDMatchCountdown(float CountdownTime);
 	void SetHUDAnnouncementCountdown(float CountdownTime);
+	void SetHUDGrenades(int32 Grenades);
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -53,45 +54,48 @@ protected:
 
 	// 客户端与服务器同步时间的间隔（频率）
 	UPROPERTY(EditAnywhere, Category = Time)
-		float TimeSyncFrequency = 5.f;
+		float TimeSyncFrequency = 5.f;	// 时间同步频率
 
-	float TimeSyncRunningTime = 0.f;
+	float TimeSyncRunningTime = 0.f;	// 时间同步运行时间
 
-	void CheckTimeSync(float DeltaTime);
-	void HandleMatchHasStarted();
-	void HandleCooldown();
+	void CheckTimeSync(float DeltaTime);	// 检查时间同步
+	void HandleMatchHasStarted();	// 处理游戏开始
+	void HandleCooldown();	// 处理冷却时间
 
+	// 服务器检查游戏状态
 	UFUNCTION(Server, Reliable)
 		void ServerCheckMatchState();
 
+	// 客户端加入游戏
 	UFUNCTION(Client, Reliable)
 		void ClientJoinMidGame(FName StateOfMatch, float Warmup, float Match, float Cooldown, float StartingTime);	// 客户端在游戏中途加入
 
 private:
 	UPROPERTY()
-		class ABlasterHUD* BlasterHUD;
+		class ABlasterHUD* BlasterHUD;	// HUD
 
 	UPROPERTY()
-		class ABlasterGameMode* BlasterGameMode;
+		class ABlasterGameMode* BlasterGameMode;	// 游戏模式
 
-	float LevelStartingTime = 0.f;
-	float MatchTime = 0.f;
-	float WarmupTime = 0.f;
-	float CooldownTime = 0.f;
-	uint32 CountdownInt = 0;
+	float LevelStartingTime = 0.f;	//	游戏开始时间
+	float MatchTime = 0.f;		// 游戏时间
+	float WarmupTime = 0.f;		// 预热时间
+	float CooldownTime = 0.f;	//	冷却时间
+	uint32 CountdownInt = 0;	// 倒计时整数部分
 
 	UPROPERTY(ReplicatedUsing = OnRep_MatchState)
-		FName MatchState;
+		FName MatchState;	// 当前游戏状态
 
 	UFUNCTION()
-		void OnRep_MatchState();
+		void OnRep_MatchState();	// 当MatchState发生变化时，调用该函数
 
 	UPROPERTY()
-		class UCharacterOverlay* CharacterOverlay;
+		class UCharacterOverlay* CharacterOverlay;	// 角色覆盖层
 
-	bool bInitializeCharacterOverlay = false;
-	float HUDHealth;
-	float HUDMaxHealth;
-	float HUDScore;
-	int32 HUDDefeats;
+	bool bInitializeCharacterOverlay = false;	// 是否初始化角色覆盖层
+	float HUDHealth;	// 生命值
+	float HUDMaxHealth;	// 最大生命值
+	float HUDScore;	 // 分数
+	int32 HUDDefeats;	// 击杀数
+	int32 HUDGrenades;	// 手榴弹数量
 };

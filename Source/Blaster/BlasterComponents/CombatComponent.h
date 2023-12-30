@@ -220,6 +220,18 @@ private:
 
 	void UpdateShotgunAmmoValue();
 
+	UPROPERTY(ReplicatedUsing = OnRep_GrenadeCount)
+	int32 GrenadeCount = 4;		// 榴弹数量
+
+	UFUNCTION()
+	void OnRep_GrenadeCount();	// 榴弹数量通知函数
+
+	UPROPERTY(EditAnywhere)
+	int32 MaxGrenadeCount = 4;	// 最大榴弹数量
+
+	void UpdateGrenadeCount();
+
 public:
-	// Called every frame
+	FORCEINLINE int32 GetGrenadeCount() const { return GrenadeCount; }
+
 };

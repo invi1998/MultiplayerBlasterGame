@@ -37,16 +37,17 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 	// 这些变量都是需要通过rpc网络复制到各个客户单进行同步的数据
 	// 注册装备的武器,是否瞄准，携带的弹药数量
-	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
-	DOREPLIFETIME(UCombatComponent, bAiming);
+	DOREPLIFETIME(UCombatComponent, EquippedWeapon);	// 装备的武器
+	DOREPLIFETIME(UCombatComponent, bAiming);	// 是否瞄准
 	// 携带的弹药数量只对客户单来说是有重要意义，因为他和客户端是一对一的关系，只有一个客户端需要将这个值设置在HUD中显示
 	// 所以这里可以使用适当的生命周期条件,并指定条件对象 COND_OwnerOnly
 	// 这样，该变量就只会复制到拥有该弹药的客户端，而不会广播给所有客户端，谁拿到，复制给谁，就这样，这将会节省带宽提高性能
-	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);
-	DOREPLIFETIME(UCombatComponent, CombatState);
+	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);	// 携带的弹药数量
+	DOREPLIFETIME(UCombatComponent, CombatState); // 战斗状态
+	DOREPLIFETIME(UCombatComponent, GrenadeCount);	// 手榴弹数量
 }
 
-// Called when the game starts
+// Called when the game starts or when spawned
 void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -452,27 +453,37 @@ int32 UCombatComponent::AmountToReload()
 	return 0;
 }
 
+// 服务端换弹
 void UCombatComponent::ThrowGrenade()
 {
+	if (GrenadeCount <= 0) return;	// 如果手榴弹数量小于等于0，那么就不需要进行投掷手榴弹的动作了
+
 	if (CombatState != ECombatState::ECS_Unoccupied || EquippedWeapon == nullptr) return;;
 
 	CombatState = ECombatState::ECS_ThrowingGrenade;
 
 	if (Character)
 	{
-		Character->PlayThrowGrenadeMontage();
-		AttachActorToLeftHand(EquippedWeapon);
-		ShowAttachedGrenade(true);
+		Character->PlayThrowGrenadeMontage();	// 播放投掷手榴弹的蒙太奇动画
+		AttachActorToLeftHand(EquippedWeapon);	// 将武器附加到左手
+		ShowAttachedGrenade(true);		// 显示手榴弹
 	}
-	if (Character && !Character->HasAuthority())
+	if (Character && !Character->HasAuthority())	// 如果是客户端，那么客户端需要通过RPC网络复制调用服务端的函数进行投掷手榴弹
 	{
 		ServerThrowGrenade();
+	}
+	if (Character && Character->HasAuthority())	// 如果是服务端，那么服务端需要通过RPC网络复制调用客户端的函数进行投掷手榴弹
+	{
+		GrenadeCount = FMath::Clamp(GrenadeCount - 1, 0, GrenadeCount);	// 手榴弹数量减1
+		UpdateGrenadeCount();
 	}
 	
 }
 
+// 服务端投掷手榴弹
 void UCombatComponent::ServerThrowGrenade_Implementation()
 {
+	if (GrenadeCount <= 0) return;	// 如果手榴弹数量小于等于0，那么就不需要进行投掷手榴弹的动作了
 	CombatState = ECombatState::ECS_ThrowingGrenade;
 	if (Character)
 	{
@@ -480,6 +491,7 @@ void UCombatComponent::ServerThrowGrenade_Implementation()
 		AttachActorToLeftHand(EquippedWeapon);
 		ShowAttachedGrenade(true);
 	}
+	GrenadeCount = FMath::Clamp(GrenadeCount - 1, 0, GrenadeCount);	// 手榴弹数量减1
 }
 
 void UCombatComponent::OnRep_CombatState()
@@ -552,6 +564,21 @@ void UCombatComponent::UpdateShotgunAmmoValue()
 		JumpToShotgunEnd();
 	}
 
+}
+
+void UCombatComponent::OnRep_GrenadeCount()
+{
+	UpdateGrenadeCount();
+}
+
+void UCombatComponent::UpdateGrenadeCount()
+{
+	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;	// 获取控制器
+
+	if (Controller)
+	{
+		Controller->SetHUDGrenades(GrenadeCount);
+	}
 }
 
 void UCombatComponent::OnRep_EquippedWeapon()
