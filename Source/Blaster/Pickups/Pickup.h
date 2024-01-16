@@ -24,12 +24,12 @@ protected:
 
 	UFUNCTION()
 	virtual void OnSphereOverlap(
-		UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult
+		UPrimitiveComponent* OverlappedComponent,	// 该组件将被触发
+		AActor* OtherActor,							// 与该组件发生重叠的Actor
+		UPrimitiveComponent* OtherComp,			// 与该组件发生重叠的组件
+		int32 OtherBodyIndex,						// 与该组件发生重叠的组件的BodyIndex
+		bool bFromSweep,							// 是否是由Sweep引起的重叠
+		const FHitResult& SweepResult				// Sweep引起的重叠的结果
 	);
 
 private:
