@@ -3,6 +3,7 @@
 #include "BlasterCharacter.h"
 
 #include "Blaster/BlasterComponents/CombatComponent.h"
+#include "Blaster/BlasterComponents/BuffComponent.h"
 #include "Blaster/Weapon/Weapon.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -56,6 +57,10 @@ ABlasterCharacter::ABlasterCharacter()
 	// 战斗组件
 	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 	Combat->SetIsReplicated(true);
+
+	// BUFF组件
+	Buff = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
+	Buff->SetIsReplicated(true);	// 设置BUFF组件为可复制
 
 	// 设置角色可蹲伏（也可以在UE编辑器中勾选）
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
@@ -198,6 +203,10 @@ void ABlasterCharacter::PostInitializeComponents()
 	if (Combat)
 	{
 		Combat->Character = this;
+	}
+	if (Buff)
+	{
+		Buff->Character = this;
 	}
 }
 
