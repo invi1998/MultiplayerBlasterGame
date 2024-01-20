@@ -32,6 +32,9 @@ protected:
 		const FHitResult& SweepResult				// Sweep引起的重叠的结果
 	);
 
+	UPROPERTY(EditAnywhere)
+	float BaseTurnRate = 45.f;		// 基础旋转速率 (deg/sec)
+
 private:
 	UPROPERTY(EditAnywhere)
 	class USphereComponent* OverlapSphere;
