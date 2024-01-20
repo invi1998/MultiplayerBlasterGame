@@ -47,10 +47,36 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UCombatComponent, GrenadeCount);	// 手榴弹数量
 }
 
+void UCombatComponent::PickupAmmo(EWeaponType WeaponType, int32 Amount)
+{
+	if (Character == nullptr) return;
+
+	if (CarriedAmmoMap.Contains(WeaponType))	// 确保携带的弹药数量中包含该类型的弹药
+	{
+		CarriedAmmoMap[WeaponType] = FMath::Clamp(CarriedAmmoMap[WeaponType] + Amount, 0, MaxCarriedAmmoMap[WeaponType]);	// 更新携带的弹药数量
+		// CarriedAmmo = CarriedAmmoMap[WeaponType];	// 更新携带的弹药数量
+		UpdateCarriedAmmo();	// 更新携带的弹药数量
+	}
+
+	// 同时，如果我们拾取了弹药，这时我们装备的武器正好是空的，而且也正好是我们拾取的弹药类型，那么我们就需要换弹
+	if (EquippedWeapon && EquippedWeapon->IsEmpty() && EquippedWeapon->GetWeaponType() == WeaponType)
+	{
+		Reload();
+	}
+}
+
 // Called when the game starts or when spawned
 void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	MaxCarriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, MaxARAmmo);	// 最大携带的突击步枪弹药数量
+	MaxCarriedAmmoMap.Emplace(EWeaponType::EWT_RocketLauncher, MaxRocketAmmo);	// 最大携带的火箭弹药数量
+	MaxCarriedAmmoMap.Emplace(EWeaponType::EWT_Pistol, MaxPistolAmmo);	// 最大携带的手枪子弹的数量
+	MaxCarriedAmmoMap.Emplace(EWeaponType::EWT_SubmachineGun, MaxSMGAmmo);	// 最大携带的冲锋枪子弹的数量
+	MaxCarriedAmmoMap.Emplace(EWeaponType::EWT_Shotgun, MaxShotgunAmmo);	// 最大携带的霰弹枪子弹的数量
+	MaxCarriedAmmoMap.Emplace(EWeaponType::EWT_SniperRifle, MaxSniperAmmo);	// 最大携带的狙击枪子弹的数量
+	MaxCarriedAmmoMap.Emplace(EWeaponType::EWT_GrenadeLauncher, MaxGrenadeLauncherAmmo);	// 最大携带的手榴弹的数量
 
 	// ...
 	if (Character)

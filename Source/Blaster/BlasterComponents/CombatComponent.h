@@ -44,6 +44,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerLaunchGrenade(const FVector_NetQuantize& Target);
 
+	void PickupAmmo(EWeaponType WeaponType, int32 Amount); // 捡起弹药, 传入武器类型和数量
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -177,7 +179,30 @@ private:
 	UFUNCTION()
 		void OnRep_CarriedAmmo();
 
-	TMap<EWeaponType, int32> CarriedAmmoMap;
+	TMap<EWeaponType, int32> CarriedAmmoMap;	// 携带的弹药数量（不同类型的武器携带的弹药数量）
+
+	UPROPERTY(EditAnywhere)
+	int32 MaxARAmmo = 300;	// 突击步枪最大弹药数量
+
+	UPROPERTY(EditAnywhere)
+	int32 MaxRocketAmmo = 10;	// 火箭筒最大弹药数量
+
+	UPROPERTY(EditAnywhere)
+	int32 MaxPistolAmmo = 100;	// 手枪最大弹药数量
+
+	UPROPERTY(EditAnywhere)
+	int32 MaxSMGAmmo = 200;	// 冲锋枪最大弹药数量
+
+	UPROPERTY(EditAnywhere)
+	int32 MaxShotgunAmmo = 100;	// 霰弹枪最大弹药数量
+
+	UPROPERTY(EditAnywhere)
+	int32 MaxSniperAmmo = 50;	// 狙击步枪最大弹药数量
+
+	UPROPERTY(EditAnywhere)
+	int32 MaxGrenadeLauncherAmmo = 10;	// 榴弹发射器最大弹药数量
+
+	TMap<EWeaponType, int32> MaxCarriedAmmoMap;	// 携带的弹药数量（不同类型的武器允许携带的最大弹药数量）
 
 	// 突击步枪子弹数
 	UPROPERTY(EditAnywhere)
