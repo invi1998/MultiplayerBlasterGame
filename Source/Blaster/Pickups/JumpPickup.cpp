@@ -3,6 +3,7 @@
 
 #include "JumpPickup.h"
 
+#include "Blaster/BlasterComponents/BuffComponent.h"
 #include "Blaster/Character/BlasterCharacter.h"
 
 AJumpPickup::AJumpPickup()
@@ -17,7 +18,11 @@ void AJumpPickup::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(OtherActor);
 	if (BlasterCharacter)
 	{
-
+		UBuffComponent* Buff = BlasterCharacter->GetBuff();
+		if (Buff)
+		{
+			Buff->AddJump(JumpZVelocity, JumpBuffTime);
+		}
 	}
 	Destroy();
 }

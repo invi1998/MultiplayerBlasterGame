@@ -22,7 +22,7 @@ private:
 
 private:
 	UPROPERTY(EditAnywhere)
-	float JumpZVelocity = 4000.f;	// 跳跃速度
+	float JumpZVelocity = 2400.f;	// 跳跃速度
 
 	UPROPERTY(EditAnywhere)
 	float JumpBuffTime = 10.f;	// 跳跃buff时间
