@@ -23,7 +23,11 @@ public:
 
 	void AddSpeed(float BuffBaseSpeed, float BuffCrouchSpeed, float BuffTime);		// 增加速度 传入速度和持续时间
 
+	void AddJump(float JumpZVelocity, float JumpTime);		// 增加跳跃速度 传入跳跃速度和持续时间
+
 	void SetInitialSpeed(float BaseSpeed, float CrouchSpeed);		// 设置初始速度
+
+	void SetInitialJumpZVelocity(float JumpZVelocity);		// 设置初始跳跃速度
 
 protected:
 	// Called when the game starts
@@ -52,6 +56,17 @@ private:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastSpeedBuff(float BuffBaseSpeed, float BuffCrouchSpeed, float BuffTime);		// 速度buff多播函数
+
+	/*
+	 * 跳跃buff
+	 */
+	FTimerHandle JumpBuffTimerHandle;		// 跳跃buff计时器句柄
+
+	void RestJump();		// 重置跳跃
+	float InitialJumpZVelocity = 0.0f;		// 初始跳跃速度
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastJumpBuff(float JumpZVelocity, float JumpTime);		// 跳跃buff多播函数
 
 
 public:	

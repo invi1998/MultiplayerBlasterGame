@@ -42,10 +42,34 @@ void UBuffComponent::AddSpeed(float BuffBaseSpeed, float BuffCrouchSpeed, float 
 	MulticastSpeedBuff(BuffBaseSpeed, BuffCrouchSpeed, BuffTime);		// 多播速度buff
 }
 
+void UBuffComponent::AddJump(float JumpZVelocity, float JumpTime)
+{
+	if (Character == nullptr) return;		// 如果Character为空，就返回
+
+	if (JumpBuffTimerHandle.IsValid())
+	{
+		Character->GetWorldTimerManager().ClearTimer(JumpBuffTimerHandle);		// 清除计时器
+	}
+
+	Character->GetWorldTimerManager().SetTimer(JumpBuffTimerHandle, this, &UBuffComponent::RestJump, JumpTime);		// 设置计时器
+
+	if (Character->GetCharacterMovement())
+	{
+		Character->GetCharacterMovement()->JumpZVelocity = JumpZVelocity;		// 设置跳跃速度
+	}
+
+	MulticastJumpBuff(JumpZVelocity, JumpTime);		// 多播跳跃buff
+}
+
 void UBuffComponent::SetInitialSpeed(float BaseSpeed, float CrouchSpeed)
 {
 	InitialBaseSpeed = BaseSpeed;		// 设置初始基础速度
 	InitialCrouchSpeed = CrouchSpeed;	// 设置初始蹲下速度
+}
+
+void UBuffComponent::SetInitialJumpZVelocity(float JumpZVelocity)
+{
+	InitialJumpZVelocity = JumpZVelocity;		// 设置初始跳跃速度
 }
 
 
@@ -88,8 +112,26 @@ void UBuffComponent::ResetSpeed()
 
 void UBuffComponent::MulticastSpeedBuff_Implementation(float BuffBaseSpeed, float BuffCrouchSpeed, float BuffTime)
 {
+	if (Character == nullptr || Character->GetCharacterMovement() == nullptr) return;		// 如果Character为空或者Character的CharacterMovement为空，就返回
+
 	Character->GetCharacterMovement()->MaxWalkSpeed = BuffBaseSpeed;		// 设置最大行走速度
 	Character->GetCharacterMovement()->MaxWalkSpeedCrouched = BuffCrouchSpeed;		// 设置最大蹲下速度
+}
+
+void UBuffComponent::RestJump()
+{
+	if (Character == nullptr || Character->GetCharacterMovement() == nullptr) return;		// 如果Character为空或者Character的CharacterMovement为空，就返回
+
+	Character->GetCharacterMovement()->JumpZVelocity = InitialJumpZVelocity;		// 设置跳跃速度
+
+	MulticastJumpBuff(InitialJumpZVelocity, 0.0f);		// 多播跳跃buff
+}
+
+void UBuffComponent::MulticastJumpBuff_Implementation(float JumpZVelocity, float JumpTime)
+{
+	if (Character == nullptr || Character->GetCharacterMovement() == nullptr) return;		// 如果Character为空或者Character的CharacterMovement为空，就返回
+
+	Character->GetCharacterMovement()->JumpZVelocity = JumpZVelocity;		// 设置跳跃速度
 }
 
 // Called every frame
