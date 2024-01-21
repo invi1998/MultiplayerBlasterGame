@@ -64,6 +64,8 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowSniperScopeWidget(bool bShowScope);
 
+	void UpdateHUDHealth();	// 更新HUD血量
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -114,8 +116,6 @@ protected:
 	// 角色受到伤害处理函数
 	UFUNCTION()
 		void ReceiveDamage(AActor* DamageActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
-
-	void UpdateHUDHealth();	// 更新HUD血量
 
 	// 初始化HUD
 	void PollInit();
@@ -216,7 +216,7 @@ private:
 
 	// 将玩家血量更新给客户端
 	UFUNCTION()
-		void OnRep_Health();
+		void OnRep_Health(float LastHealth);
 
 	UPROPERTY()
 		class ABlasterPlayerController* BlasterPlayerController;
@@ -295,10 +295,12 @@ public:
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
 	FORCEINLINE bool IsElimmed() const { return bElimmed; }
 	FORCEINLINE float GetHealth() const { return Health; }
+	FORCEINLINE void SetHealth(float NewHealth) { Health = NewHealth; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 	ECombatState GetCombatState() const;
 	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }
 	FORCEINLINE bool GetDisableGamePlay() const { return bDisableGamePlay; }
 	FORCEINLINE UAnimMontage* GetReloadMontage() const { return ReloadMontage; }
 	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const { return AttachedGrenade; }
+	FORCEINLINE UBuffComponent* GetBuff() const { return Buff; }
 };

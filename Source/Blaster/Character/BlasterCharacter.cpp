@@ -697,10 +697,13 @@ float ABlasterCharacter::CalculateSpeed()
 	return Velocity.Size();
 }
 
-void ABlasterCharacter::OnRep_Health()
+void ABlasterCharacter::OnRep_Health(float LastHealth)
 {
-	UpdateHUDHealth();
-	PlayHitReactMontage();
+	UpdateHUDHealth();	// 更新HUD血量
+	if (Health < LastHealth)
+	{
+		PlayHitReactMontage();	// 播放受伤动画
+	}
 }
 
 void ABlasterCharacter::Elim()
