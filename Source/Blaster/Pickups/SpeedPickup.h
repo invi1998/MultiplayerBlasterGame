@@ -26,5 +26,7 @@ private:
 	float BaseSpeedBuff = 1600.5f;	// 基础速度加成
 
 	UPROPERTY(EditAnywhere)
-	float BaseCrouchSpeedBuff = 0.5f;	// 基础蹲下速度加成
+	float CrouchSpeedBuff = 0.5f;	// 蹲下速度加成
+
+	float SpeedBuffTime = 3.0f;	// 速度加成持续时间
 };

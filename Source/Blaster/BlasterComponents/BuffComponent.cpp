@@ -4,6 +4,7 @@
 #include "BuffComponent.h"
 
 #include "Blaster/Character/BlasterCharacter.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values for this component's properties
 UBuffComponent::UBuffComponent()
@@ -20,6 +21,31 @@ void UBuffComponent::AddHealth(float HealthAmount, float HealingTime)
 	bHealing = true;		// 设置正在治疗为true
 	HealingRate = HealthAmount / HealingTime;		// 计算治疗速率
 	AmountToHeal = HealthAmount;		// 计算治疗量，一旦治疗量达到了HealthAmount，就会停止治疗
+}
+
+void UBuffComponent::AddSpeed(float BuffBaseSpeed, float BuffCrouchSpeed, float BuffTime)
+{
+	if (Character == nullptr) return;		// 如果Character为空，就返回
+
+	if (SpeedBuffTimerHandle.IsValid())		// 如果计时器有效
+	{
+		Character->GetWorldTimerManager().ClearTimer(SpeedBuffTimerHandle);		// 清除计时器
+	}
+	Character->GetWorldTimerManager().SetTimer(SpeedBuffTimerHandle, this, &UBuffComponent::ResetSpeed, BuffTime);		// 设置计时器
+
+	if (Character->GetCharacterMovement())
+	{
+		Character->GetCharacterMovement()->MaxWalkSpeed = BuffBaseSpeed;		// 设置最大行走速度
+		Character->GetCharacterMovement()->MaxWalkSpeedCrouched = BuffCrouchSpeed;		// 设置最大蹲下速度
+	}
+
+	MulticastSpeedBuff(BuffBaseSpeed, BuffCrouchSpeed, BuffTime);		// 多播速度buff
+}
+
+void UBuffComponent::SetInitialSpeed(float BaseSpeed, float CrouchSpeed)
+{
+	InitialBaseSpeed = BaseSpeed;		// 设置初始基础速度
+	InitialCrouchSpeed = CrouchSpeed;	// 设置初始蹲下速度
 }
 
 
@@ -49,6 +75,22 @@ void UBuffComponent::HealRampUp(float DeltaTime)
 	}
 }
 
+
+void UBuffComponent::ResetSpeed()
+{
+	if (Character == nullptr || Character->GetCharacterMovement() == nullptr) return;		// 如果Character为空或者Character的CharacterMovement为空，就返回
+
+	Character->GetCharacterMovement()->MaxWalkSpeed = InitialBaseSpeed;		// 设置最大行走速度
+	Character->GetCharacterMovement()->MaxWalkSpeedCrouched = InitialCrouchSpeed;		// 设置最大蹲下速度
+
+	MulticastSpeedBuff(InitialBaseSpeed, InitialCrouchSpeed, 0.0f);		// 多播速度buff
+}
+
+void UBuffComponent::MulticastSpeedBuff_Implementation(float BuffBaseSpeed, float BuffCrouchSpeed, float BuffTime)
+{
+	Character->GetCharacterMovement()->MaxWalkSpeed = BuffBaseSpeed;		// 设置最大行走速度
+	Character->GetCharacterMovement()->MaxWalkSpeedCrouched = BuffCrouchSpeed;		// 设置最大蹲下速度
+}
 
 // Called every frame
 void UBuffComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

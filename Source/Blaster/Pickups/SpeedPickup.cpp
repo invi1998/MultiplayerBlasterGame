@@ -3,6 +3,9 @@
 
 #include "SpeedPickup.h"
 
+#include "Blaster/BlasterComponents/BuffComponent.h"
+#include "Blaster/Character/BlasterCharacter.h"
+
 ASpeedPickup::ASpeedPickup()
 {
 }
@@ -12,5 +15,15 @@ void ASpeedPickup::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 	Super::OnSphereOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 
 	
+	ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(OtherActor);
+	if (BlasterCharacter)
+	{
+		UBuffComponent* Buff = BlasterCharacter->GetBuff();
+		if (Buff)
+		{
+			Buff->AddSpeed(BaseSpeedBuff, CrouchSpeedBuff, SpeedBuffTime);
+		}
+	}
 
+	Destroy();
 }

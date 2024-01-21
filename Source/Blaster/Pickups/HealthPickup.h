@@ -24,8 +24,8 @@ protected:
 
 private:
 	UPROPERTY(EditAnywhere)
-	float HealthAmount = 100.0f;	// 血量
+	float HealthAmount = 50.0f;	// 血量
 
 	UPROPERTY(EditAnywhere)
-	float HealingTime = 5.0f;	// 治疗时间，因为我们希望在拾取后有一个治疗的过程，而不是立刻就回满血量，所以我们需要一个治疗时间
+	float HealingTime = 7.0f;	// 治疗时间，因为我们希望在拾取后有一个治疗的过程，而不是立刻就回满血量，所以我们需要一个治疗时间
 };
