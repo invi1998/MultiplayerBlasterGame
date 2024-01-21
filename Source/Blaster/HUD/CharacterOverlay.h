@@ -16,26 +16,41 @@ class BLASTER_API UCharacterOverlay : public UUserWidget
 
 public:
 	UPROPERTY(meta = (BindWidget))
-		class UProgressBar* HealthBar;
+		class UProgressBar* HealthBar;	// 血条
 
 	UPROPERTY(meta = (BindWidget))
-		class UTextBlock* HealthText;
+	UProgressBar* HealthAdditionBar;	// 血条增加
 
 	UPROPERTY(meta = (BindWidget))
-		UTextBlock* ScoreAmount;
+	UProgressBar* HealthSubtractionBar;	// 血条减少
 
 	UPROPERTY(meta = (BindWidget))
-		UTextBlock* DefeatsAmount;
+	UProgressBar* ShieldBar_L2R;	// 护盾条 从左到右
 
 	UPROPERTY(meta = (BindWidget))
-		UTextBlock* WeaponAmmoAmount;
+	UProgressBar* ShieldBar_R2L;	// 护盾条 从右到左
 
 	UPROPERTY(meta = (BindWidget))
-		UTextBlock* CarriedAmmoAmount;
+		class UTextBlock* HealthText;	// 血量
 
 	UPROPERTY(meta = (BindWidget))
-		UTextBlock* MatchCountdownText;
+	UTextBlock* ShieldText;		// 护盾
 
 	UPROPERTY(meta = (BindWidget))
-		UTextBlock* GrenadesText;
+		UTextBlock* ScoreAmount;	// 分数
+
+	UPROPERTY(meta = (BindWidget))
+		UTextBlock* DefeatsAmount;	// 击杀数
+
+	UPROPERTY(meta = (BindWidget))
+		UTextBlock* WeaponAmmoAmount;	// 武器弹药
+
+	UPROPERTY(meta = (BindWidget))
+		UTextBlock* CarriedAmmoAmount;	// 携带弹药
+
+	UPROPERTY(meta = (BindWidget))
+		UTextBlock* MatchCountdownText;	// 比赛倒计时
+
+	UPROPERTY(meta = (BindWidget))
+		UTextBlock* GrenadesText;	// 榴弹
 };

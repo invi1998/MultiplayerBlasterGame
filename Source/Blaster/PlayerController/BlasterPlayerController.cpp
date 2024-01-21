@@ -147,6 +147,9 @@ void ABlasterPlayerController::PollInit()
 			if (CharacterOverlay)
 			{
 				SetHUDHealth(HUDHealth, HUDMaxHealth);
+				SetHUDShield(HUDShield, HUDMaxShield);
+				/*SetHUDHealthAddition(HUDHealthAddition, HUDMaxHealth);
+				SetHUDHealthSubtraction(HUDHealthSubtraction, HUDMaxHealth);*/
 				SetHUDScore(HUDScore);
 				SetHUDDefeats(HUDDefeats);
 
@@ -301,7 +304,10 @@ void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 {
 	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 
-	bool bHUDValid = BlasterHUD && BlasterHUD->CharacterOverlay && BlasterHUD->CharacterOverlay->HealthBar && BlasterHUD->CharacterOverlay->HealthText;
+	bool bHUDValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->HealthBar &&
+		BlasterHUD->CharacterOverlay->HealthText;
 
 	if (bHUDValid)
 	{
@@ -315,6 +321,51 @@ void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 		bInitializeCharacterOverlay = true;
 		HUDHealth = Health;
 		HUDMaxHealth = MaxHealth;
+	}
+}
+
+void ABlasterPlayerController::SetHUDShield(float Shield, float MaxShield)
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+
+	bool bHUDValid = BlasterHUD &&	// HUD存在
+			BlasterHUD->CharacterOverlay &&	// HUD的角色信息UI存在
+			BlasterHUD->CharacterOverlay->ShieldBar_R2L &&	// HUD的角色信息UI的护盾条存在(从右到左)
+			BlasterHUD->CharacterOverlay->ShieldBar_L2R &&	// HUD的角色信息UI的护盾条存在(从左到右)
+			BlasterHUD->CharacterOverlay->ShieldText;	// HUD的角色信息UI的护盾值文本存在
+
+	if (bHUDValid)
+	{
+		float ShieldPercent = Shield / MaxShield;
+		
+		// 如果我们的护盾值小于等于当前血条的反向值，那么护盾值的起始点就是血条的终点（为了实现这种效果，我将护盾的百分比加上血条百分比）
+		if (ShieldPercent <= 1.f - BlasterHUD->CharacterOverlay->HealthBar->Percent)
+		{
+			ShieldPercent += BlasterHUD->CharacterOverlay->HealthBar->Percent;
+			// 然后我们使用从左到右的进度条填充类型
+			BlasterHUD->CharacterOverlay->ShieldBar_R2L->Visibility = ESlateVisibility::Hidden;
+			BlasterHUD->CharacterOverlay->ShieldBar_L2R->Visibility = ESlateVisibility::Visible;
+
+			// 然后设置护盾条的层级在血条的下面
+			BlasterHUD->CharacterOverlay->ShieldBar_L2R->SetRenderTransformPivot(FVector2D(0.f, 0.5f));
+		}
+		else // 否则，护盾的进度条的填充类型就是从左到右
+		{
+			BlasterHUD->CharacterOverlay->ShieldBar_L2R->Visibility = ESlateVisibility::Hidden;
+			BlasterHUD->CharacterOverlay->ShieldBar_R2L->Visibility = ESlateVisibility::Visible;
+		}
+
+		BlasterHUD->CharacterOverlay->ShieldBar_R2L->SetPercent(ShieldPercent);
+		BlasterHUD->CharacterOverlay->ShieldBar_L2R->SetPercent(ShieldPercent);
+
+		FString ShieldString = FString::Printf(TEXT("%d / %d"), FMath::CeilToInt(Shield), FMath::CeilToInt(MaxShield));
+		BlasterHUD->CharacterOverlay->ShieldText->SetText(FText::FromString(ShieldString));
+	}
+	else
+	{
+		bInitializeCharacterOverlay = true;
+		HUDShield = Shield;
+		HUDMaxShield = MaxShield;
 	}
 }
 

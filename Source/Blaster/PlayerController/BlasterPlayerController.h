@@ -16,6 +16,7 @@ class BLASTER_API ABlasterPlayerController : public APlayerController
 
 public:
 	void SetHUDHealth(float Health, float MaxHealth);
+	void SetHUDShield(float Shield, float MaxShield);	// 设置护盾
 	void SetHUDScore(float Score);
 	void SetHUDDefeats(int32 Defeats);
 	void SetHUDWeaponAmmo(int32 Ammo);
@@ -95,6 +96,8 @@ private:
 	bool bInitializeCharacterOverlay = false;	// 是否初始化角色覆盖层
 	float HUDHealth;	// 生命值
 	float HUDMaxHealth;	// 最大生命值
+	float HUDShield;	// 护盾
+	float HUDMaxShield;	// 最大护盾
 	float HUDScore;	 // 分数
 	int32 HUDDefeats;	// 击杀数
 	int32 HUDGrenades;	// 手榴弹数量
