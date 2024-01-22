@@ -307,10 +307,47 @@ void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 	bool bHUDValid = BlasterHUD &&
 		BlasterHUD->CharacterOverlay &&
 		BlasterHUD->CharacterOverlay->HealthBar &&
+		BlasterHUD->CharacterOverlay->HealthAdditionBar &&
+		BlasterHUD->CharacterOverlay->HealthSubtractionBar &&
 		BlasterHUD->CharacterOverlay->HealthText;
 
 	if (bHUDValid)
 	{
+		if (Health > HUDHealth)
+		{
+			// 先设置血条增加进度条
+			BlasterHUD->CharacterOverlay->HealthAdditionBar->SetVisibility(ESlateVisibility::Visible);
+			BlasterHUD->CharacterOverlay->HealthSubtractionBar->SetVisibility(ESlateVisibility::Hidden);
+			BlasterHUD->CharacterOverlay->HealthAdditionBar->SetPercent(Health / MaxHealth);
+			BlasterHUD->CharacterOverlay->HealthSubtractionBar->SetPercent(Health / MaxHealth);
+			// 然后用血条增加进度百分比和真实血条百分比做差值混合，让血条增加进度条的进度条变化更加平滑
+			float HealthAdditionBarPercent = BlasterHUD->CharacterOverlay->HealthAdditionBar->Percent;
+			float HealthBarPercent = BlasterHUD->CharacterOverlay->HealthBar->Percent;
+			for (float i = HealthBarPercent; i < HealthAdditionBarPercent; i += 0.01f)
+			{
+				BlasterHUD->CharacterOverlay->HealthBar->SetPercent(i);
+				
+			}
+		}
+		else if (Health < HUDHealth)
+		{
+			BlasterHUD->CharacterOverlay->HealthAdditionBar->SetVisibility(ESlateVisibility::Hidden);
+			BlasterHUD->CharacterOverlay->HealthSubtractionBar->SetVisibility(ESlateVisibility::Visible);
+			BlasterHUD->CharacterOverlay->HealthAdditionBar->SetPercent(Health / MaxHealth);
+			BlasterHUD->CharacterOverlay->HealthBar->SetPercent(Health / MaxHealth);
+
+			float HealthSubtractionBarPercent = BlasterHUD->CharacterOverlay->HealthSubtractionBar->Percent;
+			float HealthBarPercent = BlasterHUD->CharacterOverlay->HealthBar->Percent;
+			for (float i = HealthBarPercent; i > HealthSubtractionBarPercent; i -= 0.01f)
+			{
+				BlasterHUD->CharacterOverlay->HealthSubtractionBar->SetPercent(i);
+			}
+		}
+		else
+		{
+			BlasterHUD->CharacterOverlay->HealthAdditionBar->SetVisibility(ESlateVisibility::Hidden);
+			BlasterHUD->CharacterOverlay->HealthSubtractionBar->SetVisibility(ESlateVisibility::Hidden);
+		}
 		const float HealthPercent = Health / MaxHealth;
 		BlasterHUD->CharacterOverlay->HealthBar->SetPercent(HealthPercent);
 		FString HealthText = FString::Printf(TEXT("%d / %d"), FMath::CeilToInt(Health), FMath::CeilToInt(MaxHealth));

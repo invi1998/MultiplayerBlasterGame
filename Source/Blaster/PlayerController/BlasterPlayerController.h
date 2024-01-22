@@ -31,7 +31,8 @@ public:
 
 	virtual void ReceivedPlayer() override;		// 在玩家加入的时候，尽快与与服务器进行时间同步
 
-	void OnMatchStateSet(FName state);
+	void OnMatchStateSet(FName state);	// 当游戏状态发生变化时，调用该函数
+
 
 protected:
 	virtual void BeginPlay() override;
