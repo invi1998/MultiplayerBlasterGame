@@ -339,14 +339,14 @@ void ABlasterPlayerController::SetHUDShield(float Shield, float MaxShield)
 		float ShieldPercent = Shield / MaxShield;
 		
 		// 如果我们的护盾值小于等于当前血条的反向值，那么护盾值的起始点就是血条的终点（为了实现这种效果，我将护盾的百分比加上血条百分比）
-		if (BlasterHUD->CharacterOverlay->HealthBar->Percent < 1.f && ShieldPercent <= 1.f - BlasterHUD->CharacterOverlay->HealthBar->Percent)
+		if (BlasterHUD->CharacterOverlay->HealthBar->Percent < 1.f && ShieldPercent > 0 && ShieldPercent <= 1.f - BlasterHUD->CharacterOverlay->HealthBar->Percent)
 		{
 			ShieldPercent += BlasterHUD->CharacterOverlay->HealthBar->Percent;
 			// 然后我们使用从左到右的进度条填充类型
 			BlasterHUD->CharacterOverlay->ShieldBar_R2L->SetPercent(0);
 			BlasterHUD->CharacterOverlay->ShieldBar_L2R->SetPercent(ShieldPercent);
 		}
-		else if (BlasterHUD->CharacterOverlay->HealthBar->Percent < 1.f && ShieldPercent > 1.f - BlasterHUD->CharacterOverlay->HealthBar->Percent)
+		else if (BlasterHUD->CharacterOverlay->HealthBar->Percent < 1.f && ShieldPercent > 0 && ShieldPercent > 1.f - BlasterHUD->CharacterOverlay->HealthBar->Percent)
 		{
 			// 然后我们使用从右到左的进度条填充类型
 			BlasterHUD->CharacterOverlay->ShieldBar_R2L->SetPercent(ShieldPercent);
