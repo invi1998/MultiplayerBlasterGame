@@ -173,6 +173,7 @@ void ABlasterCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	UpdateHUDHealth();
+	UpdateHUDShield();
 
 	if (HasAuthority())
 	{
@@ -325,9 +326,19 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const U
 {
 	if (bElimmed) return;	// 如果已经被淘汰，那么就不再接受伤害
 
-	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+	float DamageToHealth = Damage;	// 伤害值
+	if (Shield > 0.f)
+	{
+		// 如果护盾大于0，那么就先扣除护盾
+		float DamageToShield = FMath::Clamp(Damage, 0.f, Shield);
+		Shield -= DamageToShield;
+		DamageToHealth = FMath::Clamp(Damage - DamageToShield, 0.f, Health);
+	}
+
+	Health = FMath::Clamp(Health - DamageToHealth, 0.f, MaxHealth);
 
 	UpdateHUDHealth();
+	UpdateHUDShield();
 	PlayHitReactMontage();
 
 	if (Health == 0.f)

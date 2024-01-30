@@ -93,13 +93,17 @@ private:
 
 	UPROPERTY()
 		class UCharacterOverlay* CharacterOverlay;	// 角色覆盖层
-
-	bool bInitializeCharacterOverlay = false;	// 是否初始化角色覆盖层
+		
 	float HUDHealth;	// 生命值
+	bool bInitializeHealth = false;	// 是否初始化生命值
 	float HUDMaxHealth;	// 最大生命值
 	float HUDShield;	// 护盾
+	bool bInitializeShield = false;	// 是否初始化护盾
 	float HUDMaxShield;	// 最大护盾
 	float HUDScore;	 // 分数
+	bool bInitializeScore = false;	// 是否初始化分数
 	int32 HUDDefeats;	// 击杀数
+	bool bInitializeDefeats = false;	// 是否初始化击杀数
 	int32 HUDGrenades;	// 手榴弹数量
+	bool bInitializeGrenades = false;	// 是否初始化手榴弹数量
 };
