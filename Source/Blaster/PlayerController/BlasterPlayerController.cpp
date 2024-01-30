@@ -307,47 +307,10 @@ void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 	bool bHUDValid = BlasterHUD &&
 		BlasterHUD->CharacterOverlay &&
 		BlasterHUD->CharacterOverlay->HealthBar &&
-		BlasterHUD->CharacterOverlay->HealthAdditionBar &&
-		BlasterHUD->CharacterOverlay->HealthSubtractionBar &&
 		BlasterHUD->CharacterOverlay->HealthText;
 
 	if (bHUDValid)
 	{
-		if (Health > HUDHealth)
-		{
-			// 先设置血条增加进度条
-			BlasterHUD->CharacterOverlay->HealthAdditionBar->SetVisibility(ESlateVisibility::Visible);
-			BlasterHUD->CharacterOverlay->HealthSubtractionBar->SetVisibility(ESlateVisibility::Hidden);
-			BlasterHUD->CharacterOverlay->HealthAdditionBar->SetPercent(Health / MaxHealth);
-			BlasterHUD->CharacterOverlay->HealthSubtractionBar->SetPercent(Health / MaxHealth);
-			// 然后用血条增加进度百分比和真实血条百分比做差值混合，让血条增加进度条的进度条变化更加平滑
-			float HealthAdditionBarPercent = BlasterHUD->CharacterOverlay->HealthAdditionBar->Percent;
-			float HealthBarPercent = BlasterHUD->CharacterOverlay->HealthBar->Percent;
-			for (float i = HealthBarPercent; i < HealthAdditionBarPercent; i += 0.01f)
-			{
-				BlasterHUD->CharacterOverlay->HealthBar->SetPercent(i);
-				
-			}
-		}
-		else if (Health < HUDHealth)
-		{
-			BlasterHUD->CharacterOverlay->HealthAdditionBar->SetVisibility(ESlateVisibility::Hidden);
-			BlasterHUD->CharacterOverlay->HealthSubtractionBar->SetVisibility(ESlateVisibility::Visible);
-			BlasterHUD->CharacterOverlay->HealthAdditionBar->SetPercent(Health / MaxHealth);
-			BlasterHUD->CharacterOverlay->HealthBar->SetPercent(Health / MaxHealth);
-
-			float HealthSubtractionBarPercent = BlasterHUD->CharacterOverlay->HealthSubtractionBar->Percent;
-			float HealthBarPercent = BlasterHUD->CharacterOverlay->HealthBar->Percent;
-			for (float i = HealthBarPercent; i > HealthSubtractionBarPercent; i -= 0.01f)
-			{
-				BlasterHUD->CharacterOverlay->HealthSubtractionBar->SetPercent(i);
-			}
-		}
-		else
-		{
-			BlasterHUD->CharacterOverlay->HealthAdditionBar->SetVisibility(ESlateVisibility::Hidden);
-			BlasterHUD->CharacterOverlay->HealthSubtractionBar->SetVisibility(ESlateVisibility::Hidden);
-		}
 		const float HealthPercent = Health / MaxHealth;
 		BlasterHUD->CharacterOverlay->HealthBar->SetPercent(HealthPercent);
 		FString HealthText = FString::Printf(TEXT("%d / %d"), FMath::CeilToInt(Health), FMath::CeilToInt(MaxHealth));
@@ -376,24 +339,32 @@ void ABlasterPlayerController::SetHUDShield(float Shield, float MaxShield)
 		float ShieldPercent = Shield / MaxShield;
 		
 		// 如果我们的护盾值小于等于当前血条的反向值，那么护盾值的起始点就是血条的终点（为了实现这种效果，我将护盾的百分比加上血条百分比）
-		if (ShieldPercent <= 1.f - BlasterHUD->CharacterOverlay->HealthBar->Percent)
+		if (BlasterHUD->CharacterOverlay->HealthBar->Percent < 1.f && ShieldPercent <= 1.f - BlasterHUD->CharacterOverlay->HealthBar->Percent)
 		{
 			ShieldPercent += BlasterHUD->CharacterOverlay->HealthBar->Percent;
 			// 然后我们使用从左到右的进度条填充类型
-			BlasterHUD->CharacterOverlay->ShieldBar_R2L->Visibility = ESlateVisibility::Hidden;
-			BlasterHUD->CharacterOverlay->ShieldBar_L2R->Visibility = ESlateVisibility::Visible;
-
-			// 然后设置护盾条的层级在血条的下面
-			BlasterHUD->CharacterOverlay->ShieldBar_L2R->SetRenderTransformPivot(FVector2D(0.f, 0.5f));
+			BlasterHUD->CharacterOverlay->ShieldBar_R2L->SetPercent(0);
+			BlasterHUD->CharacterOverlay->ShieldBar_L2R->SetPercent(ShieldPercent);
 		}
-		else // 否则，护盾的进度条的填充类型就是从左到右
+		else if (BlasterHUD->CharacterOverlay->HealthBar->Percent < 1.f && ShieldPercent > 1.f - BlasterHUD->CharacterOverlay->HealthBar->Percent)
 		{
-			BlasterHUD->CharacterOverlay->ShieldBar_L2R->Visibility = ESlateVisibility::Hidden;
-			BlasterHUD->CharacterOverlay->ShieldBar_R2L->Visibility = ESlateVisibility::Visible;
+			// 然后我们使用从右到左的进度条填充类型
+			BlasterHUD->CharacterOverlay->ShieldBar_R2L->SetPercent(ShieldPercent);
+			BlasterHUD->CharacterOverlay->ShieldBar_L2R->SetPercent(0);
+
+		}
+		else if (BlasterHUD->CharacterOverlay->HealthBar->Percent == 1.f)
+		{
+			// 如果我们的血条是满的，那么护盾的进度条的填充类型就是从右到左
+			BlasterHUD->CharacterOverlay->ShieldBar_R2L->SetPercent(ShieldPercent);
+			BlasterHUD->CharacterOverlay->ShieldBar_L2R->SetPercent(0);
 		}
 
-		BlasterHUD->CharacterOverlay->ShieldBar_R2L->SetPercent(ShieldPercent);
-		BlasterHUD->CharacterOverlay->ShieldBar_L2R->SetPercent(ShieldPercent);
+		if (ShieldPercent <= 0.f)
+		{
+			BlasterHUD->CharacterOverlay->ShieldBar_L2R->SetPercent(0);
+			BlasterHUD->CharacterOverlay->ShieldBar_R2L->SetPercent(0);
+		}
 
 		FString ShieldString = FString::Printf(TEXT("%d / %d"), FMath::CeilToInt(Shield), FMath::CeilToInt(MaxShield));
 		BlasterHUD->CharacterOverlay->ShieldText->SetText(FText::FromString(ShieldString));
