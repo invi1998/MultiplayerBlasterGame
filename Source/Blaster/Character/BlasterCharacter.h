@@ -66,6 +66,8 @@ public:
 
 	void UpdateHUDHealth();	// 更新HUD血量
 
+	void UpdateHUDShield();	// 更新HUD护盾
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -217,6 +219,18 @@ private:
 	// 将玩家血量更新给客户端
 	UFUNCTION()
 		void OnRep_Health(float LastHealth);
+
+	/*
+	 * 玩家护盾
+	 */
+	UPROPERTY(EditAnywhere, Category="Player Stats")
+	float MaxShield = 100.f;
+
+	UPROPERTY(ReplicatedUsing = OnRep_Shield, VisibleAnywhere, Category = "Player Stats")
+	float Shield = 100.f;
+
+	UFUNCTION()
+	void OnRep_Shield(float LastShield);
 
 	UPROPERTY()
 		class ABlasterPlayerController* BlasterPlayerController;

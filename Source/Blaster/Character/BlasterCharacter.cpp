@@ -100,6 +100,16 @@ void ABlasterCharacter::UpdateHUDHealth()
 	}
 }
 
+void ABlasterCharacter::UpdateHUDShield()
+{
+	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+
+	if (BlasterPlayerController)
+	{
+		BlasterPlayerController->SetHUDShield(Shield, MaxShield);
+	}
+}
+
 void ABlasterCharacter::PollInit()
 {
 	if (BlasterPlayerState == nullptr)
@@ -192,9 +202,10 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	// 这里就是我们需要注册要复制重叠武器变量的地方
-	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
-	DOREPLIFETIME(ABlasterCharacter, Health);
-	DOREPLIFETIME(ABlasterCharacter, bDisableGamePlay);
+	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);	// 只有所有者才会复制,这样就不会出现武器重叠的bug了
+	DOREPLIFETIME(ABlasterCharacter, Health);	// 复制血量
+	DOREPLIFETIME(ABlasterCharacter, bDisableGamePlay);	// 复制是否禁用游戏
+	DOREPLIFETIME(ABlasterCharacter, Shield);	// 复制护盾
 }
 
 void ABlasterCharacter::PostInitializeComponents()
@@ -704,6 +715,15 @@ void ABlasterCharacter::OnRep_Health(float LastHealth)
 {
 	UpdateHUDHealth();	// 更新HUD血量
 	if (Health < LastHealth)
+	{
+		PlayHitReactMontage();	// 播放受伤动画
+	}
+}
+
+void ABlasterCharacter::OnRep_Shield(float LastShield)
+{
+	UpdateHUDShield();	// 更新HUD护盾
+	if (Shield < LastShield)
 	{
 		PlayHitReactMontage();	// 播放受伤动画
 	}
