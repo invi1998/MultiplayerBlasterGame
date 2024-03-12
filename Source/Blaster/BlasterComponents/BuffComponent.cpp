@@ -72,6 +72,13 @@ void UBuffComponent::SetInitialJumpZVelocity(float JumpZVelocity)
 	InitialJumpZVelocity = JumpZVelocity;		// 设置初始跳跃速度
 }
 
+void UBuffComponent::ReplenishShield(float ShieldReplenishAmount, float ShieldReplenishTime)
+{
+	bShieldReplenishing = true;		// 设置正在补充护盾为true
+	ShieldReplenishRate = ShieldReplenishAmount / ShieldReplenishTime;		// 计算护盾补充速率
+	ShieldAmountToReplenish += ShieldReplenishAmount;		// 计算护盾补充量
+}
+
 
 // Called when the game starts
 void UBuffComponent::BeginPlay()
@@ -96,6 +103,23 @@ void UBuffComponent::HealRampUp(float DeltaTime)
 		bHealing = false;		// 设置正在治疗为false
 		HealingRate = 0.0f;		// 设置治疗速率为0
 		AmountToHeal = 0.0f;		// 设置治疗量为0
+	}
+}
+
+void UBuffComponent::ShieldRampUp(float DeltaTime)
+{
+	if (!bShieldReplenishing || Character == nullptr || Character->IsElimmed()) return;		// 如果没有补充护盾或者Character为空，或者Character已经被淘汰，就返回
+
+	const float ShieldThisFrame = ShieldReplenishRate * DeltaTime;		// 计算本帧护盾补充量
+	Character->SetShield(FMath::Clamp(Character->GetShield() + ShieldThisFrame, 0.0f, Character->GetMaxShield()));		// 设置护盾，使用FMath::Clamp()方法来限制护盾在0到最大护盾之间
+	Character->UpdateHUDShield();		// 更新护盾UI
+	ShieldAmountToReplenish -= ShieldThisFrame;		// 护盾补充量减去本帧护盾补充量
+
+	if (ShieldAmountToReplenish <= 0.0f || Character->GetShield() >= Character->GetMaxShield())		// 如果护盾补充量小于等于0 或者 护盾大于等于最大护盾
+	{
+		bShieldReplenishing = false;		// 设置正在补充护盾为false
+		ShieldReplenishRate = 0.0f;		// 设置护盾补充速率为0
+		ShieldAmountToReplenish = 0.0f;		// 设置护盾补充量为0
 	}
 }
 
@@ -141,6 +165,9 @@ void UBuffComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 
 	// 每帧调用HealRampUp()方法
 	HealRampUp(DeltaTime);
+
+	// 每帧调用ShieldRampUp()方法
+	ShieldRampUp(DeltaTime);
 
 }
 

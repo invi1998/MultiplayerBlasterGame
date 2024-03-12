@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blaster/Pickups/HealthPickup.h"
+#include "Blaster/Pickups/ShieldPickup.h"
 #include "Components/ActorComponent.h"
 #include "BuffComponent.generated.h"
 
@@ -28,12 +29,15 @@ public:
 	void SetInitialSpeed(float BaseSpeed, float CrouchSpeed);		// 设置初始速度
 
 	void SetInitialJumpZVelocity(float JumpZVelocity);		// 设置初始跳跃速度
+	void ReplenishShield(float ShieldReplenishAmount, float ShieldReplenishTime);		// 增加护盾 传入护盾补充量和护盾补充时间
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 	void HealRampUp(float DeltaTime);		// 治疗速率上升, 传入DeltaTime, 用于计算治疗速率
+
+	void ShieldRampUp(float DeltaTime);		// 护盾速率上升, 传入DeltaTime, 用于计算护盾速率
 
 private:
 	UPROPERTY()
@@ -45,6 +49,13 @@ private:
 	bool bHealing = false;		// 是否正在治疗
 	float HealingRate = 0.0f;	// 治疗速率
 	float AmountToHeal = 0.0f;	// 治疗量
+
+	/*
+	 * 护盾Buff
+	 */
+	bool bShieldReplenishing = false;			// 是否正在补充护盾
+	float ShieldReplenishRate = 0.0f;			// 护盾补充速率
+	float ShieldAmountToReplenish = 0.0f;		// 护盾补充量
 
 	/*
 	 * 速度buff
