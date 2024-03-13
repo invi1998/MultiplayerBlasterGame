@@ -52,6 +52,11 @@ private:
 	UPROPERTY(EditAnywhere)
 	class UNiagaraSystem* PickupEffectNiagaraSystem;		// 拾取特效的NiagaraSystem
 
+	FTimerHandle BindOverlapTimer;		// 绑定重叠事件的定时器
+
+	float BindOverlapTime = 0.25f;		// 绑定重叠时间
+
+	void BindOverlapTimerFinished();	// 绑定重叠事件的定时器结束时调用的函数
 
 public:
 
