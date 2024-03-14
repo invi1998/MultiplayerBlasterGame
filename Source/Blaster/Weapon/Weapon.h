@@ -70,6 +70,12 @@ public:
 	 */
 	void EnableCustomDepth(bool bEnable);
 
+	// 武器是否被销毁当被丢弃时
+	bool bDestroyOnDrop = false;
+
+	// 武器是否会被销毁
+	bool bDestroyWeapon = false;
+
 public:
 	// Sets default values for this actor's properties
 	AWeapon();
@@ -149,12 +155,15 @@ private:
 	UPROPERTY(EditAnywhere)
 		int32 MagCapacity;
 
+	// 武器的所有者
 	UPROPERTY()
 		class ABlasterCharacter* BlasterOwnerCharacter;
 
+	// 武器的控制器
 	UPROPERTY()
 		class ABlasterPlayerController* BlasterOwnerController;
 
+	// 武器类型
 	UPROPERTY(EditAnywhere)
 		EWeaponType WeaponType;
 

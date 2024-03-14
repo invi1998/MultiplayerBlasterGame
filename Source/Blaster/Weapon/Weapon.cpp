@@ -293,6 +293,11 @@ void AWeapon::Dropped()
 	SetOwner(nullptr);
 	BlasterOwnerCharacter = nullptr;
 	BlasterOwnerController = nullptr;
+
+	if (bDestroyOnDrop)
+	{
+		Destroy();
+	}
 }
 
 void AWeapon::AddAmmo(int32 AmmoToAdd)

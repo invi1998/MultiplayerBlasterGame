@@ -170,6 +170,8 @@ void ABlasterCharacter::SpawnDefaultWeapon()
 	if (World && !bElimmed && BlasterGameMode && DefaultWeaponClass)
 	{
 		AWeapon* StartingWeapon = World->SpawnActor<AWeapon>(DefaultWeaponClass);
+		StartingWeapon->bDestroyWeapon = true;	// 对于角色的默认武器，我们希望它在被丢弃时被销毁
+		StartingWeapon->bDestroyOnDrop = true;	// 对于角色的默认武器，我们希望它在被丢弃时被销毁
 		if (Combat)
 		{
 			Combat->EquipWeapon(StartingWeapon);
@@ -305,6 +307,7 @@ void ABlasterCharacter::PlayReloadMontage()
 		case EWeaponType::EWT_GrenadeLauncher:
 			SectionName = FName("GrenadeLauncher");
 			break;
+		default: break;
 		}
 
 		AnimInstance->Montage_JumpToSection(SectionName);
@@ -776,7 +779,14 @@ void ABlasterCharacter::Elim()
 {
 	if (Combat && Combat->EquippedWeapon)
 	{
-		Combat->EquippedWeapon->Dropped();
+		if (Combat->EquippedWeapon->bDestroyOnDrop || Combat->EquippedWeapon->bDestroyWeapon)
+		{
+			Combat->EquippedWeapon->Destroy();
+		}
+		else
+		{
+			Combat->EquippedWeapon->Dropped();
+		}
 	}
 	MulticastElim();
 	// 设置复活倒计时
