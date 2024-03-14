@@ -35,10 +35,10 @@ public:
 
 
 protected:
-	virtual void BeginPlay() override;
-	virtual void OnPossess(APawn* InPawn) override;
-	void SetHUDTime();
-	void PollInit();
+	virtual void BeginPlay() override;	// 当游戏开始时，调用该函数
+	virtual void OnPossess(APawn* InPawn) override;		// 当玩家控制器开始控制一个Pawn时，调用该函数
+	void SetHUDTime();	// 设置HUD时间
+	void PollInit();	// 轮询初始化
 
 	/*
 	 * 服务端和客户端之间的同步时间
@@ -106,4 +106,8 @@ private:
 	bool bInitializeDefeats = false;	// 是否初始化击杀数
 	int32 HUDGrenades;	// 手榴弹数量
 	bool bInitializeGrenades = false;	// 是否初始化手榴弹数量
+	float HUDCarriedAmmo;	// 携带弹药
+	bool bInitializeCarriedAmmo = false;	// 是否初始化携带弹药
+	float HUDWeaponAmmo;	// 武器弹药
+	bool bInitializeWeaponAmmo = false;	// 是否初始化武器弹药
 };

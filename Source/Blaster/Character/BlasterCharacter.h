@@ -23,11 +23,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;		// 设置玩家输入组件
 
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;	// 获取生命周期复制属性
 
-	virtual void PostInitializeComponents() override;
+	virtual void PostInitializeComponents() override;	// 初始化组件
 
 	// 播放开火蒙太奇动画
 	void PlayFireMontage(bool bAiming);
@@ -67,6 +67,8 @@ public:
 	void UpdateHUDHealth();	// 更新HUD血量
 
 	void UpdateHUDShield();	// 更新HUD护盾
+
+	void UpdateHUDAmmo();	// 更新HUD弹药
 
 protected:
 	// Called when the game starts or when spawned
@@ -124,6 +126,9 @@ protected:
 
 	// 原地旋转
 	void RotatePlace(float DeltaTime);
+
+	// 生成默认武器
+	void SpawnDefaultWeapon();
 
 private:
 	// 添加弹簧臂和摄像机
@@ -294,6 +299,12 @@ private:
 	 */
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* AttachedGrenade;
+
+	/*
+	 * 角色默认武器
+	 */
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AWeapon> DefaultWeaponClass;
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);

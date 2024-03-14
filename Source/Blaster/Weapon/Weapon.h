@@ -110,33 +110,42 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 		USkeletalMeshComponent* WeaponMesh;
 
+	// 武器碰撞体
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 		class USphereComponent* AreaSphere;
 
+	// 武器状态
 	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "Weapon Properties")
 		EWeaponState WeaponState;
 
+	// 武器拾取的Widget组件
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 		class UWidgetComponent* PickupWidget;
 
+	// 武器状态同步
 	UFUNCTION()
 		void OnRep_WeaponState();
 
+	// 武器开火动画
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 		class UAnimationAsset* FireAnimation;
 
+	// 武器准心
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<class ACasing> CasingClass;
 
+	// 武器子弹数量
 	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Ammo)
 		int32 Ammo;
 
+	// 武器子弹数量同步
 	UFUNCTION()
 		void OnRep_Ammo();
 
 	// 扣除弹药，检测武器是否有一个有效的所有者
 	void SpendRound();
 
+	// 武器的弹药容量
 	UPROPERTY(EditAnywhere)
 		int32 MagCapacity;
 
