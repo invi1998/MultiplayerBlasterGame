@@ -25,5 +25,7 @@ public:
 		void ShowPlayerNetRole(APawn* InPawn);
 
 protected:
-	virtual void OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld) override;
+	// UE5.1之后该方法被弃用，使用下面的方法代替
+	// virtual void OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld) override;
+	virtual void NativeDestruct() override;	// 该方法在UMG部件被销毁时调用
 };

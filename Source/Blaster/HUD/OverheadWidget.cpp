@@ -39,10 +39,17 @@ void UOverheadWidget::ShowPlayerNetRole(APawn* InPawn)
 	SetDisplayText(RemoteRoleString);
 }
 
-void UOverheadWidget::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)
+void UOverheadWidget::NativeDestruct()
 {
 	// 将控件从视图中移除
 	RemoveFromParent();
-
-	Super::OnLevelRemovedFromWorld(InLevel, InWorld);
+	Super::NativeDestruct();
 }
+
+//void UOverheadWidget::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)
+//{
+//	// 将控件从视图中移除
+//	RemoveFromParent();
+//
+//	Super::OnLevelRemovedFromWorld(InLevel, InWorld);
+//}

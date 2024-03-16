@@ -65,11 +65,18 @@ bool UMenu::Initialize()
 	return true;
 }
 
-void UMenu::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)
+void UMenu::NativeDestruct()
 {
 	MenuTearDown();
-	Super::OnLevelRemovedFromWorld(InLevel, InWorld);
+	Super::NativeDestruct();
 }
+
+// UE5.1之后该方法被弃用，改为使用NativeDestruct方法代替
+//void UMenu::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)
+//{
+//	MenuTearDown();
+//	Super::OnLevelRemovedFromWorld(InLevel, InWorld);
+//}
 
 void UMenu::OnCreateSession(bool bWasSuccessful)
 {
