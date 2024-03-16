@@ -19,10 +19,10 @@ public:
 		class UProgressBar* HealthBar;	// 血条
 
 	UPROPERTY(meta=(BindWidget))
-	class UImage* HealthBarNative;	// 护盾条
+	class UImage* HealthBarNative;	// 血条
 
-	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
-	class UMaterialInstanceDynamic* HealthBarMaterial;	// 血条材质
+	//UPROPERTY(VisibleAnywhere, meta = (BindWidget))
+	//class UMaterialInstanceDynamic* HealthBarMaterial;	// 血条材质
 
 	UPROPERTY(meta = (BindWidget))
 	UProgressBar* HealthAdditionBar;	// 血条增加

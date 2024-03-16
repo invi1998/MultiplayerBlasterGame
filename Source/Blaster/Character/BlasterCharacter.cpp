@@ -204,6 +204,8 @@ void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	BeforeDamageHealth = Health;
+
 	SpawnDefaultWeapon();	// 角色生成默认武器
 
 	UpdateHUDAmmo();
@@ -371,6 +373,7 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const U
 		DamageToHealth = FMath::Clamp(Damage - DamageToShield, 0.f, Health);
 	}
 
+	BeforeDamageHealth = Health;
 	Health = FMath::Clamp(Health - DamageToHealth, 0.f, MaxHealth);
 
 	UpdateHUDHealth();

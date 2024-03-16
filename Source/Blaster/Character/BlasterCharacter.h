@@ -70,6 +70,10 @@ public:
 
 	void UpdateHUDAmmo();	// 更新HUD弹药
 
+	float BeforeDamageHealth = 100.f;	// 玩家受到伤害前的血量
+
+	float AfterHealHealth = 100.f;		// 玩家受到治疗后的血量
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

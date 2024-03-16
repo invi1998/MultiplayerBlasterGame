@@ -13,6 +13,7 @@
 #include "Blaster/BlasterComponents/CombatComponent.h"
 #include "Blaster/GameState/BlasterGameState.h"
 #include "Blaster/PlayerState/BlasterPlayerState.h"
+#include "Components/Image.h"
 
 void ABlasterPlayerController::BeginPlay()
 {
@@ -326,19 +327,22 @@ void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 	}
 }
 
-void ABlasterPlayerController::SetHUDHealthNative(float Health, float MaxHealth)
+void ABlasterPlayerController::SetHUDHealthNative(float Health, float MaxHealth, float BeforeHealth)
 {
 	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 
 	bool bHUDValid = BlasterHUD &&
 		BlasterHUD->CharacterOverlay &&
-		BlasterHUD->CharacterOverlay->HealthBarNative &&
-		BlasterHUD->CharacterOverlay->HealthBarMaterial;
+		BlasterHUD->CharacterOverlay->HealthBarNative;
 
 	if (bHUDValid)
 	{
+		const float BeforeHealthPercent = BeforeHealth / MaxHealth;
 		const float HealthPercent = Health / MaxHealth;
-		BlasterHUD->CharacterOverlay->HealthBarMaterial->SetScalarParameterValue(FName("Before"), HealthPercent);
+		UMaterialInstanceDynamic* HealthBarMaterial = BlasterHUD->CharacterOverlay->HealthBarNative->GetDynamicMaterial();
+		HealthBarMaterial->SetScalarParameterValue(FName("Before"), BeforeHealthPercent);
+		HealthBarMaterial->SetScalarParameterValue(FName("Current"), HealthPercent);
+		// 设置播放动画时间范围
 	}
 }
 
