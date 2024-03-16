@@ -15,7 +15,8 @@ class BLASTER_API ABlasterPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
-	void SetHUDHealth(float Health, float MaxHealth);
+	void SetHUDHealth(float Health, float MaxHealth);	// 设置生命值
+	void SetHUDHealthNative(float Health, float MaxHealth);	// 设置生命值
 	void SetHUDShield(float Shield, float MaxShield);	// 设置护盾
 	void SetHUDScore(float Score);
 	void SetHUDDefeats(int32 Defeats);

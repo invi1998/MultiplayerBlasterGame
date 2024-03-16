@@ -326,6 +326,22 @@ void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 	}
 }
 
+void ABlasterPlayerController::SetHUDHealthNative(float Health, float MaxHealth)
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+
+	bool bHUDValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->HealthBarNative &&
+		BlasterHUD->CharacterOverlay->HealthBarMaterial;
+
+	if (bHUDValid)
+	{
+		const float HealthPercent = Health / MaxHealth;
+		BlasterHUD->CharacterOverlay->HealthBarMaterial->SetScalarParameterValue(FName("Before"), HealthPercent);
+	}
+}
+
 void ABlasterPlayerController::SetHUDShield(float Shield, float MaxShield)
 {
 	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;

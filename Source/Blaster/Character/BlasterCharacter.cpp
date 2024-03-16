@@ -97,6 +97,7 @@ void ABlasterCharacter::UpdateHUDHealth()
 	if (BlasterPlayerController)
 	{
 		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
+		BlasterPlayerController->SetHUDHealthNative(Health, MaxHealth);
 	}
 }
 
