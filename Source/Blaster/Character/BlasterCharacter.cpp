@@ -97,7 +97,16 @@ void ABlasterCharacter::UpdateHUDHealth()
 	if (BlasterPlayerController)
 	{
 		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
-		BlasterPlayerController->SetHUDHealthNative(Health, MaxHealth);
+	}
+}
+
+void ABlasterCharacter::UpdateHUDHealthNative()
+{
+	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+
+	if (BlasterPlayerController)
+	{
+		BlasterPlayerController->SetHUDHealthNative(Health, MaxHealth, BeforeDamageHealth);
 	}
 }
 
@@ -208,6 +217,7 @@ void ABlasterCharacter::BeginPlay()
 
 	SpawnDefaultWeapon();	// 角色生成默认武器
 
+	UpdateHUDHealthNative();
 	UpdateHUDAmmo();
 	UpdateHUDHealth();
 	UpdateHUDShield();
@@ -233,6 +243,8 @@ void ABlasterCharacter::Tick(float DeltaTime)
 
 	HidCameraIfCharacterClose();
 	PollInit();
+
+	DamageRampUp(DeltaTime);
 }
 
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -375,7 +387,15 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const U
 
 	BeforeDamageHealth = Health;
 	Health = FMath::Clamp(Health - DamageToHealth, 0.f, MaxHealth);
+	DamageRate = DamageToHealth / 2.f;	// 伤害速率
 
+	if (DamageRate > 0.f)
+	{
+		// 如果受到伤害，那么就播放受伤动画
+		bDamaging = true;
+	}
+
+	UpdateHUDHealthNative();
 	UpdateHUDHealth();
 	UpdateHUDShield();
 	PlayHitReactMontage();
@@ -879,6 +899,25 @@ void ABlasterCharacter::StartDissolve()
 	{
 		DissolveTimeline->AddInterpFloat(DissolveCurve, DissolveTrack);
 		DissolveTimeline->Play();
+	}
+}
+
+void ABlasterCharacter::DamageRampUp(float DeltaTime)
+{
+	if (!bDamaging) return;
+
+	const float DamageThisFrame = DamageRate * DeltaTime;	// 计算本帧伤害量
+	BeforeDamageHealth = FMath::Clamp(BeforeDamageHealth - DamageThisFrame, Health, MaxHealth);	// 计算伤害后的血量
+	UpdateHUDHealthNative();	// 更新HUD血量
+
+	if (BeforeDamageHealth > Health)
+	{
+		bDamaging = true;
+	}
+	else
+	{
+		bDamaging = false;
+		DamageRate = 0.f;
 	}
 }
 

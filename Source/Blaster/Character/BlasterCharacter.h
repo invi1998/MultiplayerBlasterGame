@@ -17,7 +17,7 @@ class BLASTER_API ABlasterCharacter : public ACharacter, public IInteractWithCro
 
 public:
 	// Sets default values for this character's properties
-	ABlasterCharacter();
+	   ABlasterCharacter();
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -66,13 +66,11 @@ public:
 
 	void UpdateHUDHealth();	// 更新HUD血量
 
+	void UpdateHUDHealthNative();	// 更新HUD伤害
+
 	void UpdateHUDShield();	// 更新HUD护盾
 
 	void UpdateHUDAmmo();	// 更新HUD弹药
-
-	float BeforeDamageHealth = 100.f;	// 玩家受到伤害前的血量
-
-	float AfterHealHealth = 100.f;		// 玩家受到治疗后的血量
 
 protected:
 	// Called when the game starts or when spawned
@@ -309,6 +307,16 @@ private:
 	 */
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AWeapon> DefaultWeaponClass;
+
+	/*
+	 * 扣血效果
+	 */
+	float BeforeDamageHealth = 100.0f;	// 扣血前的血量
+	bool bDamaging = false;		// 是否正在扣血
+	float DamageRate = 0.0f;	// 扣血速率
+	float AmountToDamage = 0.0f;	// 扣血量
+
+	void DamageRampUp(float DeltaTime);	// 扣血速率上升
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
