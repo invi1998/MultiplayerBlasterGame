@@ -227,6 +227,10 @@ private:
 	UFUNCTION()
 		void OnRep_Health(float LastHealth);
 
+	// 将玩家血量更新给客户端
+	UFUNCTION()
+	void OnRep_BeforeHealth(float LastHealth);
+
 	/*
 	 * 玩家护盾
 	 */
@@ -311,7 +315,9 @@ private:
 	/*
 	 * 扣血效果
 	 */
+	UPROPERTY(ReplicatedUsing = OnRep_BeforeHealth, VisibleAnywhere, Category = "Player Stats")
 	float BeforeDamageHealth = 100.0f;	// 扣血前的血量
+
 	bool bDamaging = false;		// 是否正在扣血
 	float DamageRate = 0.0f;	// 扣血速率
 	float AmountToDamage = 0.0f;	// 扣血量

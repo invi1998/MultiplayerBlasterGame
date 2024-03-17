@@ -213,14 +213,16 @@ void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	BeforeDamageHealth = Health;
+	
 
 	SpawnDefaultWeapon();	// 角色生成默认武器
 
-	UpdateHUDHealthNative();
 	UpdateHUDAmmo();
 	UpdateHUDHealth();
 	UpdateHUDShield();
+
+	BeforeDamageHealth = Health;
+	UpdateHUDHealthNative();
 
 	if (HasAuthority())
 	{
@@ -241,10 +243,10 @@ void ABlasterCharacter::Tick(float DeltaTime)
 
 	RotatePlace(DeltaTime);
 
+	DamageRampUp(DeltaTime);
+
 	HidCameraIfCharacterClose();
 	PollInit();
-
-	DamageRampUp(DeltaTime);
 }
 
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -254,6 +256,7 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	// 这里就是我们需要注册要复制重叠武器变量的地方
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);	// 只有所有者才会复制,这样就不会出现武器重叠的bug了
 	DOREPLIFETIME(ABlasterCharacter, Health);	// 复制血量
+	DOREPLIFETIME(ABlasterCharacter, BeforeDamageHealth);	// 复制血量
 	DOREPLIFETIME(ABlasterCharacter, bDisableGamePlay);	// 复制是否禁用游戏
 	DOREPLIFETIME(ABlasterCharacter, Shield);	// 复制护盾
 }
@@ -387,13 +390,7 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const U
 
 	BeforeDamageHealth = Health;
 	Health = FMath::Clamp(Health - DamageToHealth, 0.f, MaxHealth);
-	DamageRate = DamageToHealth / 2.f;	// 伤害速率
-
-	if (DamageRate > 0.f)
-	{
-		// 如果受到伤害，那么就播放受伤动画
-		bDamaging = true;
-	}
+	DamageRate = DamageToHealth / 1.f;	// 伤害速率
 
 	UpdateHUDHealthNative();
 	UpdateHUDHealth();
@@ -790,6 +787,11 @@ void ABlasterCharacter::OnRep_Health(float LastHealth)
 	}
 }
 
+void ABlasterCharacter::OnRep_BeforeHealth(float LastHealth)
+{
+	UpdateHUDHealthNative();	// 更新HUD血量
+}
+
 void ABlasterCharacter::OnRep_Shield(float LastShield)
 {
 	UpdateHUDShield();	// 更新HUD护盾
@@ -904,19 +906,12 @@ void ABlasterCharacter::StartDissolve()
 
 void ABlasterCharacter::DamageRampUp(float DeltaTime)
 {
-	if (!bDamaging) return;
-
 	const float DamageThisFrame = DamageRate * DeltaTime;	// 计算本帧伤害量
 	BeforeDamageHealth = FMath::Clamp(BeforeDamageHealth - DamageThisFrame, Health, MaxHealth);	// 计算伤害后的血量
 	UpdateHUDHealthNative();	// 更新HUD血量
 
-	if (BeforeDamageHealth > Health)
+	if (BeforeDamageHealth <= Health)
 	{
-		bDamaging = true;
-	}
-	else
-	{
-		bDamaging = false;
 		DamageRate = 0.f;
 	}
 }
