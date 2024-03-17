@@ -22,6 +22,6 @@ private:
 	float ShieldReplenishAmount = 50.0f;	// 护盾补充量
 
 	UPROPERTY(EditAnywhere)
-	float ShieldReplenishTime = 10.0f;		// 护盾补充时间
+	float ShieldReplenishTime = 0.5f;		// 护盾补充时间
 
 };
