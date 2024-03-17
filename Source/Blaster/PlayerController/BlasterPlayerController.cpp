@@ -158,7 +158,7 @@ void ABlasterPlayerController::PollInit()
 				if (bInitializeDefeats) SetHUDDefeats(HUDDefeats);
 				if (bInitializeWeaponAmmo) SetHUDWeaponAmmo(HUDWeaponAmmo);
 				if (bInitializeCarriedAmmo) SetHUDCarriedAmmo(HUDCarriedAmmo);
-				if (bInitializeBeforeHealth) SetHUDHealthNative(HUDHealth, HUDMaxHealth, HUDBeforeDamage);
+				if (bInitializeBeforeHealth) SetHUDHealthNative(HUDHealth, HUDMaxHealth, HUDHealth, HUDHealth);
 
 				ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(GetPawn());
 				if (BlasterCharacter && BlasterCharacter->GetCombat())
@@ -331,7 +331,7 @@ void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 	}
 }
 
-void ABlasterPlayerController::SetHUDHealthNative(float Health, float MaxHealth, float BeforeHealth)
+void ABlasterPlayerController::SetHUDHealthNative(float Health, float MaxHealth, float BeforeHealth, float AfterHealHealth)
 {
 	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 
@@ -343,10 +343,12 @@ void ABlasterPlayerController::SetHUDHealthNative(float Health, float MaxHealth,
 	{
 		const float BeforeHealthPercent = BeforeHealth / MaxHealth;
 		const float HealthPercent = Health / MaxHealth;
+		const float AfterHealHealthPercent = AfterHealHealth / MaxHealth;
 		if (UMaterialInstanceDynamic* HealthBarMaterial = BlasterHUD->CharacterOverlay->HealthBarNative->GetDynamicMaterial())
 		{
 			HealthBarMaterial->SetScalarParameterValue(FName("Before"), BeforeHealthPercent);
 			HealthBarMaterial->SetScalarParameterValue(FName("Current"), HealthPercent);
+			HealthBarMaterial->SetScalarParameterValue(FName("After"), AfterHealHealthPercent);
 			// 设置播放动画时间范围
 		}
 		

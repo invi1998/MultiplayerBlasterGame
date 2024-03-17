@@ -57,6 +57,8 @@ public:
 
 	virtual void Destroyed() override;
 
+	void SetAfterHealHealth(float Clamp) { AfterHealHealth = Clamp; }
+
 	UPROPERTY(Replicated)
 		bool bDisableGamePlay = false;
 
@@ -231,6 +233,9 @@ private:
 	UFUNCTION()
 	void OnRep_BeforeHealth(float LastHealth);
 
+	UFUNCTION()
+	void OnRep_AfterHealth(float LastHealth);
+
 	/*
 	 * 玩家护盾
 	 */
@@ -317,6 +322,12 @@ private:
 	 */
 	UPROPERTY(ReplicatedUsing = OnRep_BeforeHealth, VisibleAnywhere, Category = "Player Stats")
 	float BeforeDamageHealth = 100.0f;	// 扣血前的血量
+
+	/*
+	 * 治疗效果
+	 */
+	UPROPERTY(ReplicatedUsing = OnRep_AfterHealth, VisibleAnywhere, Category = "Player Stats")
+	float AfterHealHealth = 0.f;	// 治疗后的血量
 
 	bool bDamaging = false;		// 是否正在扣血
 	float DamageRate = 0.0f;	// 扣血速率

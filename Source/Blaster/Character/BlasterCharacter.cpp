@@ -106,7 +106,7 @@ void ABlasterCharacter::UpdateHUDHealthNative()
 
 	if (BlasterPlayerController)
 	{
-		BlasterPlayerController->SetHUDHealthNative(Health, MaxHealth, BeforeDamageHealth);
+		BlasterPlayerController->SetHUDHealthNative(Health, MaxHealth, BeforeDamageHealth, AfterHealHealth);
 	}
 }
 
@@ -223,6 +223,7 @@ void ABlasterCharacter::BeginPlay()
 	UpdateHUDShield();
 
 	BeforeDamageHealth = Health;
+	AfterHealHealth = 0.f;
 	UpdateHUDHealthNative();
 
 	if (HasAuthority())
@@ -258,6 +259,7 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);	// 只有所有者才会复制,这样就不会出现武器重叠的bug了
 	DOREPLIFETIME(ABlasterCharacter, Health);	// 复制血量
 	DOREPLIFETIME(ABlasterCharacter, BeforeDamageHealth);	// 复制血量
+	DOREPLIFETIME(ABlasterCharacter, AfterHealHealth);	// 复制血量
 	DOREPLIFETIME(ABlasterCharacter, bDisableGamePlay);	// 复制是否禁用游戏
 	DOREPLIFETIME(ABlasterCharacter, Shield);	// 复制护盾
 }
@@ -789,6 +791,11 @@ void ABlasterCharacter::OnRep_Health(float LastHealth)
 }
 
 void ABlasterCharacter::OnRep_BeforeHealth(float LastHealth)
+{
+	UpdateHUDHealthNative();	// 更新HUD血量
+}
+
+void ABlasterCharacter::OnRep_AfterHealth(float LastHealth)
 {
 	UpdateHUDHealthNative();	// 更新HUD血量
 }
