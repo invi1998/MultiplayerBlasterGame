@@ -18,6 +18,7 @@ public:
 	void SetHUDHealth(float Health, float MaxHealth);	// 设置生命值
 	void SetHUDHealthNative(float Health, float MaxHealth, float BeforeDamage);	// 设置生命值
 	void SetHUDShield(float Shield, float MaxShield);	// 设置护盾
+	void SetHUDShieldNative(float Shield, float MaxShield);	// 设置护盾
 	void SetHUDScore(float Score);
 	void SetHUDDefeats(int32 Defeats);
 	void SetHUDWeaponAmmo(int32 Ammo);

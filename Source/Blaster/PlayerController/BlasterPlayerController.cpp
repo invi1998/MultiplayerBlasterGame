@@ -148,7 +148,10 @@ void ABlasterPlayerController::PollInit()
 			if (CharacterOverlay)
 			{
 				if (bInitializeHealth) SetHUDHealth(HUDHealth, HUDMaxHealth);
-				if (bInitializeShield) SetHUDShield(HUDShield, HUDMaxShield);
+				if (bInitializeShield) {
+					SetHUDShield(HUDShield, HUDMaxShield);
+					SetHUDShieldNative(HUDShield, HUDMaxShield);
+				}
 				/*SetHUDHealthAddition(HUDHealthAddition, HUDMaxHealth);
 				SetHUDHealthSubtraction(HUDHealthSubtraction, HUDMaxHealth);*/
 				if (bInitializeScore) SetHUDScore(HUDScore);
@@ -355,6 +358,32 @@ void ABlasterPlayerController::SetHUDHealthNative(float Health, float MaxHealth,
 		HUDMaxBeforeDamageHealth = MaxHealth;
 	}
 }
+
+
+void ABlasterPlayerController::SetHUDShieldNative(float Shield, float MaxShield)
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+
+	bool bHUDValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->HealthBarNative;
+
+	if (bHUDValid)
+	{
+		const float ShieldPercent = Shield / MaxShield;
+		if (UMaterialInstanceDynamic* ShieldBarMaterial = BlasterHUD->CharacterOverlay->HealthBarNative->GetDynamicMaterial())
+		{
+			ShieldBarMaterial->SetScalarParameterValue(FName("Shield"), ShieldPercent);
+		}
+	}
+	else
+	{
+		bInitializeShield = true;
+		HUDShield = Shield;
+		HUDMaxShield = MaxShield;
+	}
+}
+
 
 void ABlasterPlayerController::SetHUDShield(float Shield, float MaxShield)
 {

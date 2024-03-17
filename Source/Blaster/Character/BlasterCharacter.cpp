@@ -117,6 +117,7 @@ void ABlasterCharacter::UpdateHUDShield()
 	if (BlasterPlayerController)
 	{
 		BlasterPlayerController->SetHUDShield(Shield, MaxShield);
+		BlasterPlayerController->SetHUDShieldNative(Shield, MaxShield);
 	}
 }
 
