@@ -50,7 +50,7 @@ public:
 
 	virtual void OnRep_ReplicatedMovement() override;
 
-	void Elim();
+	void Elim();		// ½ÇÉ«±»»÷°Ü
 
 	UFUNCTION(NetMulticast, Reliable)
 		void MulticastElim();

@@ -821,6 +821,18 @@ void ABlasterCharacter::Elim()
 			Combat->EquippedWeapon->Dropped();
 		}
 	}
+	if (Combat && Combat->SecondaryWeapon)
+	{
+		if (Combat->SecondaryWeapon->bDestroyOnDrop || Combat->SecondaryWeapon->bDestroyWeapon)
+		{
+			Combat->SecondaryWeapon->Destroy();
+		}
+		else
+		{
+			Combat->SecondaryWeapon->Dropped();
+		}
+	}
+
 	MulticastElim();
 	// 设置复活倒计时
 	GetWorldTimerManager().SetTimer(
