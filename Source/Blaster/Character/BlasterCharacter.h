@@ -52,6 +52,9 @@ public:
 
 	void Elim();		// 角色被击败
 
+	void DropOrDestroyWeapon();		// 丢弃或销毁武器
+	void DropOrDestroyWeapon(AWeapon* Weapon);		// 丢弃或销毁武器
+
 	UFUNCTION(NetMulticast, Reliable)
 		void MulticastElim();
 

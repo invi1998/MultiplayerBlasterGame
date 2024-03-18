@@ -810,28 +810,7 @@ void ABlasterCharacter::OnRep_Shield(float LastShield)
 
 void ABlasterCharacter::Elim()
 {
-	if (Combat && Combat->EquippedWeapon)
-	{
-		if (Combat->EquippedWeapon->bDestroyOnDrop || Combat->EquippedWeapon->bDestroyWeapon)
-		{
-			Combat->EquippedWeapon->Destroy();
-		}
-		else
-		{
-			Combat->EquippedWeapon->Dropped();
-		}
-	}
-	if (Combat && Combat->SecondaryWeapon)
-	{
-		if (Combat->SecondaryWeapon->bDestroyOnDrop || Combat->SecondaryWeapon->bDestroyWeapon)
-		{
-			Combat->SecondaryWeapon->Destroy();
-		}
-		else
-		{
-			Combat->SecondaryWeapon->Dropped();
-		}
-	}
+	DropOrDestroyWeapon();
 
 	MulticastElim();
 	// 设置复活倒计时
@@ -841,6 +820,33 @@ void ABlasterCharacter::Elim()
 		&ABlasterCharacter::ElimTimerFinished,
 		ElimDelay
 	);
+}
+
+void ABlasterCharacter::DropOrDestroyWeapon()
+{
+	if (Combat && Combat->EquippedWeapon)
+	{
+		DropOrDestroyWeapon(Combat->EquippedWeapon);
+	}
+	if (Combat && Combat->SecondaryWeapon)
+	{
+		DropOrDestroyWeapon(Combat->SecondaryWeapon);
+	}
+}
+
+void ABlasterCharacter::DropOrDestroyWeapon(AWeapon* Weapon)
+{
+	if (Weapon)
+	{
+		if (Weapon->bDestroyOnDrop || Weapon->bDestroyWeapon)
+		{
+			Weapon->Destroy();
+		}
+		else
+		{
+			Weapon->Dropped();
+		}
+	}
 }
 
 void ABlasterCharacter::ElimTimerFinished()
