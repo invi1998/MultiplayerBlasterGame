@@ -54,10 +54,10 @@ protected:
 	void SetAiming(bool bIsAiming);
 
 	UFUNCTION(Server, Reliable)
-		void ServerSetAiming(bool bIsAiming);
+	void ServerSetAiming(bool bIsAiming);
 
 	UFUNCTION()
-		void OnRep_EquippedWeapon();
+	void OnRep_EquippedWeapon();
 
 	UFUNCTION()
 	void OnRep_SecondaryWeapon();
@@ -67,10 +67,10 @@ protected:
 	// 创建server RPC
 	// 这个函数被设计为从客户端调用，然后再服务端进行执行
 	UFUNCTION(Server, Reliable)
-		void ServerFire(const FVector_NetQuantize& TracerHitTarget);
+	void ServerFire(const FVector_NetQuantize& TracerHitTarget);
 
 	UFUNCTION(NetMulticast, Reliable)
-		void MuticastFire(const FVector_NetQuantize& TracerHitTarget);
+	void MuticastFire(const FVector_NetQuantize& TracerHitTarget);
 
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 

@@ -369,11 +369,11 @@ void UCombatComponent::SwapWeapon()
 		SecondaryWeapon->SetOwner(Character);
 
 		//// 交换武器后，需要将武器的HUD弹药数量设置
-		//EquippedWeapon->SetHUDAmmo();
+		EquippedWeapon->SetHUDAmmo();
 		//SecondaryWeapon->SetHUDAmmo();
 
-		//// 交换武器后，需要将武器的携带的弹药数量设置
-		//UpdateCarriedAmmo();
+		// 交换武器后，需要将武器的携带的弹药数量设置
+		UpdateCarriedAmmo();
 
 		// 交换武器后，需要将武器的自定义深度设置
 		EquippedWeapon->EnableCustomDepth(false);
@@ -713,6 +713,7 @@ void UCombatComponent::OnRep_EquippedWeapon()
 
 		EquippedWeapon->EnableCustomDepth(false);
 		EquippedWeapon->SetHUDAmmo();
+		UpdateCarriedAmmo();
 	}
 }
 
