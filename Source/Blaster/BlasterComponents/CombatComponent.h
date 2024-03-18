@@ -58,6 +58,9 @@ protected:
 	UFUNCTION()
 		void OnRep_EquippedWeapon();
 
+	UFUNCTION()
+	void OnRep_SecondaryWeapon();
+
 	void Fire();
 
 	// 创建server RPC
@@ -88,13 +91,17 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AProjectile> GrenadeClass;
 
-	void DropEquippedWeapon();
-	void AttachActorToRightHand(AActor* ActorToAttach);
-	void AttachActorToLeftHand(AActor* ActorToAttach);
-	void UpdateCarriedAmmo();
-	void PlayEquipWeaponSound();
-	void ReloadEmptyWeapon();
-	void ShowAttachedGrenade(bool bShowGrenade);
+	void DropEquippedWeapon();		// 丢弃当前装备的武器
+	void AttachActorToRightHand(AActor* ActorToAttach);		// 将ActorToAttach附加到右手
+	void AttachActorToLeftHand(AActor* ActorToAttach);		// 将ActorToAttach附加到左手
+	void AttachActorToBack(AActor* ActorToAttach);			// 将ActorToAttach附加到背部
+	void UpdateCarriedAmmo();		// 更新携带的弹药
+	void PlayEquipWeaponSound(AWeapon* WeaponToEquip);	// 播放装备武器的声音	
+	void ReloadEmptyWeapon();		// 重新装填空武器
+	void ShowAttachedGrenade(bool bShowGrenade);	// 显示附加的榴弹
+
+	void EquipPrimaryWeapon(class AWeapon* WeaponToEquip);		// 装备主武器
+	void EquipSecondaryWeapon(class AWeapon* WeaponToEquip);	// 装备副武器
 
 private:
 	UPROPERTY()
@@ -106,6 +113,9 @@ private:
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 		class AWeapon* EquippedWeapon;		// 当前装备的武器
+
+	UPROPERTY(ReplicatedUsing = OnRep_SecondaryWeapon)
+	class AWeapon* SecondaryWeapon;			// 副武器
 
 	// 瞄准
 	UPROPERTY(Replicated)

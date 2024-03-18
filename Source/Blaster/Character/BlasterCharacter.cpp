@@ -481,16 +481,7 @@ void ABlasterCharacter::EquipButtonPressed()
 
 	if (Combat)
 	{
-		if (HasAuthority())
-		{
-			// 如果是服务端按下E，那就直接执行拾取武器的动作
-			Combat->EquipWeapon(OverlappingWeapon);
-		}
-		else
-		{
-			// 否则就是客户端，客户端需要发送RTC
-			ServerEquipButtonPressed();
-		}
+		ServerEquipButtonPressed();
 	}
 }
 

@@ -38,8 +38,9 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	// 这些变量都是需要通过rpc网络复制到各个客户单进行同步的数据
 	// 注册装备的武器,是否瞄准，携带的弹药数量
 	DOREPLIFETIME(UCombatComponent, EquippedWeapon);	// 装备的武器
+	DOREPLIFETIME(UCombatComponent, SecondaryWeapon);	// 次要武器
 	DOREPLIFETIME(UCombatComponent, bAiming);	// 是否瞄准
-	// 携带的弹药数量只对客户单来说是有重要意义，因为他和客户端是一对一的关系，只有一个客户端需要将这个值设置在HUD中显示
+	// 携带的弹药数量只对客户端来说是有重要意义，因为他和客户端是一对一的关系，只有一个客户端需要将这个值设置在HUD中显示
 	// 所以这里可以使用适当的生命周期条件,并指定条件对象 COND_OwnerOnly
 	// 这样，该变量就只会复制到拥有该弹药的客户端，而不会广播给所有客户端，谁拿到，复制给谁，就这样，这将会节省带宽提高性能
 	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);	// 携带的弹药数量
@@ -324,6 +325,27 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	if (Character == nullptr || WeaponToEquip == nullptr) return;
 	if (CombatState != ECombatState::ECS_Unoccupied) return;
 
+	if (EquippedWeapon != nullptr && SecondaryWeapon == nullptr)
+	{
+		// 如果当前角色主武器装备，次要武器没有装备，那么就装备次要武器
+		EquipSecondaryWeapon(WeaponToEquip);
+	}
+	else
+	{
+		// 如果当前角色主武器没有装备，或者主幅武器都装备了，那么就装备主武器
+		EquipPrimaryWeapon(WeaponToEquip);
+	}
+
+	// 一旦bOrientRotationToMovement设置为True后，角色的朝向会转向移动的方向
+	// 一旦bOrientRotationToMovement 为False，但是bUseControllerDesiredRotation设置为True。
+	// 那么在角色移动中，如果Controller的朝向和角色朝向不一致，
+	// 角色朝向就会平滑的按照RotationRate里配置的各个轴的旋转速率来旋转角色的Rotation到Controller的朝向。
+	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+	Character->bUseControllerRotationYaw = true;
+}
+
+void UCombatComponent::EquipPrimaryWeapon(AWeapon* WeaponToEquip)
+{
 	DropEquippedWeapon();
 
 	EquippedWeapon = WeaponToEquip;
@@ -336,16 +358,21 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 
 	UpdateCarriedAmmo();
 
-	PlayEquipWeaponSound();
+	PlayEquipWeaponSound(WeaponToEquip);
 
 	ReloadEmptyWeapon();
+}
 
-	// 一旦bOrientRotationToMovement设置为True后，角色的朝向会转向移动的方向
-	// 一旦bOrientRotationToMovement 为False，但是bUseControllerDesiredRotation设置为True。
-	// 那么在角色移动中，如果Controller的朝向和角色朝向不一致，
-	// 角色朝向就会平滑的按照RotationRate里配置的各个轴的旋转速率来旋转角色的Rotation到Controller的朝向。
-	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
-	Character->bUseControllerRotationYaw = true;
+void UCombatComponent::EquipSecondaryWeapon(AWeapon* WeaponToEquip)
+{
+	SecondaryWeapon = WeaponToEquip;
+	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+
+	AttachActorToBack(SecondaryWeapon);
+
+	SecondaryWeapon->SetOwner(Character);
+
+	PlayEquipWeaponSound(WeaponToEquip);
 }
 
 void UCombatComponent::DropEquippedWeapon()
@@ -383,6 +410,18 @@ void UCombatComponent::AttachActorToLeftHand(AActor* ActorToAttach)
 	}
 }
 
+void UCombatComponent::AttachActorToBack(AActor* ActorToAttach)
+{
+	if (Character == nullptr || Character->GetMesh() == nullptr || ActorToAttach == nullptr) return;
+
+	const USkeletalMeshSocket* BackpackSocket = Character->GetMesh()->GetSocketByName(FName("BackpackSocket"));
+
+	if (BackpackSocket)
+	{
+		BackpackSocket->AttachActor(ActorToAttach, Character->GetMesh());
+	}
+}
+
 void UCombatComponent::UpdateCarriedAmmo()
 {
 	if (EquippedWeapon == nullptr) return;
@@ -398,15 +437,15 @@ void UCombatComponent::UpdateCarriedAmmo()
 	}
 }
 
-void UCombatComponent::PlayEquipWeaponSound()
+void UCombatComponent::PlayEquipWeaponSound(AWeapon* WeaponToEquip)
 {
 
-	if (Character && EquippedWeapon && EquippedWeapon->EquipSound)
+	if (Character && WeaponToEquip && WeaponToEquip->EquipSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(
 			this,
-			EquippedWeapon->EquipSound,
-			EquippedWeapon->GetActorLocation()
+			WeaponToEquip->EquipSound,
+			Character->GetActorLocation()
 		);
 	}
 }
@@ -620,7 +659,18 @@ void UCombatComponent::OnRep_EquippedWeapon()
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
 
-		PlayEquipWeaponSound();
+		PlayEquipWeaponSound(EquippedWeapon);
+	}
+}
+
+void UCombatComponent::OnRep_SecondaryWeapon()
+{
+	if (SecondaryWeapon && Character)
+	{
+		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+		AttachActorToBack(SecondaryWeapon);
+
+		PlayEquipWeaponSound(SecondaryWeapon);
 	}
 }
 
