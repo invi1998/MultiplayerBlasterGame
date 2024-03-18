@@ -344,6 +344,50 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	Character->bUseControllerRotationYaw = true;
 }
 
+void UCombatComponent::SwapWeapon()
+{
+	if (Character == nullptr) return;
+	if (CombatState != ECombatState::ECS_Unoccupied) return;
+
+	if (EquippedWeapon && SecondaryWeapon)
+	{
+		// 如果当前角色主武器装备，次要武器也装备了，那么就交换主武器和次要武器
+		AWeapon* TempWeapon = EquippedWeapon;
+		EquippedWeapon = SecondaryWeapon;
+		SecondaryWeapon = TempWeapon;
+
+		// 交换武器后，需要将武器的状态设置为装备状态
+		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
+
+		// 交换武器后，需要将武器的位置设置为装备状态
+		AttachActorToRightHand(EquippedWeapon);
+		AttachActorToBack(SecondaryWeapon);
+
+		// 交换武器后，需要将武器的拥有者设置为角色
+		EquippedWeapon->SetOwner(Character);
+		SecondaryWeapon->SetOwner(Character);
+
+		//// 交换武器后，需要将武器的HUD弹药数量设置
+		//EquippedWeapon->SetHUDAmmo();
+		//SecondaryWeapon->SetHUDAmmo();
+
+		//// 交换武器后，需要将武器的携带的弹药数量设置
+		//UpdateCarriedAmmo();
+
+		// 交换武器后，需要将武器的自定义深度设置
+		EquippedWeapon->EnableCustomDepth(false);
+		SecondaryWeapon->EnableCustomDepth(false);
+
+		// 交换武器后，需要将武器的装备声音设置
+		PlayEquipWeaponSound(EquippedWeapon);
+		PlayEquipWeaponSound(SecondaryWeapon);
+
+		// 交换武器后，需要将武器的装备声音设置
+		ReloadEmptyWeapon();
+	}
+}
+
 void UCombatComponent::EquipPrimaryWeapon(AWeapon* WeaponToEquip)
 {
 	if (!WeaponToEquip) return;
@@ -372,17 +416,13 @@ void UCombatComponent::EquipSecondaryWeapon(AWeapon* WeaponToEquip)
 	if (!WeaponToEquip) return;
 
 	SecondaryWeapon = WeaponToEquip;
-	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
 
 	AttachActorToBack(SecondaryWeapon);
 
 	SecondaryWeapon->SetOwner(Character);
 
 	PlayEquipWeaponSound(WeaponToEquip);
-
-	SecondaryWeapon->EnableCustomDepth(true);
-	SecondaryWeapon->GetWeaponMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_TAN);
-	SecondaryWeapon->GetWeaponMesh()->MarkRenderStateDirty();
 }
 
 void UCombatComponent::DropEquippedWeapon()
@@ -672,6 +712,7 @@ void UCombatComponent::OnRep_EquippedWeapon()
 		PlayEquipWeaponSound(EquippedWeapon);
 
 		EquippedWeapon->EnableCustomDepth(false);
+		EquippedWeapon->SetHUDAmmo();
 	}
 }
 
@@ -679,18 +720,9 @@ void UCombatComponent::OnRep_SecondaryWeapon()
 {
 	if (SecondaryWeapon && Character)
 	{
-		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
 		AttachActorToBack(SecondaryWeapon);
-
 		PlayEquipWeaponSound(SecondaryWeapon);
-
-		SecondaryWeapon->EnableCustomDepth(true);
-
-		if (SecondaryWeapon->GetWeaponMesh())
-		{
-			SecondaryWeapon->GetWeaponMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_TAN);
-			SecondaryWeapon->GetWeaponMesh()->MarkRenderStateDirty();
-		}
 		
 	}
 }

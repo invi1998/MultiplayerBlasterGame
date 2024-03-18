@@ -14,6 +14,7 @@ enum class EWeaponState : uint8
 	EWS_Initial UMETA(DisplayName = "Initial State"),		// 武器在世界上放置时的状态
 	EWS_Equipped UMETA(DisplayName = "Equipped"),			// 武器被装备时的状态
 	EWS_Dropped UMETA(DisplayName = "Dropped"),				// 武器被丢弃时的状态
+	EWS_EquippedSecondary UMETA(DisplayName = "Equipped Secondary"),	// 武器被装备为次要武器时的状态
 	// 这些就是我们可以用于控制打开物理，打开碰撞，让武器反弹的地方
 
 	EWS_MAX UMETA(DisplayName = "DefaultMax")				// 默认最大常量
@@ -92,6 +93,15 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void OnWeaponStateSet();
+
+	virtual void OnEquiped();
+
+	virtual void OnDropped();
+
+	virtual void OnEquippedSecondary();
+
 
 	UFUNCTION()
 		virtual void OnSphereOverlap(
