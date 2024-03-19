@@ -216,24 +216,32 @@ void UCombatComponent::Fire()
 
 void UCombatComponent::FireProjectileWeapon()
 {
-	if (EquippedWeapon)
+	if (EquippedWeapon && Character)
 	{
 		// 如果武器是使用散射的，那么就使用散射
 		HitTarget = EquippedWeapon->bUseScatter ? EquippedWeapon->TraceEndWithScatter(HitTarget) : HitTarget;
 
-		LocalFire(HitTarget);
+		if (!Character->HasAuthority())
+		{
+			LocalFire(HitTarget);
+		}
+		
 		ServerFire(HitTarget);
 	}
 }
 
 void UCombatComponent::FireHitscanWeapon()
 {
-	if (EquippedWeapon)
+	if (EquippedWeapon && Character)
 	{
 		// 如果武器是使用散射的，那么就使用散射
 		HitTarget = EquippedWeapon->bUseScatter ? EquippedWeapon->TraceEndWithScatter(HitTarget) : HitTarget;
 		
-		LocalFire(HitTarget);
+		if (!Character->HasAuthority())
+		{
+			LocalFire(HitTarget);
+		}
+
 		ServerFire(HitTarget);
 	}
 }
@@ -241,13 +249,17 @@ void UCombatComponent::FireHitscanWeapon()
 void UCombatComponent::FireShotgun()
 {
 	AShotgun* Shotgun = Cast<AShotgun>(EquippedWeapon);
-	if (Shotgun)
+	if (Shotgun && Character)
 	{
-		TArray<FVector> HitTargets;
+		TArray<FVector_NetQuantize> HitTargets;
 		Shotgun->ShotgunTraceHitWithScatter(HitTarget, HitTargets);
 
-		LocalFire(HitTarget);
-		ServerFire(HitTarget);
+		if (!Character->HasAuthority())
+		{
+			LocalShotgunFire(HitTargets);
+		}
+		
+		ServerShotgunFire(HitTargets);
 	}
 }
 
@@ -255,18 +267,23 @@ void UCombatComponent::LocalFire(const FVector_NetQuantize& TraceHitTarget)
 {
 	if (EquippedWeapon == nullptr) return;
 
-	if (Character && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
-	{
-		Character->PlayFireMontage(bAiming);
-		EquippedWeapon->Fire(TraceHitTarget);
-		CombatState = ECombatState::ECS_Unoccupied;
-		return;
-	}
-
 	if (Character && CombatState == ECombatState::ECS_Unoccupied)
 	{
 		Character->PlayFireMontage(bAiming);
 		EquippedWeapon->Fire(TraceHitTarget);
+	}
+}
+
+void UCombatComponent::LocalShotgunFire(const TArray<FVector_NetQuantize>& TraceHitTargets)
+{
+	AShotgun* Shotgun = Cast<AShotgun>(EquippedWeapon);
+	if (Character == nullptr || Shotgun == nullptr) return;
+
+	if (CombatState == ECombatState::ECS_Reloading || CombatState == ECombatState::ECS_Unoccupied)
+	{
+		Character->PlayFireMontage(bAiming);
+		Shotgun->FireShotgun(TraceHitTargets);
+		CombatState = ECombatState::ECS_Unoccupied;
 	}
 }
 
@@ -360,6 +377,18 @@ void UCombatComponent::FireTimerFinished()
 void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TracerHitTarget)
 {
 	MuticastFire(TracerHitTarget);
+}
+
+void UCombatComponent::ServerShotgunFire_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets)
+{
+	MulticastShotgunFire(TraceHitTargets);
+}
+
+void UCombatComponent::MulticastShotgunFire_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets)
+{
+	if (Character && Character->IsLocallyControlled() && !Character->HasAuthority()) return;	// 如果是客户端，那么客户端不需要再次进行多播，因为客户端已经在本地进行了多播
+
+	LocalShotgunFire(TraceHitTargets);	// 如果是服务端，那么服务端需要再次进行多播，因为服务端需要将多播的结果同步到客户端
 }
 
 void UCombatComponent::MuticastFire_Implementation(const FVector_NetQuantize& TracerHitTarget)

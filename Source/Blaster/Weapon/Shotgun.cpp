@@ -10,37 +10,34 @@
 #include "particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
 
-void AShotgun::Fire(const FVector& HitTarget)
+void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 {
-	AWeapon::Fire(HitTarget);
-
-	APawn* OwnerPawn = Cast<APawn>(GetOwner());
-	if (OwnerPawn == nullptr)
-	{
-		return;
-	}
+	AWeapon::Fire(FVector());
+	const APawn* OwnerPawn = Cast<APawn>(GetOwner());
+	if (OwnerPawn == nullptr) return;
 
 	AController* InstigatorController = OwnerPawn->GetController();
 
 	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash");
 	if (MuzzleFlashSocket)
 	{
-		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
+		const FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
 		FVector Start = SocketTransform.GetLocation();
 
 		// 计算霰弹枪子弹命中个数
 
 		// 因为霰弹枪子弹散射的缘故，它有可能同时命中多个角色，我们也需要处理这种情况
 		// 这里采用一个map结构处理，键为角色指针，值为子弹命中数量
+		// 击中角色和对应数量的map映射
 		TMap<ABlasterCharacter*, uint32> HitMap;
 
-		for (uint32 i = 0; i < NumberOfPellets; i++)
+		for (FVector_NetQuantize HitTarget : HitTargets)
 		{
 			FHitResult FireHit;
 			WeaponTraceHit(Start, HitTarget, FireHit);
 
 			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());
-			if (BlasterCharacter && HasAuthority() && InstigatorController)
+			if (BlasterCharacter)
 			{
 				if (HitMap.Contains(BlasterCharacter))
 				{
@@ -51,6 +48,7 @@ void AShotgun::Fire(const FVector& HitTarget)
 					HitMap.Emplace(BlasterCharacter, 1);
 				}
 			}
+
 
 			if (ImpactParticles)
 			{
@@ -81,8 +79,8 @@ void AShotgun::Fire(const FVector& HitTarget)
 			if (HitPair.Key && HasAuthority() && InstigatorController)
 			{
 				UGameplayStatics::ApplyDamage(
-					HitPair.Key,
-					Damage * HitPair.Value,
+					HitPair.Key,		// 被击中的角色
+					Damage * HitPair.Value,	// 伤害乘以命中数量
 					InstigatorController,
 					this,
 					UDamageType::StaticClass()
@@ -92,7 +90,7 @@ void AShotgun::Fire(const FVector& HitTarget)
 	}
 }
 
-void AShotgun::ShotgunTraceHitWithScatter(const FVector& HitTarget, TArray<FVector>& HitTargets)
+void AShotgun::ShotgunTraceHitWithScatter(const FVector& HitTarget, TArray<FVector_NetQuantize>& HitTargets)
 {
 	// 从武器的枪口位置开始追踪
 	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash");
@@ -113,13 +111,13 @@ void AShotgun::ShotgunTraceHitWithScatter(const FVector& HitTarget, TArray<FVect
 		FVector EndLoc = SphereCenter + RandVec;
 		FVector ToEndLoc = EndLoc - TraceStart;
 
-		DrawDebugSphere(GetWorld(), SphereCenter, SphereRadius, 12, FColor::Magenta, true);
+		/*DrawDebugSphere(GetWorld(), SphereCenter, SphereRadius, 12, FColor::Magenta, true);
 		DrawDebugSphere(GetWorld(), EndLoc, 4.0f, 12, FColor::Orange, true);
 		DrawDebugLine(
 			GetWorld(),
 			TraceStart, FVector(TraceStart + ToEndLoc * TRACE_LENGTH / ToEndLoc.Size()),
 			FColor::Green,
-			true);
+			true);*/
 
 		HitTargets.Add(FVector(TraceStart + ToEndLoc * TRACE_LENGTH / ToEndLoc.Size()));
 	}
