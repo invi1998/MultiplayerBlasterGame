@@ -188,14 +188,65 @@ void UCombatComponent::Fire()
 	if (CanFire())
 	{
 		bCanFire = false;
-		ServerFire(HitTarget);
-		LocalFire(HitTarget);
 
 		if (EquippedWeapon)
 		{
 			CrosshairShootingFactor = 0.75f;
+
+			switch (EquippedWeapon->FiringType)
+			{
+			case EFiringType::EFT_HitScan:
+				FireHitscanWeapon();
+				break;
+			case EFiringType::EFT_Projectile: 
+				FireProjectileWeapon();
+				break;
+			case EFiringType::EFT_Shotgun: 
+				FireShotgun();
+				break;
+			case EFiringType::EFT_MAX: break;
+			default: break;
+			}
+
 		}
 		StartFireTimer();
+	}
+}
+
+void UCombatComponent::FireProjectileWeapon()
+{
+	ServerFire(HitTarget);
+	LocalFire(HitTarget);
+}
+
+void UCombatComponent::FireHitscanWeapon()
+{
+	if (EquippedWeapon)
+	{
+		// 如果武器是使用散射的，那么就使用散射
+		HitTarget = EquippedWeapon->bUseScatter ? EquippedWeapon->TraceEndWithScatter(HitTarget) : HitTarget;
+		
+		LocalFire(HitTarget);
+		ServerFire(HitTarget);
+	}
+}
+
+void UCombatComponent::FireShotgun()
+{
+	if (EquippedWeapon == nullptr) return;
+
+	if (Character && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
+	{
+				Character->PlayFireMontage(bAiming);
+		EquippedWeapon->Fire(HitTarget);
+		CombatState = ECombatState::ECS_Unoccupied;
+		return;
+	}
+
+	if (Character && CombatState == ECombatState::ECS_Unoccupied)
+	{
+				Character->PlayFireMontage(bAiming);
+		EquippedWeapon->Fire(HitTarget);
 	}
 }
 

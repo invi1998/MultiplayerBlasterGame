@@ -64,6 +64,12 @@ protected:
 
 	void Fire();
 
+	void FireProjectileWeapon();
+
+	void FireHitscanWeapon();
+
+	void FireShotgun();
+
 	void LocalFire(const FVector_NetQuantize& TraceHitTarget);
 
 	// ´´½¨server RPC

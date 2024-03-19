@@ -20,6 +20,16 @@ enum class EWeaponState : uint8
 	EWS_MAX UMETA(DisplayName = "DefaultMax")				// 默认最大常量
 };
 
+UENUM(BlueprintType)
+enum class EFiringType : uint8
+{
+	EFT_HitScan UMETA(DisplayName = "Hit Scan Weapon"),		// 扫描
+	EFT_Projectile UMETA(DisplayName = "Projectile Weapon"),			// 投射
+	EFT_Shotgun UMETA(DisplayName = "Shotgun"),			// 霰弹枪
+
+	EFT_MAX UMETA(DisplayName = "DefaultMax")				// 默认最大常量
+};
+
 UCLASS()
 class BLASTER_API AWeapon : public AActor
 {
@@ -77,6 +87,22 @@ public:
 	// 武器是否会被销毁
 	bool bDestroyWeapon = false;
 
+	UPROPERTY(EditAnywhere)
+	EFiringType FiringType;	// 射击类型
+
+	/*
+	 * 跟踪和散射
+	 */
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	float DistanceToSphere = 800.f;		// 距离球体
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	float SphereRadius = 75.0f;			// 球体半径
+
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	bool bUseScatter = false;	// 是否使用散射
+
 public:
 	// Sets default values for this actor's properties
 	AWeapon();
@@ -89,6 +115,10 @@ public:
 	// 丢弃武器 / 死亡掉落武器
 	void Dropped();
 	void AddAmmo(int32 AmmoToAdd);
+
+
+	FVector TraceEndWithScatter(const FVector& HitTarget);	// 跟踪结束位置
+
 
 protected:
 	// Called when the game starts or when spawned
