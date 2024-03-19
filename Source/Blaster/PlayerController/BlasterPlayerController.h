@@ -74,6 +74,13 @@ protected:
 	UFUNCTION(Client, Reliable)
 		void ClientJoinMidGame(FName StateOfMatch, float Warmup, float Match, float Cooldown, float StartingTime);	// 客户端在游戏中途加入
 
+
+	void HightPingWarning();	// 高延迟警告
+
+	void StopHighPingWarning();	// 停止高延迟警告
+
+	void CheckHighPing(float DeltaSeconds);	// 检查高延迟
+
 private:
 	UPROPERTY()
 		class ABlasterHUD* BlasterHUD;	// HUD
@@ -115,4 +122,19 @@ private:
 	bool bInitializeCarriedAmmo = false;	// 是否初始化携带弹药
 	float HUDWeaponAmmo;	// 武器弹药
 	bool bInitializeWeaponAmmo = false;	// 是否初始化武器弹药
+
+	UPROPERTY(EditAnywhere)
+	float HighPingWarningTime = 0.f;		// 高延迟警告时间
+
+	UPROPERTY(EditAnywhere)
+	float PingAnimationRunningTime = 0.f;	// 高延迟警告动画运行时间
+
+	UPROPERTY(EditAnywhere)
+	float HighPingWarningDuration = 10.f;	// 高延迟警告持续时间
+
+	UPROPERTY(EditAnywhere)
+	float HighPingWarningFrequency = 20.f;			// 检查延迟频率
+
+	UPROPERTY(EditAnywhere)
+	float HighPingThreshold = 50.f;	// 高延迟阈值
 };

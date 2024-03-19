@@ -59,4 +59,10 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 		UTextBlock* GrenadesText;	// 榴弹
+
+	UPROPERTY(meta=(BindWidget))
+	UImage* HighPingImage;			// 高延迟图标
+
+	UPROPERTY(meta = (BindWidgetAnim), Transient)	// 标记为瞬态，也就是说这个变量不会被保存到内存中
+	class UWidgetAnimation* HighPingAnimation;	// 高延迟动画
 };
