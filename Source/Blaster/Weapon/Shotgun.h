@@ -17,6 +17,8 @@ class BLASTER_API AShotgun : public AHitScanWeapon
 public:
 	virtual void Fire(const FVector& HitTarget) override;
 
+	void ShotgunTraceHitWithScatter(const FVector& HitTarget, TArray<FVector>& HitTargets);		// 霰弹枪射击，返回多个命中目标
+
 private:
 	// 霰弹枪每发子弹射出的散弹数
 	UPROPERTY(EditAnywhere, Category="Weapon Scatter")

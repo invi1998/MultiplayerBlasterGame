@@ -318,24 +318,24 @@ void AWeapon::AddAmmo(int32 AmmoToAdd)
 	SetHUDAmmo();
 }
 
-FVector AWeapon::TraceEndWithScatter(const FVector& HitTarget)
+FVector AWeapon::TraceEndWithScatter(const FVector& HitTarget) const
 {
 	// 从武器的枪口位置开始追踪
 	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash");
 
 	if (MuzzleFlashSocket == nullptr) return FVector::ZeroVector;
 
-	FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
-	FVector TraceStart = SocketTransform.GetLocation();
+	const FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
+	const FVector TraceStart = SocketTransform.GetLocation();
 
 
 	// 一个从跟踪起始位置指向命中目标的向量（归一化的向量）
-	FVector ToTargetNormalized = (HitTarget - TraceStart).GetSafeNormal();
+	const FVector ToTargetNormalized = (HitTarget - TraceStart).GetSafeNormal();
 	// 从轨迹起点到头部目标的某个位置
-	FVector SphereCenter = TraceStart + ToTargetNormalized * DistanceToSphere;
-	FVector RandVec = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.f, SphereRadius);
-	FVector EndLoc = SphereCenter + RandVec;
-	FVector ToEndLoc = EndLoc - TraceStart;
+	const FVector SphereCenter = TraceStart + ToTargetNormalized * DistanceToSphere;
+	const FVector RandVec = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.f, SphereRadius);
+	const FVector EndLoc = SphereCenter + RandVec;
+	const FVector ToEndLoc = EndLoc - TraceStart;
 
 	/*DrawDebugSphere(GetWorld(), SphereCenter, SphereRadius, 12, FColor::Magenta, true);
 	DrawDebugSphere(GetWorld(), EndLoc, 4.0f, 12, FColor::Orange, true);

@@ -6,6 +6,7 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
 
@@ -88,5 +89,38 @@ void AShotgun::Fire(const FVector& HitTarget)
 				);
 			}
 		}
+	}
+}
+
+void AShotgun::ShotgunTraceHitWithScatter(const FVector& HitTarget, TArray<FVector>& HitTargets)
+{
+	// 从武器的枪口位置开始追踪
+	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash");
+
+	if (MuzzleFlashSocket == nullptr) return;
+
+	const FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
+	const FVector TraceStart = SocketTransform.GetLocation();
+
+	// 一个从跟踪起始位置指向命中目标的向量（归一化的向量）
+	const FVector ToTargetNormalized = (HitTarget - TraceStart).GetSafeNormal();
+	// 从轨迹起点到头部目标的某个位置
+	const FVector SphereCenter = TraceStart + ToTargetNormalized * DistanceToSphere;
+	
+	for (uint32 i = 0; i < NumberOfPellets; i++)
+	{
+		FVector RandVec = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.f, SphereRadius);
+		FVector EndLoc = SphereCenter + RandVec;
+		FVector ToEndLoc = EndLoc - TraceStart;
+
+		DrawDebugSphere(GetWorld(), SphereCenter, SphereRadius, 12, FColor::Magenta, true);
+		DrawDebugSphere(GetWorld(), EndLoc, 4.0f, 12, FColor::Orange, true);
+		DrawDebugLine(
+			GetWorld(),
+			TraceStart, FVector(TraceStart + ToEndLoc * TRACE_LENGTH / ToEndLoc.Size()),
+			FColor::Green,
+			true);
+
+		HitTargets.Add(FVector(TraceStart + ToEndLoc * TRACE_LENGTH / ToEndLoc.Size()));
 	}
 }

@@ -18,6 +18,7 @@
 #include "Sound/SoundCue.h"
 #include "Blaster/Character/BlasterAnimInstance.h"
 #include "Blaster/Weapon/Projectile.h"
+#include "Blaster/Weapon/Shotgun.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -215,8 +216,14 @@ void UCombatComponent::Fire()
 
 void UCombatComponent::FireProjectileWeapon()
 {
-	ServerFire(HitTarget);
-	LocalFire(HitTarget);
+	if (EquippedWeapon)
+	{
+		// 如果武器是使用散射的，那么就使用散射
+		HitTarget = EquippedWeapon->bUseScatter ? EquippedWeapon->TraceEndWithScatter(HitTarget) : HitTarget;
+
+		LocalFire(HitTarget);
+		ServerFire(HitTarget);
+	}
 }
 
 void UCombatComponent::FireHitscanWeapon()
@@ -233,20 +240,14 @@ void UCombatComponent::FireHitscanWeapon()
 
 void UCombatComponent::FireShotgun()
 {
-	if (EquippedWeapon == nullptr) return;
-
-	if (Character && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
+	AShotgun* Shotgun = Cast<AShotgun>(EquippedWeapon);
+	if (Shotgun)
 	{
-				Character->PlayFireMontage(bAiming);
-		EquippedWeapon->Fire(HitTarget);
-		CombatState = ECombatState::ECS_Unoccupied;
-		return;
-	}
+		TArray<FVector> HitTargets;
+		Shotgun->ShotgunTraceHitWithScatter(HitTarget, HitTargets);
 
-	if (Character && CombatState == ECombatState::ECS_Unoccupied)
-	{
-				Character->PlayFireMontage(bAiming);
-		EquippedWeapon->Fire(HitTarget);
+		LocalFire(HitTarget);
+		ServerFire(HitTarget);
 	}
 }
 

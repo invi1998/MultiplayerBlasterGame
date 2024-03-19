@@ -117,7 +117,7 @@ public:
 	void AddAmmo(int32 AmmoToAdd);
 
 
-	FVector TraceEndWithScatter(const FVector& HitTarget);	// 跟踪结束位置
+	FVector TraceEndWithScatter(const FVector& HitTarget) const;	// 跟踪结束位置
 
 
 protected:
