@@ -64,6 +64,8 @@ protected:
 
 	void Fire();
 
+	void LocalFire(const FVector_NetQuantize& TraceHitTarget);
+
 	// 创建server RPC
 	// 这个函数被设计为从客户端调用，然后再服务端进行执行
 	UFUNCTION(Server, Reliable)
