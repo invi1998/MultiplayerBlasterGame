@@ -95,7 +95,6 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void ServerReload();
 
-
 	void HandleReload();
 
 	int32 AmountToReload();
@@ -107,6 +106,8 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AProjectile> GrenadeClass;
+
+	bool bLocalReloading = false;
 
 	void DropEquippedWeapon();		// 丢弃当前装备的武器
 	void AttachActorToRightHand(AActor* ActorToAttach);		// 将ActorToAttach附加到右手

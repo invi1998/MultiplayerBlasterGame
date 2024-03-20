@@ -290,6 +290,7 @@ void UCombatComponent::LocalShotgunFire(const TArray<FVector_NetQuantize>& Trace
 bool UCombatComponent::CanFire()
 {
 	if (EquippedWeapon == nullptr) return false;
+	if (bLocalReloading) return false;
 	// 因为霰弹枪一次性装弹会有4次装弹动画，所以这里特写霰弹枪的开火判定逻辑，只要有一次装弹（有子弹，哪怕是在装弹状态下也可以开火）
 	if (!EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
 	{
@@ -626,16 +627,20 @@ void UCombatComponent::ShowAttachedGrenade(bool bShowGrenade)
 
 void UCombatComponent::Reload()
 {
-	if (CarriedAmmo > 0 && CombatState == ECombatState::ECS_Unoccupied && EquippedWeapon && !EquippedWeapon->IsFull())
+	if (CarriedAmmo > 0 && CombatState == ECombatState::ECS_Unoccupied && EquippedWeapon && !EquippedWeapon->IsFull() && !bLocalReloading)
 	{
 		// 如果当前角色携带的弹药数量小于等于0（没有子弹），那么就没必要rpc广播换弹动作，没有子弹，不需要换弹，节省网络带宽
 		ServerReload();
+		HandleReload();
+
+		bLocalReloading = true;
 	}
 }
 
 void UCombatComponent::FinishReloading()
 {
 	if (Character == nullptr) return;
+	bLocalReloading = false;
 	if (Character->HasAuthority())
 	{
 		CombatState = ECombatState::ECS_Unoccupied;
@@ -651,15 +656,21 @@ void UCombatComponent::ServerReload_Implementation()
 {
 	if (Character == nullptr || EquippedWeapon == nullptr) return;
 
-	
-
 	CombatState = ECombatState::ECS_Reloading;
-	HandleReload();
+
+	if (!Character->IsLocallyControlled())
+	{
+		// 我们只在服务端换弹操作，因为我们在向服务端发送换弹操作的时候，客户端已经在本地进行了换弹操作
+		HandleReload();
+	}
 }
 
 void UCombatComponent::HandleReload()
 {
-	Character->PlayReloadMontage();
+	if (Character)
+	{
+		Character->PlayReloadMontage();
+	}
 }
 
 int32 UCombatComponent::AmountToReload()
@@ -722,7 +733,12 @@ void UCombatComponent::OnRep_CombatState()
 	switch (CombatState)
 	{
 	case ECombatState::ECS_Reloading:
-		HandleReload();
+		{
+			if (Character && !Character->IsLocallyControlled())
+			{
+				HandleReload();
+			}
+		}
 		break;
 	case ECombatState::ECS_Unoccupied:
 		if(bFireButtonPressed)
