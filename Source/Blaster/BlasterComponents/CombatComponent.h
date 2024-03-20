@@ -93,7 +93,7 @@ protected:
 	void SetHUDCrosshairs(float DeltaTime);
 
 	UFUNCTION(Server, Reliable)
-		void ServerReload();
+	void ServerReload();
 
 
 	void HandleReload();
@@ -122,25 +122,32 @@ protected:
 
 private:
 	UPROPERTY()
-		class ABlasterCharacter* Character;
+	class ABlasterCharacter* Character;
+
 	UPROPERTY()
-		class ABlasterPlayerController* Controller;
+	class ABlasterPlayerController* Controller;
+
 	UPROPERTY()
-		class ABlasterHUD* HUD;
+	class ABlasterHUD* HUD;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
-		class AWeapon* EquippedWeapon;		// 当前装备的武器
+	class AWeapon* EquippedWeapon;		// 当前装备的武器
 
 	UPROPERTY(ReplicatedUsing = OnRep_SecondaryWeapon)
 	class AWeapon* SecondaryWeapon;			// 副武器
 
-	// 瞄准
-	UPROPERTY(Replicated)
-		bool bAiming;
+	// 瞄准 这个值是服务器端的值，客户端的值是由服务器端同步过来的
+	UPROPERTY(ReplicatedUsing = OnRep_Aiming)
+	bool bAiming = false;
+
+	bool bAimingButtonPressed = false;	// 瞄准按钮是否按下
+
+	UFUNCTION()
+	void OnRep_Aiming();
 
 	// 行进速率
 	UPROPERTY(EditAnywhere)
-		float BaseWalkSpeed;
+	float BaseWalkSpeed;
 
 	// 瞄准行径速率
 	UPROPERTY(EditAnywhere)
@@ -178,10 +185,10 @@ private:
 	float CurrentFOV;
 
 	UPROPERTY(EditAnywhere, Category = Combat)
-		float ZoomedFOV = 30.f;
+	float ZoomedFOV = 30.f;
 
 	UPROPERTY(EditAnywhere, Category = Combat)
-		float ZoomInterpSpeed = 20.f;
+	float ZoomInterpSpeed = 20.f;
 
 	void InterpFOV(float DeltaTime);
 
@@ -201,10 +208,10 @@ private:
 
 	// 当前武器携带的弹药数量
 	UPROPERTY(ReplicatedUsing = OnRep_CarriedAmmo)
-		int32 CarriedAmmo;
+	int32 CarriedAmmo;
 
 	UFUNCTION()
-		void OnRep_CarriedAmmo();
+	void OnRep_CarriedAmmo();
 
 	TMap<EWeaponType, int32> CarriedAmmoMap;	// 携带的弹药数量（不同类型的武器携带的弹药数量）
 
@@ -233,31 +240,31 @@ private:
 
 	// 突击步枪子弹数
 	UPROPERTY(EditAnywhere)
-		int32 StartingARAmmo = 30;
+	int32 StartingARAmmo = 30;
 
 	// 火箭筒炮弹数
 	UPROPERTY(EditAnywhere)
-		int32 StartingRocketAmmo = 0;
+	int32 StartingRocketAmmo = 0;
 
 	// 手枪子弹数
 	UPROPERTY(EditAnywhere)
-		int32 StartingPistolAmmo = 0;
+	int32 StartingPistolAmmo = 0;
 
 	// 冲锋枪子弹数
 	UPROPERTY(EditAnywhere)
-		int32 StartingSMGAmmo = 0;
+	int32 StartingSMGAmmo = 0;
 
 	// 霰弹枪子弹数
 	UPROPERTY(EditAnywhere)
-		int32 StartingShotgunAmmo = 0;
+	int32 StartingShotgunAmmo = 0;
 
 	// 狙击步枪子弹数
 	UPROPERTY(EditAnywhere)
-		int32 StartingSniperAmmo = 0;
+	int32 StartingSniperAmmo = 0;
 
 	// 榴弹发射器榴弹数
 	UPROPERTY(EditAnywhere)
-		int32 StartingGrenadeLauncherAmmo = 0;
+	int32 StartingGrenadeLauncherAmmo = 0;
 
 
 	void InitializeCarriedAmmo();

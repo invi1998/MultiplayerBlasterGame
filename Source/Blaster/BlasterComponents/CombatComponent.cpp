@@ -349,6 +349,13 @@ void UCombatComponent::SetAiming(bool bIsAiming)
 	{
 		Character->ShowSniperScopeWidget(bIsAiming);
 	}
+
+	// 只在客户端记录瞄准状态
+	if (Character->IsLocallyControlled())
+	{
+		bAimingButtonPressed = bIsAiming;
+	}
+	
 }
 
 void UCombatComponent::StartFireTimer()
@@ -511,6 +518,19 @@ void UCombatComponent::EquipSecondaryWeapon(AWeapon* WeaponToEquip)
 	SecondaryWeapon->SetOwner(Character);
 
 	PlayEquipWeaponSound(WeaponToEquip);
+}
+
+void UCombatComponent::OnRep_Aiming()
+{
+	if (Character && Character->IsLocallyControlled())
+	{
+		// 首先，bAiming是服务端同步的值，正常来说，客户端这个值和服务端是一致的
+		// 但是如果存在网络延迟，那么客户端的bAiming值可能会比服务端的bAiming值要慢一步
+		// 那么这里我们采取的策略是，这个瞄准状态我们在客户端向服务器同步的时候，我们先记录下客户端的瞄准状态
+		// 然后，我们在客户端用的就是这个记录的状态，这样在收到服务端的同步值的时候，我们就不用再去改变客户端的瞄准状态了
+		// 从而避免了因为网络延迟导致的瞄准状态的不同步，而导致一次点击，瞄准状态来回切换的情况
+		bAiming = bAimingButtonPressed;
+	}
 }
 
 void UCombatComponent::DropEquippedWeapon()
