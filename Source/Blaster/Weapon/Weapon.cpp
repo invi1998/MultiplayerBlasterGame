@@ -178,7 +178,6 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AWeapon, WeaponState);
-	DOREPLIFETIME(AWeapon, Ammo);
 }
 
 void AWeapon::Fire(const FVector& HitTarget)
@@ -209,11 +208,8 @@ void AWeapon::Fire(const FVector& HitTarget)
 			}
 		}
 	}
-	if (HasAuthority())
-	{
-		// 服务端扣除弹药
-		SpendRound();
-	}
+	// 服务端扣除弹药
+	SpendRound();
 }
 
 void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -246,6 +242,51 @@ void AWeapon::SpendRound()
 	// 子弹容量在0-MagCapacity之间
 	Ammo = FMath::Clamp(Ammo - 1, 0, MagCapacity);
 	SetHUDAmmo();
+
+	if (HasAuthority())
+	{
+		ClientUpdateAmmo(Ammo);
+	}
+	else
+	{
+		++Sequence;		// 未处理的服务器弹药请求数量
+	}
+}
+
+void AWeapon::AddAmmo(int32 Amount)
+{
+	Ammo = FMath::Clamp(Ammo + Amount, 0, MagCapacity);
+	SetHUDAmmo();
+
+	ClientAddAmmo(Amount);
+}
+
+void AWeapon::ClientAddAmmo_Implementation(int32 Amount)
+{
+	if (HasAuthority()) return;
+
+	Ammo = FMath::Clamp(Ammo + Amount, 0, MagCapacity);
+
+	BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(GetOwner()) : BlasterOwnerCharacter;
+
+	if (BlasterOwnerCharacter && BlasterOwnerCharacter->GetCombat() && IsFull())
+	{
+		BlasterOwnerCharacter->GetCombat()->JumpToShotgunEnd();	// 
+	}
+	SetHUDAmmo();
+}
+
+void AWeapon::ClientUpdateAmmo_Implementation(int32 ServerAmmo)
+{
+	if (HasAuthority()) return;
+
+	Ammo = ServerAmmo;
+	
+	--Sequence;		// 处理掉一个服务器弹药请求
+
+	Ammo -= Sequence;	// 根据未处理的服务器弹药请求数量减少弹药数量，用来纠正因为网络延迟导致的弹药数量错误
+
+	SetHUDAmmo();
 }
 
 void AWeapon::SetHUDAmmo()
@@ -259,16 +300,6 @@ void AWeapon::SetHUDAmmo()
 			BlasterOwnerController->SetHUDWeaponAmmo(Ammo);
 		}
 	}
-}
-
-void AWeapon::OnRep_Ammo()
-{
-	BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(GetOwner()) : BlasterOwnerCharacter;
-	if (BlasterOwnerCharacter && BlasterOwnerCharacter->GetCombat() && IsFull())
-	{
-		BlasterOwnerCharacter->GetCombat()->JumpToShotgunEnd();
-	}
-	SetHUDAmmo();
 }
 
 void AWeapon::SetWeaponState(EWeaponState State)
@@ -310,12 +341,6 @@ void AWeapon::Dropped()
 	{
 		Destroy();
 	}
-}
-
-void AWeapon::AddAmmo(int32 AmmoToAdd)
-{
-	Ammo = FMath::Clamp(Ammo - AmmoToAdd, 0, MagCapacity);
-	SetHUDAmmo();
 }
 
 FVector AWeapon::TraceEndWithScatter(const FVector& HitTarget) const

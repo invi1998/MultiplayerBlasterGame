@@ -114,8 +114,7 @@ public:
 	virtual void Fire(const FVector& HitTarget);
 	// 丢弃武器 / 死亡掉落武器
 	void Dropped();
-	void AddAmmo(int32 AmmoToAdd);
-
+	void AddAmmo(int32 Amount);
 
 	FVector TraceEndWithScatter(const FVector& HitTarget) const;	// 跟踪结束位置
 
@@ -181,15 +180,21 @@ private:
 		TSubclassOf<class ACasing> CasingClass;
 
 	// 武器子弹数量
-	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Ammo)
+	UPROPERTY(EditAnywhere)
 		int32 Ammo;
-
-	// 武器子弹数量同步
-	UFUNCTION()
-		void OnRep_Ammo();
 
 	// 扣除弹药，检测武器是否有一个有效的所有者
 	void SpendRound();
+
+	UFUNCTION(Client, Reliable)
+	void ClientUpdateAmmo(int32 ServerAmmo);
+
+	UFUNCTION(Client, Reliable)
+	void ClientAddAmmo(int32 Amount);
+
+	// 未处理的服务器弹药请求数量
+	// 在SpendRound()中增加，在ClientUpdateAmmo()中减少
+	int32 Sequence = 0;
 
 	// 武器的弹药容量
 	UPROPERTY(EditAnywhere)
