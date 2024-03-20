@@ -78,6 +78,63 @@ public:
 
 	void UpdateHUDAmmo();	// 更新HUD弹药
 
+	/*
+	 * 用于服务端倒带的命中盒子
+	 */
+	UPROPERTY(VisibleAnywhere)
+	class UBoxComponent* head;	// 头盒子
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* pelvis;	// 骨盆盒子
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* spine_02;	// 脊椎盒子
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* spine_03;	// 脊椎盒子
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* upperarm_l;	// 上臂盒子 左
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* upperarm_r;	// 上臂盒子 右
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* lowerarm_l;	// 下臂盒子 左
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* lowerarm_r;	// 下臂盒子 右
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* hand_l;	// 手臂盒子 左
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* hand_r;	// 手臂盒子 右
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* backpack;	// 背包
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* blanket;	// 背包毯子
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* thigh_l;	// 大腿盒子 左
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* thigh_r;	// 大腿盒子 右
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* calf_l;	// 小腿 左
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* calf_r;	// 小腿 右
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* foot_l;	// 脚盒子 左
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* foot_r;	// 脚盒子 右
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
