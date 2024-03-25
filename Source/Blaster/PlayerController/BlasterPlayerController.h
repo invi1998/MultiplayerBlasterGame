@@ -35,6 +35,7 @@ public:
 
 	void OnMatchStateSet(FName state);	// 当游戏状态发生变化时，调用该函数
 
+	float SingleTripTime = 0.0f;	// 单程时间
 
 protected:
 	virtual void BeginPlay() override;	// 当游戏开始时，调用该函数
@@ -75,7 +76,7 @@ protected:
 		void ClientJoinMidGame(FName StateOfMatch, float Warmup, float Match, float Cooldown, float StartingTime);	// 客户端在游戏中途加入
 
 
-	void HightPingWarning();	// 高延迟警告
+	void HighPingWarning();	// 高延迟警告
 
 	void StopHighPingWarning();	// 停止高延迟警告
 

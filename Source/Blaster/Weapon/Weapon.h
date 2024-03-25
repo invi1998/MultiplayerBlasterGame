@@ -131,9 +131,16 @@ protected:
 
 	virtual void OnEquippedSecondary();
 
+	// 武器的所有者
+	UPROPERTY()
+	class ABlasterCharacter* BlasterOwnerCharacter;
+
+	// 武器的控制器
+	UPROPERTY()
+	class ABlasterPlayerController* BlasterOwnerController;
 
 	UFUNCTION()
-		virtual void OnSphereOverlap(
+	virtual void OnSphereOverlap(
 			UPrimitiveComponent* OverlappedComponent,	// 原始组件
 			AActor* OtherActor,
 			UPrimitiveComponent* OtherComp,
@@ -143,45 +150,51 @@ protected:
 		);
 
 	UFUNCTION()
-		void OnSphereEndOverlap(
+	void OnSphereEndOverlap(
 			UPrimitiveComponent* OverlappedComponent,	// 原始组件
 			AActor* OtherActor,
 			UPrimitiveComponent* OtherComp,
 			int32 OtherBodyIndex
 		);
 
+	UPROPERTY(EditAnywhere)
+	float Damage = 20.f;
+
+	UPROPERTY(EditAnywhere)
+	bool bUseServerSideRewind = true;		// 是否使用服务器端倒带
+
 private:
 	// 武器骨架网格
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
-		USkeletalMeshComponent* WeaponMesh;
+	USkeletalMeshComponent* WeaponMesh;
 
 	// 武器碰撞体
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
-		class USphereComponent* AreaSphere;
+	class USphereComponent* AreaSphere;
 
 	// 武器状态
 	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "Weapon Properties")
-		EWeaponState WeaponState;
+	EWeaponState WeaponState;
 
 	// 武器拾取的Widget组件
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
-		class UWidgetComponent* PickupWidget;
+	class UWidgetComponent* PickupWidget;
 
 	// 武器状态同步
 	UFUNCTION()
-		void OnRep_WeaponState();
+	void OnRep_WeaponState();
 
 	// 武器开火动画
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
-		class UAnimationAsset* FireAnimation;
+	class UAnimationAsset* FireAnimation;
 
 	// 武器准心
 	UPROPERTY(EditAnywhere)
-		TSubclassOf<class ACasing> CasingClass;
+	TSubclassOf<class ACasing> CasingClass;
 
 	// 武器子弹数量
 	UPROPERTY(EditAnywhere)
-		int32 Ammo;
+	int32 Ammo;
 
 	// 扣除弹药，检测武器是否有一个有效的所有者
 	void SpendRound();
@@ -198,19 +211,11 @@ private:
 
 	// 武器的弹药容量
 	UPROPERTY(EditAnywhere)
-		int32 MagCapacity;
-
-	// 武器的所有者
-	UPROPERTY()
-		class ABlasterCharacter* BlasterOwnerCharacter;
-
-	// 武器的控制器
-	UPROPERTY()
-		class ABlasterPlayerController* BlasterOwnerController;
+	int32 MagCapacity;
 
 	// 武器类型
 	UPROPERTY(EditAnywhere)
-		EWeaponType WeaponType;
+	EWeaponType WeaponType;
 
 public:
 	// Called every frame
@@ -231,4 +236,6 @@ public:
 
 	FORCEINLINE int32 GetAmmo() const { return Ammo; }
 	FORCEINLINE int32 GetMagCapacity() const { return MagCapacity; }
+
+	FORCEINLINE float GetDamage() const { return Damage; }
 };

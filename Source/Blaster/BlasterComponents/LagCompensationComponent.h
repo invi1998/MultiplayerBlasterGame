@@ -64,6 +64,9 @@ public:
 
 	FServerSideRewindResult ServerSideRewind(class ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart,  const FVector_NetQuantize& HitLocation, float HitTime);	// 服务器端倒带，传入命中角色，射线起始位置，命中位置，命中时间
 
+	UFUNCTION(Server, Reliable)
+	void ServerScoreRequest(class ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime, class AWeapon* DamageCauser);	// 服务器端请求得分，传入命中角色，射线起始位置，命中位置，命中时间, 伤害来源
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -81,6 +84,7 @@ protected:
 
 	void EnableCharacterMeshCollision(ABlasterCharacter* HitCharacter, ECollisionEnabled::Type Collision);	// 启用角色碰撞，传入命中角色，是否启用
 
+	void SaveFramePackage();	// 保存帧数据到历史记录
 private:
 	UPROPERTY()
 	ABlasterCharacter* Character;	// 拥有该组件的角色

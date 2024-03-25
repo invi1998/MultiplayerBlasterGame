@@ -19,7 +19,7 @@ public:
 
 protected:
 
-	void WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit);
+	void WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit) const;
 
 protected:
 	UPROPERTY(EditAnywhere)
@@ -27,9 +27,6 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 		USoundCue* HitSound;
-
-	UPROPERTY(EditAnywhere)
-		float Damage = 20.f;
 
 private:
 

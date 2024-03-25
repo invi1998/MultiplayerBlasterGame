@@ -210,13 +210,13 @@ void ABlasterPlayerController::HandleCooldown()
 	if (BlasterHUD)
 	{
 		BlasterHUD->CharacterOverlay->RemoveFromParent();
-		bool bHUDValid = BlasterHUD->Announcement &&
+		const bool bHUDValid = BlasterHUD->Announcement &&
 			BlasterHUD->Announcement->AnnouncementText && 
 			BlasterHUD->Announcement->InfoText;
 		if (bHUDValid)
 		{
 			BlasterHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
-			FString AnnouncementText("New Match Starts In:");
+			const FString AnnouncementText("New Match Starts In:");
 			BlasterHUD->Announcement->AnnouncementText->SetText(FText::FromString(AnnouncementText));
 
 			ABlasterGameState* BlasterGameState = Cast<ABlasterGameState>(UGameplayStatics::GetGameState(this));
@@ -261,7 +261,7 @@ void ABlasterPlayerController::HandleCooldown()
 
 }
 
-void ABlasterPlayerController::HightPingWarning()
+void ABlasterPlayerController::HighPingWarning()
 {
 	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 	bool bHUDValid = BlasterHUD &&
@@ -304,7 +304,7 @@ void ABlasterPlayerController::CheckHighPing(float DeltaSeconds)
 		{
 			if (PlayerState->GetPingInMilliseconds() > HighPingThreshold)
 			{
-				HightPingWarning();
+				HighPingWarning();
 				PingAnimationRunningTime = 0;
 			}
 			/*else
@@ -358,20 +358,20 @@ void ABlasterPlayerController::ServerCheckMatchState_Implementation()
 	}
 }
 
-void ABlasterPlayerController::ClientReportServerTime_Implementation(float TimeOfClientRequest,
-                                                                     float TimeServerReceivedClientRequest)
+void ABlasterPlayerController::ClientReportServerTime_Implementation(float TimeOfClientRequest, float TimeServerReceivedClientRequest)
 {
 	// 通信往返时间
-	float RoundTripTime = GetWorld()->GetTimeSeconds() - TimeOfClientRequest;
+	const float RoundTripTime = GetWorld()->GetTimeSeconds() - TimeOfClientRequest;
+	SingleTripTime = RoundTripTime * 0.5f;
 	// 计算服务器当前时间
-	float CurrentServerTime = TimeServerReceivedClientRequest + (0.5f * RoundTripTime);
+	const float CurrentServerTime = TimeServerReceivedClientRequest + SingleTripTime;
 
 	ClientServerDelta = CurrentServerTime - GetWorld()->GetTimeSeconds();
 }
 
 void ABlasterPlayerController::ServerRequestServerTime_Implementation(float TimeOfClientRequest)
 {
-	float ServerTimeOfReceipt = GetWorld()->GetTimeSeconds();
+	const float ServerTimeOfReceipt = GetWorld()->GetTimeSeconds();
 	ClientReportServerTime(TimeOfClientRequest, ServerTimeOfReceipt);
 }
 

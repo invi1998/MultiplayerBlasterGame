@@ -4,7 +4,9 @@
 #include "LagCompensationComponent.h"
 
 #include "Blaster/Character/BlasterCharacter.h"
+#include "Blaster/Weapon/Weapon.h"
 #include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 ULagCompensationComponent::ULagCompensationComponent()
 {
@@ -172,11 +174,9 @@ void ULagCompensationComponent::EnableCharacterMeshCollision(ABlasterCharacter* 
 	HitCharacter->GetMesh()->SetCollisionEnabled(Collision);	// 设置角色的碰撞
 }
 
-
-// Called every frame
-void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void ULagCompensationComponent::SaveFramePackage()
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	if (Character == nullptr || !Character->HasAuthority()) return;		// 如果角色为空或者不是服务器，就直接返回
 
 	if (FrameHistory.Num() <= 1)
 	{
@@ -199,8 +199,17 @@ void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 		SaveFramePackage(ThisFramePackage);
 		FrameHistory.AddHead(ThisFramePackage);
 
-		ShowFramePackage(ThisFramePackage, FColor::Red);	// 显示当前帧数据
+		// ShowFramePackage(ThisFramePackage, FColor::Red);	// 显示当前帧数据
 	}
+}
+
+
+// Called every frame
+void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	SaveFramePackage();	// 保存帧数据
 	
 }
 
@@ -283,5 +292,24 @@ FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(ABlasterChar
 	}
 
 	return CheckHit(RewindFramePackage, HitCharacter, TraceStart, HitLocation);	// 检查命中
+}
+
+void ULagCompensationComponent::ServerScoreRequest_Implementation(ABlasterCharacter* HitCharacter,
+	const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime, AWeapon* DamageCauser)
+{
+	if (HitCharacter == nullptr) return;
+
+	FServerSideRewindResult Result = ServerSideRewind(HitCharacter, TraceStart, HitLocation, HitTime);	// 服务器端倒带
+	if (Result.bHitConfirmed && DamageCauser)
+	{
+		// 如果命中确认，就处理伤害
+		UGameplayStatics::ApplyDamage(
+			HitCharacter,	// 受击角色
+			DamageCauser->GetDamage(), // 伤害值
+			Character->Controller,	// 伤害来源
+			DamageCauser,	// 伤害来源
+			UDamageType::StaticClass()	// 伤害类型
+			);
+	}
 }
 

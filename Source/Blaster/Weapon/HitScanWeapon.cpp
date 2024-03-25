@@ -2,8 +2,11 @@
 
 
 #include "HitScanWeapon.h"
+
+#include "Blaster/BlasterComponents/LagCompensationComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Blaster/Character/BlasterCharacter.h"
+#include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
@@ -35,15 +38,38 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 		{
 
 			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());
-			if (BlasterCharacter && HasAuthority() && InstigatorController)
+			if (BlasterCharacter && InstigatorController)
 			{
-				UGameplayStatics::ApplyDamage(
-					BlasterCharacter,
-					Damage,
-					InstigatorController,
-					this,
-					UDamageType::StaticClass()
-				);
+				// 如果是服务器，并且客户端不使用服务器倒带，那么就直接造成伤害
+				if (HasAuthority() && !bUseServerSideRewind)
+				{
+					UGameplayStatics::ApplyDamage(
+						BlasterCharacter,
+						Damage,
+						InstigatorController,
+						this,
+						UDamageType::StaticClass()
+					);
+				}
+
+				if (!HasAuthority() && bUseServerSideRewind)
+				{
+					// 如果是客户端，并且使用服务器倒带，那么就请求服务器倒带，让服务器在倒带时间点重新计算伤害
+					BlasterOwnerCharacter = BlasterOwnerCharacter ? BlasterOwnerCharacter : Cast<ABlasterCharacter>(OwnerPawn);
+					BlasterOwnerController = BlasterOwnerController ? BlasterOwnerController : Cast<ABlasterPlayerController>(InstigatorController);
+
+					if (BlasterOwnerCharacter && BlasterOwnerController && BlasterOwnerCharacter->GetLagCompensation())
+					{
+						BlasterOwnerCharacter->GetLagCompensation()->ServerScoreRequest(
+							BlasterCharacter,
+							Start,
+							HitTarget,
+							BlasterOwnerController->GetServerTime() - BlasterOwnerController->SingleTripTime,	// 服务器时间 - 单程时间，因为数据通信也是要时间的，所以要减去单程时间，才是我们希望服务器倒带的真实时间点
+							this);
+					}
+				}
+
+				
 			}
 
 			if (ImpactParticles)
@@ -85,7 +111,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 	}
 }
 
-void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit)
+void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit) const
 {
 	UWorld* World = GetWorld();
 
