@@ -58,6 +58,120 @@ FFramePackage ULagCompensationComponent::InterpolateFrame(const FFramePackage& O
 	return InterpolatedFrame;
 }
 
+FServerSideRewindResult ULagCompensationComponent::CheckHit(const FFramePackage& FramePackage,
+	ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation)
+{
+	FServerSideRewindResult Result;
+	Result.bHitConfirmed = false;
+	Result.bHeadShot = false;
+
+	if (HitCharacter == nullptr) return Result;
+
+	FFramePackage CurrentFrame;
+	CacheBoxPosition(HitCharacter, CurrentFrame);	// 缓存当前帧数据
+	MoveBoxes(HitCharacter, FramePackage);	// 移动命中角色的命中框
+	EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::NoCollision);	// 关闭角色的碰撞
+
+	// 首先启用命中框的碰撞，然后进行射线检测
+	UBoxComponent* HeadBox = HitCharacter->HitCollisionBoxes[FName("head")];
+	HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	HeadBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);	// 设置碰撞响应
+
+	FHitResult HitResult;	// 射线检测
+	const FVector TraceEnd = TraceStart + (HitLocation - TraceStart) * 1.25f;	// 射线终点
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility);	// 射线检测
+
+		if (HitResult.bBlockingHit)		// 命中
+		{
+			ResetHitBoxes(HitCharacter, CurrentFrame);	// 重置命中框
+			EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);	// 启用角色的碰撞
+			Result.bHitConfirmed = true;	// 命中确认
+			Result.bHeadShot = true;	// 判断是否是爆头
+		}
+		else
+		{
+			for (auto& BoxPair : HitCharacter->HitCollisionBoxes)
+			{
+				if (BoxPair.Value != nullptr)
+				{
+					BoxPair.Value->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);	// 启用命中框的碰撞
+					BoxPair.Value->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);	// 设置碰撞响应
+				}
+			}
+
+			World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility);	// 射线检测
+			if (HitResult.bBlockingHit)		// 命中
+			{
+				ResetHitBoxes(HitCharacter, CurrentFrame);	// 重置命中框
+				EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);	// 启用角色的碰撞
+				Result.bHitConfirmed = true;	// 命中确认
+				Result.bHeadShot = false;	// 判断是否是爆头
+				return Result;
+			}
+		}
+	}
+
+	return Result;
+}
+
+void ULagCompensationComponent::CacheBoxPosition(ABlasterCharacter* HitCharacter, FFramePackage& OutFramePackage)
+{
+	if (HitCharacter == nullptr) return;
+
+	for(auto& BoxPair : HitCharacter->HitCollisionBoxes)
+	{
+		FBoxInformation BoxInfo;
+		BoxInfo.Location = BoxPair.Value->GetComponentLocation();
+		BoxInfo.Extent = BoxPair.Value->GetScaledBoxExtent();
+		BoxInfo.Rotation = BoxPair.Value->GetComponentRotation();
+		OutFramePackage.HitBoxInfo.Add(BoxPair.Key, BoxInfo);
+	}
+}
+
+void ULagCompensationComponent::MoveBoxes(ABlasterCharacter* HitCharacter, const FFramePackage& FramePackage)
+{
+	if (HitCharacter == nullptr) return;
+
+	for(auto& BoxPair : FramePackage.HitBoxInfo)		// 遍历帧数据
+	{
+		UBoxComponent* BoxComponent = HitCharacter->HitCollisionBoxes[BoxPair.Key];	// 获取命中框
+		if (BoxComponent)
+		{
+			BoxComponent->SetWorldLocation(BoxPair.Value.Location);		// 设置命中框的位置
+			BoxComponent->SetWorldRotation(BoxPair.Value.Rotation);		// 设置命中框的旋转
+			BoxComponent->SetBoxExtent(BoxPair.Value.Extent);			// 设置命中框的大小
+		}
+	}
+}
+
+void ULagCompensationComponent::ResetHitBoxes(ABlasterCharacter* HitCharacter, const FFramePackage& FramePackage)
+{
+	if (HitCharacter == nullptr) return;
+
+	for (auto& BoxPair : FramePackage.HitBoxInfo)		// 遍历帧数据
+	{
+		UBoxComponent* BoxComponent = HitCharacter->HitCollisionBoxes[BoxPair.Key];	// 获取命中框
+		if (BoxComponent)
+		{
+			BoxComponent->SetWorldLocation(BoxPair.Value.Location);		// 设置命中框的位置
+			BoxComponent->SetWorldRotation(BoxPair.Value.Rotation);		// 设置命中框的旋转
+			BoxComponent->SetBoxExtent(BoxPair.Value.Extent);			// 设置命中框的大小
+			BoxComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);	// 禁用命中框的碰撞
+		}
+	}
+}
+
+void ULagCompensationComponent::EnableCharacterMeshCollision(ABlasterCharacter* HitCharacter,
+	ECollisionEnabled::Type Collision)
+{
+	if (HitCharacter == nullptr || HitCharacter->GetMesh() == nullptr) return;
+
+	HitCharacter->GetMesh()->SetCollisionEnabled(Collision);	// 设置角色的碰撞
+}
+
 
 // Called every frame
 void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -108,12 +222,14 @@ void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, c
 	}
 }
 
-void ULagCompensationComponent::ServerSideRewind(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart,
+FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart,
 	const FVector_NetQuantize& HitLocation, float HitTime)
 {
 	bool bReturn = HitCharacter == nullptr ||
 		HitCharacter->GetLagCompensation() == nullptr ||
 		HitCharacter->GetLagCompensation()->FrameHistory.Num() == 0;
+
+	if (bReturn) return FServerSideRewindResult();
 
 	FFramePackage RewindFramePackage;	// 用于存储倒带的帧数据
 	bool bLerp = true;	// 是否插值，如果命中时间在两帧数据之间，就需要插值，如果命中时间等于某一帧数据的时间，就不需要插值
@@ -121,7 +237,7 @@ void ULagCompensationComponent::ServerSideRewind(ABlasterCharacter* HitCharacter
 	// 获取当前受击角色的历史帧数据
 	const TDoubleLinkedList<FFramePackage>& FrameHistory = HitCharacter->GetLagCompensation()->FrameHistory;
 	const float OldestHitTime = FrameHistory.GetTail()->GetValue().Time;	// 获取最老的帧数据的时间
-	if (OldestHitTime > HitTime) return;	// 如果最老的帧数据的时间大于命中时间，就直接返回（超出了倒带时间）
+	if (OldestHitTime > HitTime) return FServerSideRewindResult();	// 如果最老的帧数据的时间大于命中时间，就直接返回（超出了倒带时间）
 
 	if (OldestHitTime == HitTime)	// 如果最老的帧数据的时间等于命中时间，就直接获取最老的帧数据
 	{
@@ -166,8 +282,6 @@ void ULagCompensationComponent::ServerSideRewind(ABlasterCharacter* HitCharacter
 		RewindFramePackage = InterpolateFrame(YoungerNode->GetValue(), OlderNode->GetValue(), HitTime);
 	}
 
-	if (bReturn) return;
-
-
+	return CheckHit(RewindFramePackage, HitCharacter, TraceStart, HitLocation);	// 检查命中
 }
 

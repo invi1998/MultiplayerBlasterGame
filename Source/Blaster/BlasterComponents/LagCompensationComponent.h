@@ -33,6 +33,19 @@ struct FFramePackage
 	TMap<FName, FBoxInformation> HitBoxInfo;	// 命中框信息
 };
 
+USTRUCT(BlueprintType)
+struct FServerSideRewindResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	bool bHitConfirmed;	// 命中确认
+
+	UPROPERTY()
+	bool bHeadShot;		// 是否是爆头
+
+};
+
 // 处理玩家延迟的组件（服务器倒带）
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -49,7 +62,7 @@ public:
 
 	void ShowFramePackage(const FFramePackage& Package, const FColor& Color);	// 显示帧数据
 
-	void ServerSideRewind(class ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart,  const FVector_NetQuantize& HitLocation, float HitTime);	// 服务器端倒带，传入命中角色，射线起始位置，命中位置，命中时间
+	FServerSideRewindResult ServerSideRewind(class ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart,  const FVector_NetQuantize& HitLocation, float HitTime);	// 服务器端倒带，传入命中角色，射线起始位置，命中位置，命中时间
 
 protected:
 	virtual void BeginPlay() override;
@@ -57,6 +70,16 @@ protected:
 	void SaveFramePackage(FFramePackage& Package);		// 保存帧数据
 
 	FFramePackage InterpolateFrame(const FFramePackage& OlderFrame, const FFramePackage& NewerFrame, float HitTime);	// 插值帧数据
+
+	FServerSideRewindResult CheckHit(const FFramePackage& FramePackage, ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation);	// 检查命中，传入帧数据，命中角色，射线起始位置，命中位置
+
+	void CacheBoxPosition(ABlasterCharacter* HitCharacter, FFramePackage& OutFramePackage);	// 缓存命中框位置，传入命中角色，输出帧数据
+
+	void MoveBoxes(ABlasterCharacter* HitCharacter, const FFramePackage& FramePackage);	// 移动命中框，传入命中角色，帧数据
+
+	void ResetHitBoxes(ABlasterCharacter* HitCharacter, const FFramePackage& FramePackage);	// 重置命中框，传入命中角色, 帧数据
+
+	void EnableCharacterMeshCollision(ABlasterCharacter* HitCharacter, ECollisionEnabled::Type Collision);	// 启用角色碰撞，传入命中角色，是否启用
 
 private:
 	UPROPERTY()
