@@ -227,6 +227,9 @@ private:
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
 
+	UPROPERTY(VisibleAnywhere)
+	class ULagCompensationComponent* LagCompensation;		// 服务端倒带组件（延迟补偿组件）
+
 	float AO_Yaw;	// 目标偏移量 yaw 轴
 	float InterpAO_Yaw;	// 插值目标偏移量 yaw 轴
 

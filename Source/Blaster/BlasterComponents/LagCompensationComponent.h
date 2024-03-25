@@ -6,6 +6,32 @@
 #include "Components/ActorComponent.h"
 #include "LagCompensationComponent.generated.h"
 
+USTRUCT(BlueprintType)
+struct FBoxInformation
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FVector Location;	// 位置
+
+	UPROPERTY()
+	FVector Extent;		// 大小
+
+	UPROPERTY()
+	FRotator Rotation;	// 旋转
+};
+
+// 用于存储每一帧的数据（存储命中框信息的数据结构）
+USTRUCT(BlueprintType)
+struct FFramePackage
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	float Time;		// 命中时间
+
+	TMap<FName, FBoxInformation> HitBoxInfo;	// 命中框信息
+};
 
 // 处理玩家延迟的组件（服务器倒带）
 
@@ -16,9 +42,19 @@ class BLASTER_API ULagCompensationComponent : public UActorComponent
 
 public:	
 	ULagCompensationComponent();
+
+	friend class ABlasterCharacter;
+
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 protected:
 	virtual void BeginPlay() override;
+
+private:
+	UPROPERTY()
+	ABlasterCharacter* Character;	// 拥有该组件的角色
+
+	UPROPERTY()
+	class ABlasterPlayerController* Controller;	// 玩家控制器
 
 };

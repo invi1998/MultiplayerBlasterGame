@@ -13,6 +13,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Blaster/Blaster.h"
+#include "Blaster/BlasterComponents/LagCompensationComponent.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Blaster/GameMode/BlasterGameMode.h"
 #include "Blaster/PlayerState/BlasterPlayerState.h"
@@ -62,6 +63,9 @@ ABlasterCharacter::ABlasterCharacter()
 	// BUFF组件
 	Buff = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
 	Buff->SetIsReplicated(true);	// 设置BUFF组件为可复制
+
+	// 服务端倒带组件
+	LagCompensation = CreateDefaultSubobject<ULagCompensationComponent>(TEXT("LagCompensation"));
 
 	// 设置角色可蹲伏（也可以在UE编辑器中勾选）
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
@@ -355,6 +359,14 @@ void ABlasterCharacter::PostInitializeComponents()
 		Buff->SetInitialSpeed(GetCharacterMovement()->MaxWalkSpeed, GetCharacterMovement()->MaxWalkSpeedCrouched);
 
 		Buff->SetInitialJumpZVelocity(GetCharacterMovement()->JumpZVelocity);	// 设置初始跳跃速度
+	}
+	if (LagCompensation)
+	{
+		LagCompensation->Character = this;
+		if (Controller)
+		{
+			LagCompensation->Controller = Cast<ABlasterPlayerController>(Controller);
+		}
 	}
 }
 
