@@ -61,4 +61,9 @@ private:
 	UPROPERTY()
 	class ABlasterPlayerController* Controller;	// 玩家控制器
 
+	TDoubleLinkedList<FFramePackage> FrameHistory;	// 历史帧数据链表
+
+	UPROPERTY(EditAnywhere)
+	float MaxRecordTime = 5.0f;	// 最大记录时间
+
 };
