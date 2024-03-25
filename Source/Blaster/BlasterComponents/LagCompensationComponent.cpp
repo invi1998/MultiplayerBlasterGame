@@ -37,6 +37,27 @@ void ULagCompensationComponent::SaveFramePackage(FFramePackage& Package)
 	}
 }
 
+FFramePackage ULagCompensationComponent::InterpolateFrame(const FFramePackage& OlderFrame,
+	const FFramePackage& NewerFrame, float HitTime)
+{
+	FFramePackage InterpolatedFrame;
+	const float Alpha = FMath::Clamp((HitTime - OlderFrame.Time) / (NewerFrame.Time - OlderFrame.Time), 0.f, 1.f);	// 插值公式：(HitTime - OlderFrame.Time) / (NewerFrame.Time - OlderFrame.Time)
+	for(auto& BoxPair : OlderFrame.HitBoxInfo)
+	{
+		const FBoxInformation& OlderBoxInfo = BoxPair.Value;
+		const FBoxInformation& NewerBoxInfo = NewerFrame.HitBoxInfo[BoxPair.Key];
+
+		FBoxInformation InterpolatedBoxInfo;
+		InterpolatedBoxInfo.Location = FMath::Lerp(OlderBoxInfo.Location, NewerBoxInfo.Location, Alpha);
+		InterpolatedBoxInfo.Extent = FMath::Lerp(OlderBoxInfo.Extent, NewerBoxInfo.Extent, Alpha);
+		InterpolatedBoxInfo.Rotation = FMath::Lerp(OlderBoxInfo.Rotation, NewerBoxInfo.Rotation, Alpha);
+
+		InterpolatedFrame.HitBoxInfo.Add(BoxPair.Key, InterpolatedBoxInfo);
+	}
+
+	return InterpolatedFrame;
+}
+
 
 // Called every frame
 void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -142,19 +163,7 @@ void ULagCompensationComponent::ServerSideRewind(ABlasterCharacter* HitCharacter
 	if (bLerp)
 	{
 		// 如果需要插值，就进行插值，插值公式：(HitTime - YoungerNode->GetValue().Time) / (OlderNode->GetValue().Time - YoungerNode->GetValue().Time)
-		const float Alpha = (HitTime - YoungerNode->GetValue().Time) / (OlderNode->GetValue().Time - YoungerNode->GetValue().Time);
-		for(auto& BoxPair : YoungerNode->GetValue().HitBoxInfo)
-		{
-			const FBoxInformation& YoungerBoxInfo = BoxPair.Value;
-			const FBoxInformation& OlderBoxInfo = OlderNode->GetValue().HitBoxInfo[BoxPair.Key];
-
-			FBoxInformation RewindBoxInfo;
-			RewindBoxInfo.Location = FMath::Lerp(YoungerBoxInfo.Location, OlderBoxInfo.Location, Alpha);
-			RewindBoxInfo.Extent = FMath::Lerp(YoungerBoxInfo.Extent, OlderBoxInfo.Extent, Alpha);
-			RewindBoxInfo.Rotation = FMath::Lerp(YoungerBoxInfo.Rotation, OlderBoxInfo.Rotation, Alpha);
-
-			RewindFramePackage.HitBoxInfo.Add(BoxPair.Key, RewindBoxInfo);
-		}
+		RewindFramePackage = InterpolateFrame(YoungerNode->GetValue(), OlderNode->GetValue(), HitTime);
 	}
 
 	if (bReturn) return;

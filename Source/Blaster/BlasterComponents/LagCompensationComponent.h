@@ -56,6 +56,8 @@ protected:
 
 	void SaveFramePackage(FFramePackage& Package);		// 保存帧数据
 
+	FFramePackage InterpolateFrame(const FFramePackage& OlderFrame, const FFramePackage& NewerFrame, float HitTime);	// 插值帧数据
+
 private:
 	UPROPERTY()
 	ABlasterCharacter* Character;	// 拥有该组件的角色
