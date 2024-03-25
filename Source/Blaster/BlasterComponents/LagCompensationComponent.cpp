@@ -235,25 +235,25 @@ FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(ABlasterChar
 	bool bLerp = true;	// 是否插值，如果命中时间在两帧数据之间，就需要插值，如果命中时间等于某一帧数据的时间，就不需要插值
 
 	// 获取当前受击角色的历史帧数据
-	const TDoubleLinkedList<FFramePackage>& FrameHistory = HitCharacter->GetLagCompensation()->FrameHistory;
-	const float OldestHitTime = FrameHistory.GetTail()->GetValue().Time;	// 获取最老的帧数据的时间
+	const TDoubleLinkedList<FFramePackage>& HistoryFrame = HitCharacter->GetLagCompensation()->FrameHistory;
+	const float OldestHitTime = HistoryFrame.GetTail()->GetValue().Time;	// 获取最老的帧数据的时间
 	if (OldestHitTime > HitTime) return FServerSideRewindResult();	// 如果最老的帧数据的时间大于命中时间，就直接返回（超出了倒带时间）
 
 	if (OldestHitTime == HitTime)	// 如果最老的帧数据的时间等于命中时间，就直接获取最老的帧数据
 	{
-		RewindFramePackage = FrameHistory.GetTail()->GetValue();
+		RewindFramePackage = HistoryFrame.GetTail()->GetValue();
 		bLerp = false;
 	}
 
-	const float NewestHitTime = FrameHistory.GetHead()->GetValue().Time;	// 获取最新的帧数据的时间
+	const float NewestHitTime = HistoryFrame.GetHead()->GetValue().Time;	// 获取最新的帧数据的时间
 	if (NewestHitTime <= HitTime)
 	{
 		// 如果最新的帧数据的时间小于等于命中时间，存储最新的帧数据
-		RewindFramePackage = FrameHistory.GetHead()->GetValue();
+		RewindFramePackage = HistoryFrame.GetHead()->GetValue();
 		bLerp = false;
 	}
 
-	TDoubleLinkedList<FFramePackage>::TDoubleLinkedListNode* YoungerNode = FrameHistory.GetHead();		// 获取最新的帧数据
+	TDoubleLinkedList<FFramePackage>::TDoubleLinkedListNode* YoungerNode = HistoryFrame.GetHead();		// 获取最新的帧数据
 	TDoubleLinkedList<FFramePackage>::TDoubleLinkedListNode* OlderNode = YoungerNode;	// 获取次新的帧数据
 
 	// 循环遍历历史帧数据，找到命中时间对应的帧数据（命中时间在两帧数据之间，因为float精度问题，可能不会命中）OlderNode->GetValue().Time > HitTime && YoungerNode->GetValue().Time <= HitTime
