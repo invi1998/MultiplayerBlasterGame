@@ -49,6 +49,8 @@ public:
 
 	void ShowFramePackage(const FFramePackage& Package, const FColor& Color);	// 显示帧数据
 
+	void ServerSideRewind(class ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart,  const FVector_NetQuantize& HitLocation, float HitTime);	// 服务器端倒带，传入命中角色，射线起始位置，命中位置，命中时间
+
 protected:
 	virtual void BeginPlay() override;
 

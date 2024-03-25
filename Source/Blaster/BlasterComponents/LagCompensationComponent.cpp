@@ -87,3 +87,78 @@ void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, c
 	}
 }
 
+void ULagCompensationComponent::ServerSideRewind(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart,
+	const FVector_NetQuantize& HitLocation, float HitTime)
+{
+	bool bReturn = HitCharacter == nullptr ||
+		HitCharacter->GetLagCompensation() == nullptr ||
+		HitCharacter->GetLagCompensation()->FrameHistory.Num() == 0;
+
+	FFramePackage RewindFramePackage;	// 用于存储倒带的帧数据
+	bool bLerp = true;	// 是否插值，如果命中时间在两帧数据之间，就需要插值，如果命中时间等于某一帧数据的时间，就不需要插值
+
+	// 获取当前受击角色的历史帧数据
+	const TDoubleLinkedList<FFramePackage>& FrameHistory = HitCharacter->GetLagCompensation()->FrameHistory;
+	const float OldestHitTime = FrameHistory.GetTail()->GetValue().Time;	// 获取最老的帧数据的时间
+	if (OldestHitTime > HitTime) return;	// 如果最老的帧数据的时间大于命中时间，就直接返回（超出了倒带时间）
+
+	if (OldestHitTime == HitTime)	// 如果最老的帧数据的时间等于命中时间，就直接获取最老的帧数据
+	{
+		RewindFramePackage = FrameHistory.GetTail()->GetValue();
+		bLerp = false;
+	}
+
+	const float NewestHitTime = FrameHistory.GetHead()->GetValue().Time;	// 获取最新的帧数据的时间
+	if (NewestHitTime <= HitTime)
+	{
+		// 如果最新的帧数据的时间小于等于命中时间，存储最新的帧数据
+		RewindFramePackage = FrameHistory.GetHead()->GetValue();
+		bLerp = false;
+	}
+
+	TDoubleLinkedList<FFramePackage>::TDoubleLinkedListNode* YoungerNode = FrameHistory.GetHead();		// 获取最新的帧数据
+	TDoubleLinkedList<FFramePackage>::TDoubleLinkedListNode* OlderNode = YoungerNode;	// 获取次新的帧数据
+
+	// 循环遍历历史帧数据，找到命中时间对应的帧数据（命中时间在两帧数据之间，因为float精度问题，可能不会命中）OlderNode->GetValue().Time > HitTime && YoungerNode->GetValue().Time <= HitTime
+	while (OlderNode->GetValue().Time > HitTime)	// 如果次新的帧数据的时间大于命中时间
+	{
+		if (OlderNode->GetNextNode() == nullptr)	// 如果次新的帧数据的前一个节点为空，就直接返回
+		{
+			break;
+		}
+
+		if (OlderNode->GetValue().Time > HitTime && YoungerNode->GetValue().Time <= HitTime)	// 如果次新的帧数据的时间大于命中时间，且最新的帧数据的时间小于等于命中时间
+		{
+			// 获取次新的帧数据和最新的帧数据
+			YoungerNode = OlderNode;
+		}
+	}
+	if (OlderNode->GetValue().Time == HitTime)
+	{
+		RewindFramePackage = OlderNode->GetValue();
+		bLerp = false;
+	}
+
+	if (bLerp)
+	{
+		// 如果需要插值，就进行插值，插值公式：(HitTime - YoungerNode->GetValue().Time) / (OlderNode->GetValue().Time - YoungerNode->GetValue().Time)
+		const float Alpha = (HitTime - YoungerNode->GetValue().Time) / (OlderNode->GetValue().Time - YoungerNode->GetValue().Time);
+		for(auto& BoxPair : YoungerNode->GetValue().HitBoxInfo)
+		{
+			const FBoxInformation& YoungerBoxInfo = BoxPair.Value;
+			const FBoxInformation& OlderBoxInfo = OlderNode->GetValue().HitBoxInfo[BoxPair.Key];
+
+			FBoxInformation RewindBoxInfo;
+			RewindBoxInfo.Location = FMath::Lerp(YoungerBoxInfo.Location, OlderBoxInfo.Location, Alpha);
+			RewindBoxInfo.Extent = FMath::Lerp(YoungerBoxInfo.Extent, OlderBoxInfo.Extent, Alpha);
+			RewindBoxInfo.Rotation = FMath::Lerp(YoungerBoxInfo.Rotation, OlderBoxInfo.Rotation, Alpha);
+
+			RewindFramePackage.HitBoxInfo.Add(BoxPair.Key, RewindBoxInfo);
+		}
+	}
+
+	if (bReturn) return;
+
+
+}
+

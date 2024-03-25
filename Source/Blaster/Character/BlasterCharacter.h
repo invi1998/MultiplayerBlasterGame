@@ -428,4 +428,5 @@ public:
 	FORCEINLINE float GetMaxShield() const { return MaxShield; }
 	FORCEINLINE void SetShield(float NewShield) { Shield = NewShield; }
 	bool IsLocalReloading() const;
+	FORCEINLINE ULagCompensationComponent* GetLagCompensation() const { return LagCompensation; }
 };
