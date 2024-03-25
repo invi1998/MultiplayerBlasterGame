@@ -85,6 +85,12 @@ protected:
 	void EnableCharacterMeshCollision(ABlasterCharacter* HitCharacter, ECollisionEnabled::Type Collision);	// 启用角色碰撞，传入命中角色，是否启用
 
 	void SaveFramePackage();	// 保存帧数据到历史记录
+
+	/*
+	 * 霰弹枪
+	 */
+	FFramePackage InterpolateFrameForShotgun(const FFramePackage& OlderFrame, const FFramePackage& NewerFrame, float HitTime);	// 插值帧数据
+
 private:
 	UPROPERTY()
 	ABlasterCharacter* Character;	// 拥有该组件的角色
