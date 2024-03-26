@@ -31,8 +31,12 @@ struct FFramePackage
 	float Time;		// 命中时间
 
 	TMap<FName, FBoxInformation> HitBoxInfo;	// 命中框信息
+
+	UPROPERTY()
+	ABlasterCharacter* HitCharacter;	// 命中角色
 };
 
+// 普通武器的服务端倒带结果
 USTRUCT(BlueprintType)
 struct FServerSideRewindResult
 {
@@ -44,6 +48,19 @@ struct FServerSideRewindResult
 	UPROPERTY()
 	bool bHeadShot;		// 是否是爆头
 
+};
+
+// 霰弹枪的服务端倒带结果
+USTRUCT(BlueprintType)
+struct FServerSideRewindResult_Shotgun
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	TMap<ABlasterCharacter*, uint32> HeadShots;		// 爆头次数
+
+	UPROPERTY()
+	TMap<ABlasterCharacter*, uint32> BodyShots;		// 身体命中次数
 };
 
 // 处理玩家延迟的组件（服务器倒带）
@@ -86,10 +103,15 @@ protected:
 
 	void SaveFramePackage();	// 保存帧数据到历史记录
 
+	FFramePackage GetFrameToCheck(const ABlasterCharacter* HitCharacter, float HitTime);	// 获取用于检查的帧数据，传入命中角色，命中时间
+
 	/*
 	 * 霰弹枪
 	 */
-	FFramePackage GetFrameToCheck(const ABlasterCharacter* HitCharacter, float HitTime);	// 插值帧数据
+	FServerSideRewindResult_Shotgun ServerSideRewind_Shotgun(const TArray<ABlasterCharacter*>& HitCharacters, const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations, float HitTime);	// 服务器端倒带，传入命中角色，射线起始位置，命中位置，命中时间
+
+	FServerSideRewindResult_Shotgun CheckHit_Shotgun(const TArray<FFramePackage>& FramePackages, const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations);	// 检查命中，传入帧数据，命中角色，射线起始位置，命中位置
+
 
 private:
 	UPROPERTY()

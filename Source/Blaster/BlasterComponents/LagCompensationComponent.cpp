@@ -28,6 +28,7 @@ void ULagCompensationComponent::SaveFramePackage(FFramePackage& Package)
 	if (Character)
 	{
 		Package.Time = GetWorld()->TimeSeconds;
+		Package.HitCharacter = Character;
 		for(auto& BoxPair : Character->HitCollisionBoxes)
 		{
 			FBoxInformation BoxInfo;
@@ -247,7 +248,7 @@ FFramePackage ULagCompensationComponent::GetFrameToCheck(const ABlasterCharacter
 
 	if (bReturn) return FFramePackage();
 
-	FFramePackage InterpolatedFrame;
+	FFramePackage InterpolatedFrame{};
 	bool bLerp = true;
 
 	const TDoubleLinkedList<FFramePackage>& HistoryFrame = HitCharacter->GetLagCompensation()->FrameHistory;
@@ -303,8 +304,41 @@ FFramePackage ULagCompensationComponent::GetFrameToCheck(const ABlasterCharacter
 	return InterpolatedFrame;
 }
 
+FServerSideRewindResult_Shotgun ULagCompensationComponent::ServerSideRewind_Shotgun(
+	const TArray<ABlasterCharacter*>& HitCharacters, const FVector_NetQuantize& TraceStart,
+	const TArray<FVector_NetQuantize>& HitLocations, float HitTime)
+{
+	FServerSideRewindResult_Shotgun Result{};
+
+	TArray<FFramePackage> RewindFramePackages;		// 用于存储需要检查的帧数据
+
+	for (const ABlasterCharacter* HitCharacter : HitCharacters)
+	{
+		if (HitCharacter == nullptr) continue;
+
+		const FFramePackage RewindFramePackage = GetFrameToCheck(HitCharacter, HitTime);	// 获取需要检查的帧数据
+		RewindFramePackages.Add(RewindFramePackage);
+	}
+
+
+
+	return Result;
+}
+
+FServerSideRewindResult_Shotgun ULagCompensationComponent::CheckHit_Shotgun(const TArray<FFramePackage>& FramePackages,
+	const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations)
+{
+	FServerSideRewindResult_Shotgun Result{};
+
+	if (FramePackages.Num() != HitLocations.Num()) return Result;
+
+	
+
+	return Result;
+}
+
 void ULagCompensationComponent::ServerScoreRequest_Implementation(ABlasterCharacter* HitCharacter,
-	const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime, AWeapon* DamageCauser)
+                                                                  const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime, AWeapon* DamageCauser)
 {
 	if (HitCharacter == nullptr) return;
 
