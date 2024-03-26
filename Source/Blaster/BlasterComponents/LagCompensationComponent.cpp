@@ -308,8 +308,6 @@ FServerSideRewindResult_Shotgun ULagCompensationComponent::ServerSideRewind_Shot
 	const TArray<ABlasterCharacter*>& HitCharacters, const FVector_NetQuantize& TraceStart,
 	const TArray<FVector_NetQuantize>& HitLocations, float HitTime)
 {
-	FServerSideRewindResult_Shotgun Result{};
-
 	TArray<FFramePackage> RewindFramePackages;		// 用于存储需要检查的帧数据
 
 	for (const ABlasterCharacter* HitCharacter : HitCharacters)
@@ -320,9 +318,9 @@ FServerSideRewindResult_Shotgun ULagCompensationComponent::ServerSideRewind_Shot
 		RewindFramePackages.Add(RewindFramePackage);
 	}
 
+	const FServerSideRewindResult_Shotgun RewindResult = CheckHit_Shotgun(RewindFramePackages, TraceStart, HitLocations);	// 检查命中
 
-
-	return Result;
+	return RewindResult;
 }
 
 FServerSideRewindResult_Shotgun ULagCompensationComponent::CheckHit_Shotgun(const TArray<FFramePackage>& FramePackages,
@@ -332,7 +330,17 @@ FServerSideRewindResult_Shotgun ULagCompensationComponent::CheckHit_Shotgun(cons
 
 	if (FramePackages.Num() != HitLocations.Num()) return Result;
 
-	
+	for (int32 i = 0; i < FramePackages.Num(); i++)
+	{
+		const FFramePackage& FramePackage = FramePackages[i];
+		ABlasterCharacter* HitCharacter = FramePackage.HitCharacter;
+		for (const auto HitLocation : HitLocations)
+		{
+			const FServerSideRewindResult SingleResult = CheckHit(FramePackage, HitCharacter, TraceStart, HitLocation);	// 检查命中
+			Result.HeadShots.Add(FramePackage.HitCharacter, SingleResult.bHeadShot ? Result.HeadShots[FramePackage.HitCharacter] + 1 : Result.HeadShots[FramePackage.HitCharacter]);	// 更新爆头信息
+			Result.BodyShots.Add(FramePackage.HitCharacter, SingleResult.bHitConfirmed && !SingleResult.bHeadShot ? Result.BodyShots[FramePackage.HitCharacter] + 1 : Result.BodyShots[FramePackage.HitCharacter]);	// 更新身体信息
+		}
+	}
 
 	return Result;
 }
