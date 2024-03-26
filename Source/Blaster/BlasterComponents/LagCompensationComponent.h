@@ -108,7 +108,7 @@ protected:
 
 	void SaveFramePackage();	// 保存帧数据到历史记录
 
-	FFramePackage GetFrameToCheck(const ABlasterCharacter* HitCharacter, float HitTime);	// 获取用于检查的帧数据，传入命中角色，命中时间
+	FFramePackage GetFrameToCheck(ABlasterCharacter* HitCharacter, float HitTime);	// 获取用于检查的帧数据，传入命中角色，命中时间
 
 	/*
 	 * 霰弹枪

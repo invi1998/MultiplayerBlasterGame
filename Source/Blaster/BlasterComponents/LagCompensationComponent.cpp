@@ -240,7 +240,7 @@ FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(ABlasterChar
 }
 
 
-FFramePackage ULagCompensationComponent::GetFrameToCheck(const ABlasterCharacter* HitCharacter, float HitTime)
+FFramePackage ULagCompensationComponent::GetFrameToCheck(ABlasterCharacter* HitCharacter, float HitTime)
 {
 	bool bReturn = HitCharacter == nullptr ||
 		HitCharacter->GetLagCompensation() == nullptr ||
@@ -301,6 +301,8 @@ FFramePackage ULagCompensationComponent::GetFrameToCheck(const ABlasterCharacter
 		InterpolatedFrame = InterpolateFrame(YoungerNode->GetValue(), OlderNode->GetValue(), HitTime);
 	}
 
+	InterpolatedFrame.HitCharacter = HitCharacter;
+
 	return InterpolatedFrame;
 }
 
@@ -310,7 +312,7 @@ FServerSideRewindResult_Shotgun ULagCompensationComponent::ServerSideRewind_Shot
 {
 	TArray<FFramePackage> RewindFramePackages;		// 用于存储需要检查的帧数据
 
-	for (const ABlasterCharacter* HitCharacter : HitCharacters)
+	for (ABlasterCharacter* HitCharacter : HitCharacters)
 	{
 		if (HitCharacter == nullptr) continue;
 
