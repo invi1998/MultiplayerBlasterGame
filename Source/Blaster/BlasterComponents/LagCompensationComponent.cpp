@@ -203,7 +203,6 @@ void ULagCompensationComponent::SaveFramePackage()
 	}
 }
 
-
 // Called every frame
 void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
@@ -234,64 +233,74 @@ void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, c
 FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart,
 	const FVector_NetQuantize& HitLocation, float HitTime)
 {
+	const FFramePackage RewindFramePackage = GetFrameToCheck(HitCharacter, HitTime);	// 获取需要检查的帧数据
+
+	return CheckHit(RewindFramePackage, HitCharacter, TraceStart, HitLocation);	// 检查命中
+}
+
+
+FFramePackage ULagCompensationComponent::GetFrameToCheck(const ABlasterCharacter* HitCharacter, float HitTime)
+{
 	bool bReturn = HitCharacter == nullptr ||
 		HitCharacter->GetLagCompensation() == nullptr ||
 		HitCharacter->GetLagCompensation()->FrameHistory.Num() == 0;
 
-	if (bReturn) return FServerSideRewindResult();
+	if (bReturn) return FFramePackage();
 
-	FFramePackage RewindFramePackage;	// 用于存储倒带的帧数据
-	bool bLerp = true;	// 是否插值，如果命中时间在两帧数据之间，就需要插值，如果命中时间等于某一帧数据的时间，就不需要插值
+	FFramePackage InterpolatedFrame;
+	bool bLerp = true;
 
-	// 获取当前受击角色的历史帧数据
 	const TDoubleLinkedList<FFramePackage>& HistoryFrame = HitCharacter->GetLagCompensation()->FrameHistory;
-	const float OldestHitTime = HistoryFrame.GetTail()->GetValue().Time;	// 获取最老的帧数据的时间
-	if (OldestHitTime > HitTime) return FServerSideRewindResult();	// 如果最老的帧数据的时间大于命中时间，就直接返回（超出了倒带时间）
+	const float OldestHitTime = HistoryFrame.GetTail()->GetValue().Time;
+	if (OldestHitTime > HitTime) return FFramePackage();
 
-	if (OldestHitTime == HitTime)	// 如果最老的帧数据的时间等于命中时间，就直接获取最老的帧数据
+	if (OldestHitTime == HitTime)
 	{
-		RewindFramePackage = HistoryFrame.GetTail()->GetValue();
+		// 如果最老的帧数据的时间等于命中时间，就直接获取最老的帧数据
+		InterpolatedFrame = HistoryFrame.GetTail()->GetValue();
 		bLerp = false;
 	}
 
-	const float NewestHitTime = HistoryFrame.GetHead()->GetValue().Time;	// 获取最新的帧数据的时间
+	const float NewestHitTime = HistoryFrame.GetHead()->GetValue().Time;
 	if (NewestHitTime <= HitTime)
 	{
 		// 如果最新的帧数据的时间小于等于命中时间，存储最新的帧数据
-		RewindFramePackage = HistoryFrame.GetHead()->GetValue();
+		InterpolatedFrame = HistoryFrame.GetHead()->GetValue();
 		bLerp = false;
 	}
 
-	TDoubleLinkedList<FFramePackage>::TDoubleLinkedListNode* YoungerNode = HistoryFrame.GetHead();		// 获取最新的帧数据
-	TDoubleLinkedList<FFramePackage>::TDoubleLinkedListNode* OlderNode = YoungerNode;	// 获取次新的帧数据
+	TDoubleLinkedList<FFramePackage>::TDoubleLinkedListNode* YoungerNode = HistoryFrame.GetHead();
+	TDoubleLinkedList<FFramePackage>::TDoubleLinkedListNode* OlderNode = YoungerNode;
 
 	// 循环遍历历史帧数据，找到命中时间对应的帧数据（命中时间在两帧数据之间，因为float精度问题，可能不会命中）OlderNode->GetValue().Time > HitTime && YoungerNode->GetValue().Time <= HitTime
-	while (OlderNode->GetValue().Time > HitTime)	// 如果次新的帧数据的时间大于命中时间
+	while (OlderNode->GetValue().Time > HitTime)
 	{
-		if (OlderNode->GetNextNode() == nullptr)	// 如果次新的帧数据的前一个节点为空，就直接返回
+		// next节点为空，表示到达最老的帧数据
+		if (OlderNode->GetNextNode() == nullptr)
 		{
 			break;
 		}
 
-		if (OlderNode->GetValue().Time > HitTime && YoungerNode->GetValue().Time <= HitTime)	// 如果次新的帧数据的时间大于命中时间，且最新的帧数据的时间小于等于命中时间
+		if (OlderNode->GetValue().Time > HitTime)	// 如果次新的帧数据的时间大于命中时间
 		{
-			// 获取次新的帧数据和最新的帧数据
-			YoungerNode = OlderNode;
+			YoungerNode = OlderNode;	// 节点向前移动
 		}
 	}
-	if (OlderNode->GetValue().Time == HitTime)
+
+	if (OlderNode->GetValue().Time == HitTime)	// 如果次新的帧数据的时间等于命中时间，就直接获取次新的帧数据
 	{
-		RewindFramePackage = OlderNode->GetValue();
+		// 获取次新的帧数据和最新的帧数据
+		InterpolatedFrame = OlderNode->GetValue();
 		bLerp = false;
 	}
 
 	if (bLerp)
 	{
 		// 如果需要插值，就进行插值，插值公式：(HitTime - YoungerNode->GetValue().Time) / (OlderNode->GetValue().Time - YoungerNode->GetValue().Time)
-		RewindFramePackage = InterpolateFrame(YoungerNode->GetValue(), OlderNode->GetValue(), HitTime);
+		InterpolatedFrame = InterpolateFrame(YoungerNode->GetValue(), OlderNode->GetValue(), HitTime);
 	}
 
-	return CheckHit(RewindFramePackage, HitCharacter, TraceStart, HitLocation);	// 检查命中
+	return InterpolatedFrame;
 }
 
 void ULagCompensationComponent::ServerScoreRequest_Implementation(ABlasterCharacter* HitCharacter,

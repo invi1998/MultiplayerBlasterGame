@@ -89,7 +89,7 @@ protected:
 	/*
 	 * 霰弹枪
 	 */
-	FFramePackage InterpolateFrameForShotgun(const FFramePackage& OlderFrame, const FFramePackage& NewerFrame, float HitTime);	// 插值帧数据
+	FFramePackage GetFrameToCheck(const ABlasterCharacter* HitCharacter, float HitTime);	// 插值帧数据
 
 private:
 	UPROPERTY()
