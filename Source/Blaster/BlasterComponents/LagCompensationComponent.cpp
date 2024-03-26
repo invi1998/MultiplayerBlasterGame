@@ -328,23 +328,130 @@ FServerSideRewindResult_Shotgun ULagCompensationComponent::ServerSideRewind_Shot
 FServerSideRewindResult_Shotgun ULagCompensationComponent::CheckHit_Shotgun(const TArray<FFramePackage>& FramePackages,
 	const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations)
 {
-	FServerSideRewindResult_Shotgun Result{};
+	//FServerSideRewindResult_Shotgun Result{};
 
-	if (FramePackages.Num() != HitLocations.Num()) return Result;
+	//if (FramePackages.Num() != HitLocations.Num()) return Result;
 
-	for (int32 i = 0; i < FramePackages.Num(); i++)
+	//for (int32 i = 0; i < FramePackages.Num(); i++)
+	//{
+	//	const FFramePackage& FramePackage = FramePackages[i];
+	//	ABlasterCharacter* HitCharacter = FramePackage.HitCharacter;
+	//	for (const auto HitLocation : HitLocations)
+	//	{
+	//		const FServerSideRewindResult SingleResult = CheckHit(FramePackage, HitCharacter, TraceStart, HitLocation);	// 检查命中
+	//		Result.HeadShots.Add(FramePackage.HitCharacter, SingleResult.bHeadShot ? Result.HeadShots[FramePackage.HitCharacter] + 1 : Result.HeadShots[FramePackage.HitCharacter]);	// 更新爆头信息
+	//		Result.BodyShots.Add(FramePackage.HitCharacter, SingleResult.bHitConfirmed && !SingleResult.bHeadShot ? Result.BodyShots[FramePackage.HitCharacter] + 1 : Result.BodyShots[FramePackage.HitCharacter]);	// 更新身体信息
+	//	}
+	//}
+
+	//return Result;
+
+	FServerSideRewindResult_Shotgun ShotgunResult{};
+
+	for (auto& Frame : FramePackages)
 	{
-		const FFramePackage& FramePackage = FramePackages[i];
-		ABlasterCharacter* HitCharacter = FramePackage.HitCharacter;
-		for (const auto HitLocation : HitLocations)
+		if (Frame.HitCharacter == nullptr) return ShotgunResult;
+	}
+	
+	TArray<FFramePackage> CurrentFrames;
+	for (auto& Frame : FramePackages)
+	{
+		FFramePackage CurrentFrame;
+		CurrentFrame.HitCharacter = Frame.HitCharacter;
+		CacheBoxPosition(Frame.HitCharacter, CurrentFrame);
+		MoveBoxes(Frame.HitCharacter, Frame);
+		EnableCharacterMeshCollision(Frame.HitCharacter, ECollisionEnabled::NoCollision);
+		CurrentFrames.Add(CurrentFrame);
+	}
+
+	for (auto& Frame : FramePackages)
+	{
+		// Enable collision for the head first
+		UBoxComponent* HeadBox = Frame.HitCharacter->HitCollisionBoxes[FName("head")];
+		HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		HeadBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+	}
+
+	UWorld* World = GetWorld();
+	// check for head shots
+	for (auto& HitLocation : HitLocations)
+	{
+		FHitResult ConfirmHitResult;
+		const FVector TraceEnd = TraceStart + (HitLocation - TraceStart) * 1.25f;
+		if (World)
 		{
-			const FServerSideRewindResult SingleResult = CheckHit(FramePackage, HitCharacter, TraceStart, HitLocation);	// 检查命中
-			Result.HeadShots.Add(FramePackage.HitCharacter, SingleResult.bHeadShot ? Result.HeadShots[FramePackage.HitCharacter] + 1 : Result.HeadShots[FramePackage.HitCharacter]);	// 更新爆头信息
-			Result.BodyShots.Add(FramePackage.HitCharacter, SingleResult.bHitConfirmed && !SingleResult.bHeadShot ? Result.BodyShots[FramePackage.HitCharacter] + 1 : Result.BodyShots[FramePackage.HitCharacter]);	// 更新身体信息
+			World->LineTraceSingleByChannel(
+				ConfirmHitResult,
+				TraceStart,
+				TraceEnd,
+				ECollisionChannel::ECC_Visibility
+			);
+			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(ConfirmHitResult.GetActor());
+			if (BlasterCharacter)
+			{
+				if (ShotgunResult.HeadShots.Contains(BlasterCharacter))
+				{
+					ShotgunResult.HeadShots[BlasterCharacter]++;
+				}
+				else
+				{
+					ShotgunResult.HeadShots.Emplace(BlasterCharacter, 1);
+				}
+			}
 		}
 	}
 
-	return Result;
+	// enable collision for all boxes, then disable for head box
+	for (auto& Frame : FramePackages)
+	{
+		for (auto& HitBoxPair : Frame.HitCharacter->HitCollisionBoxes)
+		{
+			if (HitBoxPair.Value != nullptr)
+			{
+				HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				HitBoxPair.Value->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+			}
+		}
+		UBoxComponent* HeadBox = Frame.HitCharacter->HitCollisionBoxes[FName("head")];
+		HeadBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	// check for body shots
+	for (auto& HitLocation : HitLocations)
+	{
+		FHitResult ConfirmHitResult;
+		const FVector TraceEnd = TraceStart + (HitLocation - TraceStart) * 1.25f;
+		if (World)
+		{
+			World->LineTraceSingleByChannel(
+				ConfirmHitResult,
+				TraceStart,
+				TraceEnd,
+				ECollisionChannel::ECC_Visibility
+			);
+			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(ConfirmHitResult.GetActor());
+			if (BlasterCharacter)
+			{
+				if (ShotgunResult.BodyShots.Contains(BlasterCharacter))
+				{
+					ShotgunResult.BodyShots[BlasterCharacter]++;
+				}
+				else
+				{
+					ShotgunResult.BodyShots.Emplace(BlasterCharacter, 1);
+				}
+			}
+		}
+	}
+
+	for (auto& Frame : CurrentFrames)
+	{
+		ResetHitBoxes(Frame.HitCharacter, Frame);
+		EnableCharacterMeshCollision(Frame.HitCharacter, ECollisionEnabled::QueryAndPhysics);
+	}
+
+	return ShotgunResult;
+
 }
 
 void ULagCompensationComponent::ServerScoreRequest_Implementation(ABlasterCharacter* HitCharacter,
@@ -370,8 +477,6 @@ void ULagCompensationComponent::ServerScoreRequest_Shotgun_Implementation(
 	const TArray<ABlasterCharacter*>& HitCharacters, const FVector_NetQuantize& TraceStart,
 	const TArray<FVector_NetQuantize>& HitLocations, float HitTime, AWeapon* DamageCauser)
 {
-	if (HitCharacters.Num() != HitLocations.Num()) return;
-
 	const FServerSideRewindResult_Shotgun Result = ServerSideRewind_Shotgun(HitCharacters, TraceStart, HitLocations, HitTime);	// 服务器端倒带
 	for (const auto& HitCharacter : HitCharacters)
 	{
