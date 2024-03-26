@@ -40,10 +40,19 @@ void ULagCompensationComponent::SaveFramePackage(FFramePackage& Package)
 	}
 }
 
+// Called every frame
+void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	SaveFramePackage();	// 保存帧数据
+
+}
+
 FFramePackage ULagCompensationComponent::InterpolateFrame(const FFramePackage& OlderFrame,
 	const FFramePackage& NewerFrame, float HitTime)
 {
-	FFramePackage InterpolatedFrame;
+	FFramePackage InterpolatedFrame{};
 	const float Alpha = FMath::Clamp((HitTime - OlderFrame.Time) / (NewerFrame.Time - OlderFrame.Time), 0.f, 1.f);	// 插值公式：(HitTime - OlderFrame.Time) / (NewerFrame.Time - OlderFrame.Time)
 	for(auto& BoxPair : OlderFrame.HitBoxInfo)
 	{
@@ -204,15 +213,6 @@ void ULagCompensationComponent::SaveFramePackage()
 	}
 }
 
-// Called every frame
-void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	SaveFramePackage();	// 保存帧数据
-	
-}
-
 void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, const FColor& Color)
 {
 	Character = Character ? Character : Cast<ABlasterCharacter>(GetOwner());
@@ -351,7 +351,7 @@ void ULagCompensationComponent::ServerScoreRequest_Implementation(ABlasterCharac
 	if (HitCharacter == nullptr) return;
 
 	FServerSideRewindResult Result = ServerSideRewind(HitCharacter, TraceStart, HitLocation, HitTime);	// 服务器端倒带
-	if (Result.bHitConfirmed && DamageCauser)
+	if (Result.bHitConfirmed && DamageCauser && Character && Character->Controller)
 	{
 		// 如果命中确认，就处理伤害
 		UGameplayStatics::ApplyDamage(
@@ -361,6 +361,53 @@ void ULagCompensationComponent::ServerScoreRequest_Implementation(ABlasterCharac
 			DamageCauser,	// 伤害来源
 			UDamageType::StaticClass()	// 伤害类型
 			);
+	}
+}
+
+void ULagCompensationComponent::ServerScoreRequest_Shotgun_Implementation(
+	const TArray<ABlasterCharacter*>& HitCharacters, const FVector_NetQuantize& TraceStart,
+	const TArray<FVector_NetQuantize>& HitLocations, float HitTime, AWeapon* DamageCauser)
+{
+	if (HitCharacters.Num() != HitLocations.Num()) return;
+
+	const FServerSideRewindResult_Shotgun Result = ServerSideRewind_Shotgun(HitCharacters, TraceStart, HitLocations, HitTime);	// 服务器端倒带
+	for (const auto& HitCharacter : HitCharacters)
+	{
+		//if (DamageCauser)
+		//{
+		//	if (Result.HeadShots.Contains(HitCharacter))
+		//	{
+		//		HeadDamage = Result.HeadShots[HitCharacter] * DamageCauser->GetDamage();	// 计算爆头伤害
+		//	}
+		//	if (Result.BodyShots.Contains(HitCharacter))
+		//	{
+		//		BodyDamage = Result.BodyShots[HitCharacter] * DamageCauser->GetDamage();	// 计算身体伤害
+		//	}
+		//}
+
+		if (Character && Character->GetEquippedWeapon() && Character->Controller)
+		{
+			float BodyDamage = 0.f;
+			float HeadDamage = 0.f;
+
+			if (Result.HeadShots.Contains(HitCharacter))
+			{
+				HeadDamage = Result.HeadShots[HitCharacter] * Character->GetEquippedWeapon()->GetDamage();	// 计算爆头伤害
+			}
+			if (Result.BodyShots.Contains(HitCharacter))
+			{
+				BodyDamage = Result.BodyShots[HitCharacter] * Character->GetEquippedWeapon()->GetDamage();	// 计算身体伤害
+			}
+
+			UGameplayStatics::ApplyDamage(
+				HitCharacter,	// 受击角色
+				HeadDamage + BodyDamage, // 伤害值
+				Character->Controller,	// 伤害来源
+				Character->GetEquippedWeapon(),	// 伤害来源
+				UDamageType::StaticClass()	// 伤害类型
+			);
+		}
+
 	}
 }
 
