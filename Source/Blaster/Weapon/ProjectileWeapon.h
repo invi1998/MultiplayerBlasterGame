@@ -19,5 +19,8 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere)
-		TSubclassOf<class AProjectile> ProjectileClass;
+	TSubclassOf<class AProjectile> ProjectileClass;	// 子弹类
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AProjectile> ServerSideRewindProjectileClass;	// 服务端倒带子弹类
 };
