@@ -9,6 +9,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 
+#include "Blaster/Blaster.h"
+
 ULagCompensationComponent::ULagCompensationComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -88,17 +90,25 @@ FServerSideRewindResult ULagCompensationComponent::CheckHit(const FFramePackage&
 	// 首先启用命中框的碰撞，然后进行射线检测
 	UBoxComponent* HeadBox = HitCharacter->HitCollisionBoxes[FName("head")];
 	HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	HeadBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);	// 设置碰撞响应
+	HeadBox->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);	// 设置碰撞响应
 
 	FHitResult HitResult;	// 射线检测
 	const FVector TraceEnd = TraceStart + (HitLocation - TraceStart) * 1.25f;	// 射线终点
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility);	// 射线检测
+		World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_HitBox);	// 射线检测
 
 		if (HitResult.bBlockingHit)		// 命中
 		{
+			if (HitResult.Component.IsValid())
+			{
+				if (UBoxComponent* HitBox = Cast<UBoxComponent>(HitResult.Component.Get()))
+				{
+					DrawDebugBox(World, HitBox->GetComponentLocation(), HitBox->GetScaledBoxExtent(), HitBox->GetComponentRotation().Quaternion(), FColor::Red, false, 5.0f);
+				}
+			}
+
 			ResetHitBoxes(HitCharacter, CurrentFrame);	// 重置命中框
 			EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);	// 启用角色的碰撞
 			Result.bHitConfirmed = true;	// 命中确认
@@ -111,13 +121,21 @@ FServerSideRewindResult ULagCompensationComponent::CheckHit(const FFramePackage&
 				if (BoxPair.Value != nullptr)
 				{
 					BoxPair.Value->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);	// 启用命中框的碰撞
-					BoxPair.Value->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);	// 设置碰撞响应
+					BoxPair.Value->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);	// 设置碰撞响应
 				}
 			}
 
-			World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility);	// 射线检测
+			World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_HitBox);	// 射线检测
 			if (HitResult.bBlockingHit)		// 命中
 			{
+				if (HitResult.Component.IsValid())
+				{
+					if (UBoxComponent* HitBox = Cast<UBoxComponent>(HitResult.Component.Get()))
+					{
+						DrawDebugBox(World, HitBox->GetComponentLocation(), HitBox->GetScaledBoxExtent(), HitBox->GetComponentRotation().Quaternion(), FColor::Blue, false, 5.0f);
+					}
+				}
+
 				ResetHitBoxes(HitCharacter, CurrentFrame);	// 重置命中框
 				EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);	// 启用角色的碰撞
 				Result.bHitConfirmed = true;	// 命中确认
@@ -388,7 +406,7 @@ FServerSideRewindResult_Shotgun ULagCompensationComponent::CheckHit_Shotgun(cons
 		// Enable collision for the head first
 		UBoxComponent* HeadBox = Frame.HitCharacter->HitCollisionBoxes[FName("head")];
 		HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		HeadBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);	// 设置碰撞响应，只对可见性通道进行响应
+		HeadBox->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);	// 设置碰撞响应，只对可见性通道进行响应
 	}
 
 	UWorld* World = GetWorld();
@@ -403,10 +421,15 @@ FServerSideRewindResult_Shotgun ULagCompensationComponent::CheckHit_Shotgun(cons
 				ConfirmHitResult,
 				TraceStart,
 				TraceEnd,
-				ECollisionChannel::ECC_Visibility
+				ECC_HitBox
 			);
 			if (ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(ConfirmHitResult.GetActor()))
 			{
+				if (UBoxComponent* HitBox = Cast<UBoxComponent>(ConfirmHitResult.Component.Get()))
+				{
+					DrawDebugBox(World, HitBox->GetComponentLocation(), HitBox->GetScaledBoxExtent(), HitBox->GetComponentRotation().Quaternion(), FColor::Red, false, 5.0f);
+				}
+
 				if (ShotgunResult.HeadShots.Contains(BlasterCharacter))
 				{
 					ShotgunResult.HeadShots[BlasterCharacter]++;
@@ -427,7 +450,7 @@ FServerSideRewindResult_Shotgun ULagCompensationComponent::CheckHit_Shotgun(cons
 			if (HitBoxPair.Value != nullptr)
 			{
 				HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-				HitBoxPair.Value->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+				HitBoxPair.Value->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
 			}
 		}
 		UBoxComponent* HeadBox = Frame.HitCharacter->HitCollisionBoxes[FName("head")];
@@ -445,10 +468,15 @@ FServerSideRewindResult_Shotgun ULagCompensationComponent::CheckHit_Shotgun(cons
 				ConfirmHitResult,
 				TraceStart,
 				TraceEnd,
-				ECollisionChannel::ECC_Visibility
+				ECC_HitBox
 			);
 			if (ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(ConfirmHitResult.GetActor()))
 			{
+				if (UBoxComponent* HitBox = Cast<UBoxComponent>(ConfirmHitResult.Component.Get()))
+				{
+					DrawDebugBox(World, HitBox->GetComponentLocation(), HitBox->GetScaledBoxExtent(), HitBox->GetComponentRotation().Quaternion(), FColor::Blue, false, 5.0f);
+				}
+
 				if (ShotgunResult.BodyShots.Contains(BlasterCharacter))
 				{
 					ShotgunResult.BodyShots[BlasterCharacter]++;
