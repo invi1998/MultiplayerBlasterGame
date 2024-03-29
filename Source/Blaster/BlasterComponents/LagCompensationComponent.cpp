@@ -127,6 +127,9 @@ FServerSideRewindResult ULagCompensationComponent::CheckHit(const FFramePackage&
 		}
 	}
 
+	ResetHitBoxes(HitCharacter, CurrentFrame);	// 重置命中框
+	EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);	// 启用角色的碰撞
+
 	return Result;
 }
 
