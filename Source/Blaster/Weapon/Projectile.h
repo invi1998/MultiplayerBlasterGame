@@ -29,6 +29,8 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float InitialSpeed = 15000.f;		// 初始速度
+	
+	float Damage = 20.f;
 
 protected:
 	// Called when the game starts or when spawned
@@ -40,36 +42,33 @@ protected:
 
 	// 子弹命中逻辑处理函数
 	UFUNCTION()
-		virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-
-	UPROPERTY(EditAnywhere)
-		float Damage = 20.f;
+	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	// 子弹命中的粒子特效
 	UPROPERTY(EditAnywhere)
-		UParticleSystem* ImpactParticles;
+	UParticleSystem* ImpactParticles;
 
 	// 子弹命中的提示音
 	UPROPERTY(EditAnywhere)
-		class USoundCue* ImpactSound;
+	class USoundCue* ImpactSound;
 
 	// 添加一个碰撞箱
 	// 设置可编辑
 	UPROPERTY(EditAnywhere)
-		class UBoxComponent* CollisionBox;
+	class UBoxComponent* CollisionBox;
 
 
 	UPROPERTY(EditAnywhere)
-		class UNiagaraSystem* TrailSystem;;
+	class UNiagaraSystem* TrailSystem;;
 
 	UPROPERTY()
-		class UNiagaraComponent* TrailSystemComponent;
+	class UNiagaraComponent* TrailSystemComponent;
 
 	UPROPERTY(VisibleAnywhere)
-		class UProjectileMovementComponent* ProjectileMovementComponent;
+	class UProjectileMovementComponent* ProjectileMovementComponent;
 
 	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* ProjectileMesh;
+	UStaticMeshComponent* ProjectileMesh;
 
 	// 爆炸物的伤害范围内半径
 	UPROPERTY(EditAnywhere)
@@ -83,15 +82,16 @@ private:
 
 	// 示踪器 （显示子弹运动轨迹的粒子特效）
 	UPROPERTY(EditAnywhere)
-		class UParticleSystem* Tracer;
+	UParticleSystem* Tracer;
 
 	// 存储tracer的粒子系统组件
-	class UParticleSystemComponent* TracerComponent;
+	UPROPERTY(EditAnywhere)
+	UParticleSystemComponent* TracerComponent;
 
 	FTimerHandle DestroyTimer;
 
 	UPROPERTY(EditAnywhere)
-		float DestroyTime = 3.0f;
+	float DestroyTime = 3.0f;
 
 public:
 	// Called every frame
