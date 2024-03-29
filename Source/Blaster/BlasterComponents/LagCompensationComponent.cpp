@@ -7,6 +7,7 @@
 #include "Blaster/Weapon/Weapon.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 ULagCompensationComponent::ULagCompensationComponent()
 {
@@ -50,7 +51,7 @@ void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 }
 
 FFramePackage ULagCompensationComponent::InterpolateFrame(const FFramePackage& OlderFrame,
-	const FFramePackage& NewerFrame, float HitTime)
+	const FFramePackage& NewerFrame, float HitTime) const
 {
 	FFramePackage InterpolatedFrame{};
 	const float Alpha = FMath::Clamp((HitTime - OlderFrame.Time) / (NewerFrame.Time - OlderFrame.Time), 0.f, 1.f);	// 插值公式：(HitTime - OlderFrame.Time) / (NewerFrame.Time - OlderFrame.Time)
@@ -147,14 +148,14 @@ void ULagCompensationComponent::MoveBoxes(ABlasterCharacter* HitCharacter, const
 {
 	if (HitCharacter == nullptr) return;
 
-	for(auto& BoxPair : FramePackage.HitBoxInfo)		// 遍历帧数据
+	for (auto& HitBoxPair : HitCharacter->HitCollisionBoxes)	// 遍历命中框
 	{
-		UBoxComponent* BoxComponent = HitCharacter->HitCollisionBoxes[BoxPair.Key];	// 获取命中框
-		if (BoxComponent)
+		if (HitBoxPair.Value != nullptr)	// 如果命中框不为空
 		{
-			BoxComponent->SetWorldLocation(BoxPair.Value.Location);		// 设置命中框的位置
-			BoxComponent->SetWorldRotation(BoxPair.Value.Rotation);		// 设置命中框的旋转
-			BoxComponent->SetBoxExtent(BoxPair.Value.Extent);			// 设置命中框的大小
+			HitBoxPair.Value->SetWorldLocation(FramePackage.HitBoxInfo[HitBoxPair.Key].Location);	// 设置命中框的位置
+			HitBoxPair.Value->SetWorldRotation(FramePackage.HitBoxInfo[HitBoxPair.Key].Rotation);	// 设置命中框的旋转
+			HitBoxPair.Value->SetBoxExtent(FramePackage.HitBoxInfo[HitBoxPair.Key].Extent);			// 设置命中框的大小
+			HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::NoCollision);			// 禁用命中框的碰撞
 		}
 	}
 }
@@ -246,14 +247,22 @@ FFramePackage ULagCompensationComponent::GetFrameToCheck(ABlasterCharacter* HitC
 		HitCharacter->GetLagCompensation() == nullptr ||
 		HitCharacter->GetLagCompensation()->FrameHistory.Num() == 0;
 
-	if (bReturn) return FFramePackage();
+	if (bReturn)
+	{
+		// UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("GetFrameToCheck bReturn: %d"), bReturn), true, false, FLinearColor::Red, 5.f);
+		return FFramePackage();
+	}
 
 	FFramePackage InterpolatedFrame{};
 	bool bLerp = true;
 
 	const TDoubleLinkedList<FFramePackage>& HistoryFrame = HitCharacter->GetLagCompensation()->FrameHistory;
 	const float OldestHitTime = HistoryFrame.GetTail()->GetValue().Time;
-	if (OldestHitTime > HitTime) return FFramePackage();	// 如果最老的帧数据的时间大于命中时间，就直接返回空
+	if (OldestHitTime > HitTime)
+	{
+		// UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("GetFrameToCheck OldestHitTime: %f, HitTime: %f"), OldestHitTime, HitTime), true, false, FLinearColor::Red, 5.f);
+		return FFramePackage();	// 如果最老的帧数据的时间大于命中时间，就直接返回空
+	}
 
 	if (OldestHitTime == HitTime)
 	{
@@ -305,6 +314,7 @@ FFramePackage ULagCompensationComponent::GetFrameToCheck(ABlasterCharacter* HitC
 
 	InterpolatedFrame.HitCharacter = HitCharacter;
 
+	// UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("GetFrameToCheck bLerp: %d"), bLerp), true, false, FLinearColor::Red, 5.f);
 	return InterpolatedFrame;
 }
 
@@ -321,7 +331,7 @@ FServerSideRewindResult_Shotgun ULagCompensationComponent::ServerSideRewind_Shot
 		const FFramePackage RewindFramePackage = GetFrameToCheck(HitCharacter, HitTime);	// 获取需要检查的帧数据
 		RewindFramePackages.Add(RewindFramePackage);
 	}
-
+	// UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("ServerSideRewind_Shotgun: %d"), RewindFramePackages.Num()), true, false, FLinearColor::Red, 5.f);
 	const FServerSideRewindResult_Shotgun RewindResult = CheckHit_Shotgun(RewindFramePackages, TraceStart, HitLocations);	// 检查命中
 
 	return RewindResult;
@@ -352,7 +362,11 @@ FServerSideRewindResult_Shotgun ULagCompensationComponent::CheckHit_Shotgun(cons
 
 	for (auto& Frame : FramePackages)
 	{
-		if (Frame.HitCharacter == nullptr) return ShotgunResult;
+		if (Frame.HitCharacter == nullptr)
+		{
+			// UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("CheckHit_Shotgun Frame.HitCharacter == nullptr")), true, false, FLinearColor::Red, 5.f);
+			return ShotgunResult;
+		}
 	}
 	
 	TArray<FFramePackage> CurrentFrames;
@@ -371,7 +385,7 @@ FServerSideRewindResult_Shotgun ULagCompensationComponent::CheckHit_Shotgun(cons
 		// Enable collision for the head first
 		UBoxComponent* HeadBox = Frame.HitCharacter->HitCollisionBoxes[FName("head")];
 		HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		HeadBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+		HeadBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);	// 设置碰撞响应，只对可见性通道进行响应
 	}
 
 	UWorld* World = GetWorld();
@@ -388,8 +402,7 @@ FServerSideRewindResult_Shotgun ULagCompensationComponent::CheckHit_Shotgun(cons
 				TraceEnd,
 				ECollisionChannel::ECC_Visibility
 			);
-			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(ConfirmHitResult.GetActor());
-			if (BlasterCharacter)
+			if (ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(ConfirmHitResult.GetActor()))
 			{
 				if (ShotgunResult.HeadShots.Contains(BlasterCharacter))
 				{
@@ -421,18 +434,17 @@ FServerSideRewindResult_Shotgun ULagCompensationComponent::CheckHit_Shotgun(cons
 	// check for body shots
 	for (auto& HitLocation : HitLocations)
 	{
-		FHitResult ConfirmHitResult;
 		const FVector TraceEnd = TraceStart + (HitLocation - TraceStart) * 1.25f;
 		if (World)
 		{
+			FHitResult ConfirmHitResult;
 			World->LineTraceSingleByChannel(
 				ConfirmHitResult,
 				TraceStart,
 				TraceEnd,
 				ECollisionChannel::ECC_Visibility
 			);
-			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(ConfirmHitResult.GetActor());
-			if (BlasterCharacter)
+			if (ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(ConfirmHitResult.GetActor()))
 			{
 				if (ShotgunResult.BodyShots.Contains(BlasterCharacter))
 				{
@@ -452,6 +464,8 @@ FServerSideRewindResult_Shotgun ULagCompensationComponent::CheckHit_Shotgun(cons
 		EnableCharacterMeshCollision(Frame.HitCharacter, ECollisionEnabled::QueryAndPhysics);
 	}
 
+	// UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("CheckHit_Shotgun: %d"), ShotgunResult.HeadShots.Num()), true, false, FLinearColor::Red, 5.f);
+	// UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("CheckHit_Shotgun: %d"), ShotgunResult.BodyShots.Num()), true, false, FLinearColor::Red, 5.f);
 	return ShotgunResult;
 
 }
@@ -479,6 +493,7 @@ void ULagCompensationComponent::ServerScoreRequest_Shotgun_Implementation(
 	const TArray<ABlasterCharacter*>& HitCharacters, const FVector_NetQuantize& TraceStart,
 	const TArray<FVector_NetQuantize>& HitLocations, float HitTime, AWeapon* DamageCauser)
 {
+	// UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("ServerScoreRequest_Shotgun_Implementation: %d"), HitCharacters.Num()), true, false, FLinearColor::Red, 5.f);
 	const FServerSideRewindResult_Shotgun Result = ServerSideRewind_Shotgun(HitCharacters, TraceStart, HitLocations, HitTime);	// 服务器端倒带
 	for (const auto& HitCharacter : HitCharacters)
 	{
@@ -502,10 +517,12 @@ void ULagCompensationComponent::ServerScoreRequest_Shotgun_Implementation(
 			if (Result.HeadShots.Contains(HitCharacter))
 			{
 				HeadDamage = Result.HeadShots[HitCharacter] * Character->GetEquippedWeapon()->GetDamage();	// 计算爆头伤害
+				// UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Head Damage: %f"), HeadDamage), true, false, FLinearColor::Red, 5.f);
 			}
 			if (Result.BodyShots.Contains(HitCharacter))
 			{
 				BodyDamage = Result.BodyShots[HitCharacter] * Character->GetEquippedWeapon()->GetDamage();	// 计算身体伤害
+				// UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Body Damage: %f"), BodyDamage), true, false, FLinearColor::Red, 5.f);
 			}
 
 			UGameplayStatics::ApplyDamage(

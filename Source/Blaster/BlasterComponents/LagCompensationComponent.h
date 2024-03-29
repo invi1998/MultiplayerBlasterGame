@@ -94,7 +94,7 @@ protected:
 
 	void SaveFramePackage(FFramePackage& Package);		// 保存帧数据
 
-	FFramePackage InterpolateFrame(const FFramePackage& OlderFrame, const FFramePackage& NewerFrame, float HitTime);	// 插值帧数据
+	FFramePackage InterpolateFrame(const FFramePackage& OlderFrame, const FFramePackage& NewerFrame, float HitTime) const;	// 插值帧数据
 
 	FServerSideRewindResult CheckHit(const FFramePackage& FramePackage, ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation);	// 检查命中，传入帧数据，命中角色，射线起始位置，命中位置
 
