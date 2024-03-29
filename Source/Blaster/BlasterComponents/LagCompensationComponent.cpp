@@ -39,6 +39,7 @@ void ULagCompensationComponent::SaveFramePackage(FFramePackage& Package)
 			BoxInfo.Extent = BoxPair.Value->GetScaledBoxExtent();
 			BoxInfo.Rotation = BoxPair.Value->GetComponentRotation();
 			Package.HitBoxInfo.Add(BoxPair.Key, BoxInfo);
+
 		}
 	}
 }
@@ -64,7 +65,7 @@ FFramePackage ULagCompensationComponent::InterpolateFrame(const FFramePackage& O
 
 		FBoxInformation InterpolatedBoxInfo;
 		InterpolatedBoxInfo.Location = FMath::Lerp(OlderBoxInfo.Location, NewerBoxInfo.Location, Alpha);
-		InterpolatedBoxInfo.Extent = FMath::Lerp(OlderBoxInfo.Extent, NewerBoxInfo.Extent, Alpha);
+		InterpolatedBoxInfo.Extent = NewerBoxInfo.Extent;		// 这里千万不能差值，否则会导致命中框大小变化（因为命中框大小是固定的）
 		InterpolatedBoxInfo.Rotation = FMath::Lerp(OlderBoxInfo.Rotation, NewerBoxInfo.Rotation, Alpha);
 
 		InterpolatedFrame.HitBoxInfo.Add(BoxPair.Key, InterpolatedBoxInfo);
@@ -155,13 +156,19 @@ void ULagCompensationComponent::CacheBoxPosition(ABlasterCharacter* HitCharacter
 {
 	if (HitCharacter == nullptr) return;
 
-	for(auto& BoxPair : HitCharacter->HitCollisionBoxes)
+	for (auto& HitBoxPair : HitCharacter->HitCollisionBoxes)
 	{
-		FBoxInformation BoxInfo;
-		BoxInfo.Location = BoxPair.Value->GetComponentLocation();
-		BoxInfo.Extent = BoxPair.Value->GetScaledBoxExtent();
-		BoxInfo.Rotation = BoxPair.Value->GetComponentRotation();
-		OutFramePackage.HitBoxInfo.Add(BoxPair.Key, BoxInfo);
+		// 遍历命中框
+		if (HitBoxPair.Value != nullptr)	// 如果命中框不为空
+		{
+			FBoxInformation BoxInfo;
+			BoxInfo.Location = HitBoxPair.Value->GetComponentLocation();	// 获取命中框的位置
+			BoxInfo.Rotation = HitBoxPair.Value->GetComponentRotation();	// 获取命中框的旋转
+			BoxInfo.Extent = HitBoxPair.Value->GetScaledBoxExtent();		// 获取命中框的大小
+			OutFramePackage.HitBoxInfo.Add(HitBoxPair.Key, BoxInfo);
+
+			DrawDebugBox(GetWorld(), BoxInfo.Location, BoxInfo.Extent, BoxInfo.Rotation.Quaternion(), FColor::Orange, false, 5.0f);
+		}
 	}
 }
 
@@ -176,7 +183,8 @@ void ULagCompensationComponent::MoveBoxes(ABlasterCharacter* HitCharacter, const
 			HitBoxPair.Value->SetWorldLocation(FramePackage.HitBoxInfo[HitBoxPair.Key].Location);	// 设置命中框的位置
 			HitBoxPair.Value->SetWorldRotation(FramePackage.HitBoxInfo[HitBoxPair.Key].Rotation);	// 设置命中框的旋转
 			HitBoxPair.Value->SetBoxExtent(FramePackage.HitBoxInfo[HitBoxPair.Key].Extent);			// 设置命中框的大小
-			HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::NoCollision);			// 禁用命中框的碰撞
+
+			DrawDebugBox(GetWorld(), FramePackage.HitBoxInfo[HitBoxPair.Key].Location, FramePackage.HitBoxInfo[HitBoxPair.Key].Extent, FramePackage.HitBoxInfo[HitBoxPair.Key].Rotation.Quaternion(), FColor::Green, false, 5.0f);
 		}
 	}
 }
@@ -185,15 +193,16 @@ void ULagCompensationComponent::ResetHitBoxes(ABlasterCharacter* HitCharacter, c
 {
 	if (HitCharacter == nullptr) return;
 
-	for (auto& BoxPair : FramePackage.HitBoxInfo)		// 遍历帧数据
+	for (auto& HitBoxPair : HitCharacter->HitCollisionBoxes)
 	{
-		UBoxComponent* BoxComponent = HitCharacter->HitCollisionBoxes[BoxPair.Key];	// 获取命中框
-		if (BoxComponent)
+		if (HitBoxPair.Value != nullptr)
 		{
-			BoxComponent->SetWorldLocation(BoxPair.Value.Location);		// 设置命中框的位置
-			BoxComponent->SetWorldRotation(BoxPair.Value.Rotation);		// 设置命中框的旋转
-			BoxComponent->SetBoxExtent(BoxPair.Value.Extent);			// 设置命中框的大小
-			BoxComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);	// 禁用命中框的碰撞
+			HitBoxPair.Value->SetWorldLocation(FramePackage.HitBoxInfo[HitBoxPair.Key].Location);
+			HitBoxPair.Value->SetWorldRotation(FramePackage.HitBoxInfo[HitBoxPair.Key].Rotation);
+			HitBoxPair.Value->SetBoxExtent(FramePackage.HitBoxInfo[HitBoxPair.Key].Extent);
+			HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+			DrawDebugBox(GetWorld(), FramePackage.HitBoxInfo[HitBoxPair.Key].Location, FramePackage.HitBoxInfo[HitBoxPair.Key].Extent, FramePackage.HitBoxInfo[HitBoxPair.Key].Rotation.Quaternion(), FColor::Red, false, 5.0f);
 		}
 	}
 }
