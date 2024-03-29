@@ -20,6 +20,16 @@ public:
 
 	virtual void Destroyed() override;
 
+	/*
+	 * 用于服务端倒带
+	 */
+	bool bUseServerSideRewind = false;		// 是否使用服务端倒带
+	FVector_NetQuantize TraceStart;			// 服务端倒带位置
+	FVector_NetQuantize100 InitialVelocity;	// 服务端倒带初始速度，精度为0.01
+
+	UPROPERTY(EditAnywhere)
+	float InitialSpeed = 15000.f;		// 初始速度
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
