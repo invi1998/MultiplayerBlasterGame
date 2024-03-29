@@ -17,7 +17,6 @@ ULagCompensationComponent::ULagCompensationComponent()
 	
 }
 
-
 // Called when the game starts
 void ULagCompensationComponent::BeginPlay()
 {
@@ -510,8 +509,91 @@ FServerSideRewindResult_Shotgun ULagCompensationComponent::CheckHit_Shotgun(cons
 
 }
 
-void ULagCompensationComponent::ServerScoreRequest_Implementation(ABlasterCharacter* HitCharacter,
-                                                                  const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime, AWeapon* DamageCauser)
+FServerSideRewindResult ULagCompensationComponent::CheckHit_Projectile(const FFramePackage& FramePackage,
+	ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart,
+	const FVector_NetQuantize100& InitialVelocity)
+{
+	FServerSideRewindResult Result{false, false};
+
+	if (HitCharacter == nullptr) return Result;
+
+	FFramePackage CurrentFrame;
+	CacheBoxPosition(HitCharacter, CurrentFrame);	// 缓存当前帧数据
+	MoveBoxes(HitCharacter, FramePackage);	// 移动命中角色的命中框
+	EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::NoCollision);	// 关闭角色的碰撞
+
+	// 首先启用命中框的碰撞，然后进行射线检测
+	UBoxComponent* HeadBox = HitCharacter->HitCollisionBoxes[FName("head")];
+	HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	HeadBox->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);	// 设置碰撞响应
+
+	FPredictProjectilePathParams PathParams;	// 预测射线路径参数
+	PathParams.StartLocation = TraceStart;	// 设置起始位置
+	PathParams.LaunchVelocity = InitialVelocity;	// 设置初始速度
+	PathParams.MaxSimTime = MaxRecordTime;	// 设置最大模拟时间
+	PathParams.SimFrequency = 15.f;	// 设置模拟频率
+	PathParams.ProjectileRadius = 5.f;	// 设置射线半径
+	PathParams.bTraceWithCollision = true;	// 设置是否进行碰撞检测
+	PathParams.bTraceWithChannel = true;	// 设置是否进行通道检测
+	PathParams.TraceChannel = ECC_HitBox;	// 设置射线通道
+	PathParams.DrawDebugTime = 5.f;	// 设置调试时间
+	PathParams.DrawDebugType = EDrawDebugTrace::ForDuration;	// 设置调试类型
+
+	FPredictProjectilePathResult PathResult;	// 预测射线路径结果
+
+	UGameplayStatics::PredictProjectilePath(this, PathParams, PathResult);	// 预测射线路径
+
+	if (PathResult.HitResult.bBlockingHit)	// 命中
+	{
+		if (PathResult.HitResult.Component.IsValid())
+		{
+			if (UBoxComponent* HitBox = Cast<UBoxComponent>(PathResult.HitResult.Component.Get()))
+			{
+				DrawDebugBox(GetWorld(), HitBox->GetComponentLocation(), HitBox->GetScaledBoxExtent(), HitBox->GetComponentRotation().Quaternion(), FColor::Red, false, 5.0f);
+			}
+		}
+
+		ResetHitBoxes(HitCharacter, CurrentFrame);	// 重置命中框
+		EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);	// 启用角色的碰撞
+		Result.bHitConfirmed = true;	// 命中确认
+		Result.bHeadShot = true;	// 判断是否是爆头
+	}
+	else
+	{
+		for (auto& BoxPair : HitCharacter->HitCollisionBoxes)
+		{
+			if (BoxPair.Value != nullptr)
+			{
+				BoxPair.Value->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);	// 启用命中框的碰撞
+				BoxPair.Value->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);	// 设置碰撞响应
+			}
+		}
+
+		HeadBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		UGameplayStatics::PredictProjectilePath(this, PathParams, PathResult);	// 预测射线路径
+		if (PathResult.HitResult.bBlockingHit)	// 命中
+		{
+			if (PathResult.HitResult.Component.IsValid())
+			{
+				if (UBoxComponent* HitBox = Cast<UBoxComponent>(PathResult.HitResult.Component.Get()))
+				{
+					DrawDebugBox(GetWorld(), HitBox->GetComponentLocation(), HitBox->GetScaledBoxExtent(), HitBox->GetComponentRotation().Quaternion(), FColor::Blue, false, 5.0f);
+				}
+			}
+
+			ResetHitBoxes(HitCharacter, CurrentFrame);	// 重置命中框
+			EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);	// 启用角色的碰撞
+			Result.bHitConfirmed = true;	// 命中确认
+			Result.bHeadShot = false;		// 判断是否是爆头
+		}
+	}
+
+	return Result;
+
+}
+
+void ULagCompensationComponent::ServerScoreRequest_Implementation(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime, AWeapon* DamageCauser)
 {
 	if (HitCharacter == nullptr) return;
 
@@ -577,3 +659,31 @@ void ULagCompensationComponent::ServerScoreRequest_Shotgun_Implementation(
 	}
 }
 
+void ULagCompensationComponent::ServerScoreRequest_Projectile_Implementation(ABlasterCharacter* HitCharacter,
+	const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, float HitTime,
+	AWeapon* DamageCauser)
+{
+	if (HitCharacter == nullptr) return;
+
+	const FServerSideRewindResult Result = ServerSideRewind_Projectile(HitCharacter, TraceStart, InitialVelocity, HitTime);	// 服务器端倒带
+	if (Result.bHitConfirmed && DamageCauser && Character && Character->Controller)
+	{
+				// 如果命中确认，就处理伤害
+		UGameplayStatics::ApplyDamage(
+			HitCharacter,	// 受击角色
+			DamageCauser->GetDamage(), // 伤害值
+			Character->Controller,	// 伤害来源
+			DamageCauser,	// 伤害来源
+			UDamageType::StaticClass()	// 伤害类型
+			);
+	}
+}
+
+FServerSideRewindResult ULagCompensationComponent::ServerSideRewind_Projectile(
+	ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart,
+	const FVector_NetQuantize100& InitialVelocity, float HitTime)
+{
+	const FFramePackage RewindFramePackage = GetFrameToCheck(HitCharacter, HitTime);	// 获取需要检查的帧数据
+
+	return CheckHit_Projectile(RewindFramePackage, HitCharacter, TraceStart, InitialVelocity);	// 检查命中
+}

@@ -83,11 +83,26 @@ public:
 
 	FServerSideRewindResult_Shotgun ServerSideRewind_Shotgun(const TArray<ABlasterCharacter*>& HitCharacters, const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations, float HitTime);	// 服务器端倒带，传入命中角色，射线起始位置，命中位置，命中时间
 
+	FServerSideRewindResult ServerSideRewind_Projectile(class ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, float HitTime);	// 服务器端倒带，传入命中角色，投射起始位置，投射初始速度，命中时间
+
+	/*
+	 * 射线类型的服务端倒带（SSR for Hit Scan）
+	 */
 	UFUNCTION(Server, Reliable)
 	void ServerScoreRequest(class ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime, class AWeapon* DamageCauser);	// 服务器端请求得分，传入命中角色，射线起始位置，命中位置，命中时间, 伤害来源
 
+	/*
+	 * 霰弹枪类型的服务端倒带（SSR for Shotgun）
+	 */
 	UFUNCTION(Server, Reliable)
 	void ServerScoreRequest_Shotgun(const TArray<ABlasterCharacter*>& HitCharacters, const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations, float HitTime, class AWeapon* DamageCauser);	// 服务器端请求得分，传入命中角色，射线起始位置，命中位置，命中时间, 伤害来源
+
+	/*
+	 * 投射类型的服务端倒带（SSR for Projectile）
+	 */
+	UFUNCTION(Server, Reliable)
+	void ServerScoreRequest_Projectile(class ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, float HitTime, class AWeapon* DamageCauser);	// 服务器端请求得分，传入命中角色，投射起始位置，投射初始速度，命中时间, 伤害来源
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -95,8 +110,6 @@ protected:
 	void SaveFramePackage(FFramePackage& Package);		// 保存帧数据
 
 	FFramePackage InterpolateFrame(const FFramePackage& OlderFrame, const FFramePackage& NewerFrame, float HitTime) const;	// 插值帧数据
-
-	FServerSideRewindResult CheckHit(const FFramePackage& FramePackage, ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation);	// 检查命中，传入帧数据，命中角色，射线起始位置，命中位置
 
 	void CacheBoxPosition(ABlasterCharacter* HitCharacter, FFramePackage& OutFramePackage);	// 缓存命中框位置，传入命中角色，输出帧数据
 
@@ -111,9 +124,19 @@ protected:
 	FFramePackage GetFrameToCheck(ABlasterCharacter* HitCharacter, float HitTime);	// 获取用于检查的帧数据，传入命中角色，命中时间
 
 	/*
+	 * 射线类型的命中检查
+	 */
+	FServerSideRewindResult CheckHit(const FFramePackage& FramePackage, ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation);	// 检查命中，传入帧数据，命中角色，射线起始位置，命中位置
+
+	/*
 	 * 霰弹枪
 	 */
 	FServerSideRewindResult_Shotgun CheckHit_Shotgun(const TArray<FFramePackage>& FramePackages, const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations);	// 检查命中，传入帧数据，命中角色，射线起始位置，命中位置
+
+	/*
+	 * 投射类型的命中检查
+	 */
+	FServerSideRewindResult CheckHit_Projectile(const FFramePackage& FramePackage, ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity);	// 检查命中，传入帧数据，命中角色，投射起始位置，投射初始速度
 
 
 private:
