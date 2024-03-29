@@ -253,7 +253,7 @@ FFramePackage ULagCompensationComponent::GetFrameToCheck(ABlasterCharacter* HitC
 
 	const TDoubleLinkedList<FFramePackage>& HistoryFrame = HitCharacter->GetLagCompensation()->FrameHistory;
 	const float OldestHitTime = HistoryFrame.GetTail()->GetValue().Time;
-	if (OldestHitTime > HitTime) return FFramePackage();
+	if (OldestHitTime > HitTime) return FFramePackage();	// 如果最老的帧数据的时间大于命中时间，就直接返回空
 
 	if (OldestHitTime == HitTime)
 	{
@@ -281,6 +281,8 @@ FFramePackage ULagCompensationComponent::GetFrameToCheck(ABlasterCharacter* HitC
 		{
 			break;
 		}
+
+		OlderNode = OlderNode->GetNextNode();
 
 		if (OlderNode->GetValue().Time > HitTime)	// 如果次新的帧数据的时间大于命中时间
 		{
