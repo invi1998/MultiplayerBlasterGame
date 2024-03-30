@@ -23,7 +23,7 @@ public:
 	/*
 	 * 用于服务端倒带
 	 */
-	bool bUseServerSideRewind = false;		// 是否使用服务端倒带
+	bool bUseServerSideRewind = true;		// 是否使用服务端倒带
 	FVector_NetQuantize TraceStart;			// 服务端倒带位置
 	FVector_NetQuantize100 InitialVelocity;	// 服务端倒带初始速度，精度为0.01
 

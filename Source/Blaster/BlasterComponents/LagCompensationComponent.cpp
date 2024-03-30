@@ -166,7 +166,7 @@ void ULagCompensationComponent::CacheBoxPosition(ABlasterCharacter* HitCharacter
 			BoxInfo.Extent = HitBoxPair.Value->GetScaledBoxExtent();		// 获取命中框的大小
 			OutFramePackage.HitBoxInfo.Add(HitBoxPair.Key, BoxInfo);
 
-			DrawDebugBox(GetWorld(), BoxInfo.Location, BoxInfo.Extent, BoxInfo.Rotation.Quaternion(), FColor::Orange, false, 5.0f);
+			// DrawDebugBox(GetWorld(), BoxInfo.Location, BoxInfo.Extent, BoxInfo.Rotation.Quaternion(), FColor::Orange, false, 5.0f);
 		}
 	}
 }
@@ -183,7 +183,7 @@ void ULagCompensationComponent::MoveBoxes(ABlasterCharacter* HitCharacter, const
 			HitBoxPair.Value->SetWorldRotation(FramePackage.HitBoxInfo[HitBoxPair.Key].Rotation);	// 设置命中框的旋转
 			HitBoxPair.Value->SetBoxExtent(FramePackage.HitBoxInfo[HitBoxPair.Key].Extent);			// 设置命中框的大小
 
-			DrawDebugBox(GetWorld(), FramePackage.HitBoxInfo[HitBoxPair.Key].Location, FramePackage.HitBoxInfo[HitBoxPair.Key].Extent, FramePackage.HitBoxInfo[HitBoxPair.Key].Rotation.Quaternion(), FColor::Green, false, 5.0f);
+			// DrawDebugBox(GetWorld(), FramePackage.HitBoxInfo[HitBoxPair.Key].Location, FramePackage.HitBoxInfo[HitBoxPair.Key].Extent, FramePackage.HitBoxInfo[HitBoxPair.Key].Rotation.Quaternion(), FColor::Green, false, 5.0f);
 		}
 	}
 }
@@ -201,7 +201,7 @@ void ULagCompensationComponent::ResetHitBoxes(ABlasterCharacter* HitCharacter, c
 			HitBoxPair.Value->SetBoxExtent(FramePackage.HitBoxInfo[HitBoxPair.Key].Extent);
 			HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-			DrawDebugBox(GetWorld(), FramePackage.HitBoxInfo[HitBoxPair.Key].Location, FramePackage.HitBoxInfo[HitBoxPair.Key].Extent, FramePackage.HitBoxInfo[HitBoxPair.Key].Rotation.Quaternion(), FColor::Red, false, 5.0f);
+			// DrawDebugBox(GetWorld(), FramePackage.HitBoxInfo[HitBoxPair.Key].Location, FramePackage.HitBoxInfo[HitBoxPair.Key].Extent, FramePackage.HitBoxInfo[HitBoxPair.Key].Rotation.Quaternion(), FColor::Red, false, 5.0f);
 		}
 	}
 }
@@ -666,14 +666,14 @@ void ULagCompensationComponent::ServerScoreRequest_Projectile_Implementation(ABl
 	if (HitCharacter == nullptr) return;
 
 	const FServerSideRewindResult Result = ServerSideRewind_Projectile(HitCharacter, TraceStart, InitialVelocity, HitTime);	// 服务器端倒带
-	if (Result.bHitConfirmed && DamageCauser && Character && Character->Controller)
+	if (Result.bHitConfirmed && Character && Character->Controller)
 	{
-				// 如果命中确认，就处理伤害
+		// 如果命中确认，就处理伤害
 		UGameplayStatics::ApplyDamage(
 			HitCharacter,	// 受击角色
-			DamageCauser->GetDamage(), // 伤害值
+			Character->GetEquippedWeapon()->GetDamage(), // 伤害值
 			Character->Controller,	// 伤害来源
-			DamageCauser,	// 伤害来源
+			Character->GetEquippedWeapon(),	// 伤害来源
 			UDamageType::StaticClass()	// 伤害类型
 			);
 	}

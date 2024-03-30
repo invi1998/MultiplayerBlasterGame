@@ -43,7 +43,7 @@ void AProjectileWeapon::Fire(const FVector& HitTarget)
 					SpawnedProjectile->bUseServerSideRewind = false;
 					SpawnedProjectile->Damage = Damage;
 				}
-				else	// 服务端，非本地控制，即客户端玩家，生成非属性复制的子弹，不倒带，他会在自己的客户端进行倒带
+				else	// 服务端，非本地控制，即客户端玩家，生成非属性复制的子弹，倒带
 				{
 					SpawnedProjectile = World->SpawnActor<AProjectile>(
 						ServerSideRewindProjectileClass,
@@ -51,7 +51,7 @@ void AProjectileWeapon::Fire(const FVector& HitTarget)
 						TargetRotator,
 						SpawnParams
 					);
-					SpawnedProjectile->bUseServerSideRewind = false;
+					SpawnedProjectile->bUseServerSideRewind = true;
 				}
 			}
 			else	// 客户端，使用服务端倒带

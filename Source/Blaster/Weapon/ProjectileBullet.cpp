@@ -2,6 +2,9 @@
 
 #include "ProjectileBullet.h"
 
+#include "Blaster/BlasterComponents/LagCompensationComponent.h"
+#include "Blaster/Character/BlasterCharacter.h"
+#include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "kismet/GameplayStatics.h"
@@ -37,15 +40,33 @@ void AProjectileBullet::PostEditChangeProperty(FPropertyChangedEvent& PropertyCh
 void AProjectileBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
                               FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner()))
+	if (const ABlasterCharacter* OwnerCharacter = Cast<ABlasterCharacter>(GetOwner()))
 	{
-		if (AController* OwnerController = OwnerCharacter->Controller)
+		if (ABlasterPlayerController* OwnerController = Cast<ABlasterPlayerController>(OwnerCharacter->Controller))
 		{
-			UGameplayStatics::ApplyDamage(OtherActor, Damage, OwnerController, this, UDamageType::StaticClass());
+			if (OwnerCharacter->HasAuthority() && !bUseServerSideRewind)	// 服务端，不使用服务端倒带
+			{
+				// 服务端，不使用服务端倒带
+				UGameplayStatics::ApplyDamage(OtherActor, Damage, OwnerController, this, UDamageType::StaticClass());
+				Super::OnHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
+				return;
+			}
+			ABlasterCharacter* HitCharacter = Cast<ABlasterCharacter>(OtherActor);
+			if (bUseServerSideRewind && OwnerCharacter->GetLagCompensation() && OwnerCharacter->IsLocallyControlled() && HitCharacter)	// 需要使用服务端倒带，并且拥有服务端倒带组件，并且是本地控制，命中角色不为空
+			{
+				// 使用服务端倒带
+				OwnerCharacter->GetLagCompensation()->ServerScoreRequest_Projectile(
+					HitCharacter, 
+					TraceStart, 
+					InitialVelocity,
+					OwnerController->GetServerTime() - OwnerController->SingleTripTime, 
+					nullptr);		// 伤害来源这里填空，也可以传入角色当前装备的武器，不过不重要，因为倒带组件会自动获取伤害来源
+			}
+			
 		}
 	}
 
-	Super::OnHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
+	
 }
 
 void AProjectileBullet::BeginPlay()
