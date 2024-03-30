@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerController.h"
 #include "BlasterPlayerController.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHighPingDelegate, bool, bHighPing);	// 高延迟委托
+
 /**
  *
  */
@@ -36,6 +38,8 @@ public:
 	void OnMatchStateSet(FName state);	// 当游戏状态发生变化时，调用该函数
 
 	float SingleTripTime = 0.0f;	// 单程时间
+
+	FHighPingDelegate HighPingDelegate;	// 高延迟委托
 
 protected:
 	virtual void BeginPlay() override;	// 当游戏开始时，调用该函数
@@ -138,4 +142,7 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float HighPingThreshold = 50.f;	// 高延迟阈值
+
+	UFUNCTION(Server, Reliable)
+	void ServerReportPingStatus(bool bHighPing);	// 服务器报告延迟状态
 };

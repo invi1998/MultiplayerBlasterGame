@@ -302,15 +302,17 @@ void ABlasterPlayerController::CheckHighPing(float DeltaSeconds)
 		PlayerState = PlayerState == nullptr ? GetPlayerState<ABlasterPlayerState>() : PlayerState;
 		if (PlayerState)
 		{
+			UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("Ping: %f"), PlayerState->GetPingInMilliseconds()));
 			if (PlayerState->GetPingInMilliseconds() > HighPingThreshold)
 			{
 				HighPingWarning();
 				PingAnimationRunningTime = 0;
+				ServerReportPingStatus(true);
 			}
-			/*else
+			else
 			{
-				StopHighPingWarning();
-			}*/
+				ServerReportPingStatus(false);
+			}
 		}
 		HighPingWarningTime = 0.f;
 	}
@@ -322,6 +324,11 @@ void ABlasterPlayerController::CheckHighPing(float DeltaSeconds)
 			StopHighPingWarning();
 		}
 	}
+}
+
+void ABlasterPlayerController::ServerReportPingStatus_Implementation(bool bHighPing)
+{
+	HighPingDelegate.Broadcast(bHighPing);
 }
 
 void ABlasterPlayerController::ClientJoinMidGame_Implementation(FName StateOfMatch, float Warmup, float Match, float Cooldown, float StartingTime)

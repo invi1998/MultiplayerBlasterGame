@@ -160,8 +160,11 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float Damage = 20.f;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(Replicated, EditAnywhere)
 	bool bUseServerSideRewind = true;		// 是否使用服务器端倒带
+
+	UFUNCTION()
+	void OnPingTooHigh(bool bHighPing);		// 高延迟委托绑定函数
 
 private:
 	// 武器骨架网格
