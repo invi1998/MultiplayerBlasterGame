@@ -302,7 +302,7 @@ void ABlasterPlayerController::CheckHighPing(float DeltaSeconds)
 		PlayerState = PlayerState == nullptr ? GetPlayerState<ABlasterPlayerState>() : PlayerState;
 		if (PlayerState)
 		{
-			UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("Ping: %f"), PlayerState->GetPingInMilliseconds()));
+			UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("Ping: %d"), static_cast<int>(PlayerState->GetPingInMilliseconds())));
 			if (PlayerState->GetPingInMilliseconds() > HighPingThreshold)
 			{
 				HighPingWarning();

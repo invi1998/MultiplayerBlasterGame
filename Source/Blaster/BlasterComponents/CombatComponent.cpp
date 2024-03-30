@@ -197,7 +197,7 @@ void UCombatComponent::Fire()
 			switch (EquippedWeapon->FiringType)
 			{
 			case EFiringType::EFT_HitScan:
-				FireHitscanWeapon();
+				FireHitScanWeapon();
 				break;
 			case EFiringType::EFT_Projectile: 
 				FireProjectileWeapon();
@@ -230,7 +230,7 @@ void UCombatComponent::FireProjectileWeapon()
 	}
 }
 
-void UCombatComponent::FireHitscanWeapon()
+void UCombatComponent::FireHitScanWeapon()
 {
 	if (EquippedWeapon && Character)
 	{
@@ -290,12 +290,13 @@ void UCombatComponent::LocalShotgunFire(const TArray<FVector_NetQuantize>& Trace
 bool UCombatComponent::CanFire()
 {
 	if (EquippedWeapon == nullptr) return false;
-	if (bLocalReloading) return false;
 	// 因为霰弹枪一次性装弹会有4次装弹动画，所以这里特写霰弹枪的开火判定逻辑，只要有一次装弹（有子弹，哪怕是在装弹状态下也可以开火）
 	if (!EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
 	{
 		return true;
 	}
+
+	if (bLocalReloading) return false;
 
 	return !EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Unoccupied;
 }
@@ -445,42 +446,19 @@ void UCombatComponent::SwapWeapon()
 	if (Character == nullptr) return;
 	if (CombatState != ECombatState::ECS_Unoccupied) return;
 
+	Character->bFinishedSwapping = false;
+
 	if (EquippedWeapon && SecondaryWeapon)
 	{
+		Character->PlaySwapWeaponMontage();
+		CombatState = ECombatState::ECS_SwappingWeapon;
+
 		// 如果当前角色主武器装备，次要武器也装备了，那么就交换主武器和次要武器
 		AWeapon* TempWeapon = EquippedWeapon;
 		EquippedWeapon = SecondaryWeapon;
 		SecondaryWeapon = TempWeapon;
 
-		// 交换武器后，需要将武器的状态设置为装备状态
-		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
-		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
-
-		// 交换武器后，需要将武器的位置设置为装备状态
-		AttachActorToRightHand(EquippedWeapon);
-		AttachActorToBack(SecondaryWeapon);
-
-		// 交换武器后，需要将武器的拥有者设置为角色
-		EquippedWeapon->SetOwner(Character);
-		SecondaryWeapon->SetOwner(Character);
-
-		//// 交换武器后，需要将武器的HUD弹药数量设置
-		EquippedWeapon->SetHUDAmmo();
-		//SecondaryWeapon->SetHUDAmmo();
-
-		// 交换武器后，需要将武器的携带的弹药数量设置
-		UpdateCarriedAmmo();
-
-		// 交换武器后，需要将武器的自定义深度设置
-		EquippedWeapon->EnableCustomDepth(false);
 		SecondaryWeapon->EnableCustomDepth(false);
-
-		// 交换武器后，需要将武器的装备声音设置
-		PlayEquipWeaponSound(EquippedWeapon);
-		PlayEquipWeaponSound(SecondaryWeapon);
-
-		// 交换武器后，需要将武器的装备声音设置
-		ReloadEmptyWeapon();
 	}
 }
 
@@ -637,6 +615,11 @@ void UCombatComponent::Reload()
 	}
 }
 
+bool UCombatComponent::IsValidSwapWeapon() const
+{
+	return EquippedWeapon && SecondaryWeapon;
+}
+
 void UCombatComponent::FinishReloading()
 {
 	if (Character == nullptr) return;
@@ -650,6 +633,57 @@ void UCombatComponent::FinishReloading()
 	{
 		Fire();
 	}
+}
+
+void UCombatComponent::FinishSwapping()
+{
+	if (Character && Character->HasAuthority())
+	{
+		CombatState = ECombatState::ECS_Unoccupied;
+	}
+
+	if (Character) Character->bFinishedSwapping = true;		// 交换武器完成
+
+	if (SecondaryWeapon) SecondaryWeapon->EnableCustomDepth(true);	// 交换武器后，需要将武器的自定义深度设置
+}
+
+void UCombatComponent::FinishSwapAttachWeapon()
+{
+	// 交换武器后，需要将武器的状态设置为装备状态
+	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
+
+	// 交换武器后，需要将武器的位置设置为装备状态
+	AttachActorToRightHand(EquippedWeapon);
+	AttachActorToBack(SecondaryWeapon);
+
+	// 交换武器后，需要将武器的拥有者设置为角色
+	EquippedWeapon->SetOwner(Character);
+	SecondaryWeapon->SetOwner(Character);
+
+	//// 交换武器后，需要将武器的HUD弹药数量设置
+	EquippedWeapon->SetHUDAmmo();
+	//SecondaryWeapon->SetHUDAmmo();
+
+	// 交换武器后，需要将武器的携带的弹药数量设置
+	UpdateCarriedAmmo();
+
+	// 交换武器后，需要将武器的自定义深度设置
+	EquippedWeapon->EnableCustomDepth(false);
+	SecondaryWeapon->EnableCustomDepth(false);
+
+	// 交换武器后，需要将武器的装备声音设置
+	PlayEquipWeaponSound(EquippedWeapon);
+	// PlayEquipWeaponSound(SecondaryWeapon);
+
+	// 交换武器后，需要将武器的装备声音设置
+	ReloadEmptyWeapon();
+
+	if (Character)
+	{
+		Character->bFinishedSwapping = true;
+	}
+	
 }
 
 void UCombatComponent::ServerReload_Implementation()
@@ -752,6 +786,12 @@ void UCombatComponent::OnRep_CombatState()
 			Character->PlayThrowGrenadeMontage();
 			AttachActorToLeftHand(EquippedWeapon);
 			ShowAttachedGrenade(true);
+		}
+		break;
+	case ECombatState::ECS_SwappingWeapon:
+		if (Character && !Character->IsLocallyControlled())
+		{
+			Character->PlaySwapWeaponMontage();
 		}
 		break;
 	default:

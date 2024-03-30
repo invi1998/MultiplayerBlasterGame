@@ -26,8 +26,16 @@ public:
 	void SwapWeapon();
 	void Reload();
 
+	bool IsValidSwapWeapon() const;
+
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();
+
+	UFUNCTION(BlueprintCallable)
+	void FinishSwapping();
+
+	UFUNCTION(BlueprintCallable)
+	void FinishSwapAttachWeapon();
 
 	void FireButtonPressed(bool bPressed);
 
@@ -66,7 +74,7 @@ protected:
 
 	void FireProjectileWeapon();
 
-	void FireHitscanWeapon();
+	void FireHitScanWeapon();
 
 	void FireShotgun();
 

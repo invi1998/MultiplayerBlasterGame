@@ -116,7 +116,7 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	}
 
 	bUseFABRIK = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied;
-	if (BlasterCharacter->IsLocallyControlled() && BlasterCharacter->GetCombatState() == ECombatState::ECS_ThrowingGrenade)
+	if (BlasterCharacter->IsLocallyControlled() && BlasterCharacter->GetCombatState() == ECombatState::ECS_ThrowingGrenade && BlasterCharacter->bFinishedSwapping)	// 只有本地控制的角色才能使用 FABRIK
 	{
 		bUseFABRIK = !BlasterCharacter->IsLocalReloading();
 	}

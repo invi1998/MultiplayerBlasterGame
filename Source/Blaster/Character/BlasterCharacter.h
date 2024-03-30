@@ -33,17 +33,20 @@ public:
 	// 播放开火蒙太奇动画
 	void PlayFireMontage(bool bAiming);
 
-	// 播放开火蒙太奇动画
+	// 播放换弹蒙太奇动画
 	void PlayReloadMontage();
+
+	// 播放交换武器蒙太奇动画
+	void PlaySwapWeaponMontage() const;
 
 	// 播放死亡飞升蒙太奇动画
 	void PlayElimMontage();
 
 	// 播放人物受击的蒙太奇动画
-	void PlayHitReactMontage();
+	void PlayHitReactMontage() const;
 
 	// 播放投掷手榴弹的蒙太奇动画
-	void PlayThrowGrenadeMontage();
+	void PlayThrowGrenadeMontage() const;
 
 	//// 人物受击rpc函数（多播）
 	//UFUNCTION(NetMulticast, Unreliable)
@@ -80,6 +83,8 @@ public:
 
 	UPROPERTY()
 	TMap<FName, class UBoxComponent*> HitCollisionBoxes;	// 命中盒子
+
+	bool bFinishedSwapping = false;	// 是否完成交换
 
 protected:
 	// Called when the game starts or when spawned
@@ -207,6 +212,10 @@ private:
 	// 投掷手榴弹的动画蒙太奇
 	UPROPERTY(EditAnywhere, Category = Combat)
 	class UAnimMontage* ThrowGrenadeMontage;
+
+	// 交换武器的动画蒙太奇
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* SwapWeaponMontage;
 
 	// 如果角色靠太近就隐藏摄像头
 	void HidCameraIfCharacterClose();

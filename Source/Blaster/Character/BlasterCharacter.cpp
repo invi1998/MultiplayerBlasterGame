@@ -433,6 +433,16 @@ void ABlasterCharacter::PlayReloadMontage()
 	}
 }
 
+void ABlasterCharacter::PlaySwapWeaponMontage() const
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if (AnimInstance && SwapWeaponMontage)
+	{
+		AnimInstance->Montage_Play(SwapWeaponMontage);
+	}
+}
+
 void ABlasterCharacter::PlayElimMontage()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -443,7 +453,7 @@ void ABlasterCharacter::PlayElimMontage()
 	}
 }
 
-void ABlasterCharacter::PlayHitReactMontage()
+void ABlasterCharacter::PlayHitReactMontage() const
 {
 	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
 
@@ -457,7 +467,7 @@ void ABlasterCharacter::PlayHitReactMontage()
 	}
 }
 
-void ABlasterCharacter::PlayThrowGrenadeMontage()
+void ABlasterCharacter::PlayThrowGrenadeMontage() const
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
@@ -484,7 +494,7 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const U
 	if (Shield > 0.f)
 	{
 		// 如果护盾大于0，那么就先扣除护盾
-		float DamageToShield = FMath::Clamp(Damage, 0.f, Shield);
+		const float DamageToShield = FMath::Clamp(Damage, 0.f, Shield);
 		Shield -= DamageToShield;
 		DamageToHealth = FMath::Clamp(Damage - DamageToShield, 0.f, Health);
 	}
@@ -579,7 +589,17 @@ void ABlasterCharacter::EquipButtonPressed()
 
 	if (Combat)
 	{
-		ServerEquipButtonPressed();
+		if (Combat->CombatState == ECombatState::ECS_Unoccupied)
+		{
+			ServerEquipButtonPressed();
+		}
+		
+		if (Combat->IsValidSwapWeapon() && !HasAuthority() && Combat->CombatState == ECombatState::ECS_Unoccupied && OverlappingWeapon == nullptr)
+		{
+			PlaySwapWeaponMontage();
+			Combat->CombatState = ECombatState::ECS_SwappingWeapon;
+			bFinishedSwapping = false;
+		}
 	}
 }
 
@@ -815,7 +835,7 @@ void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 		{
 			Combat->EquipWeapon(OverlappingWeapon);
 		}
-		else
+		else if (Combat->IsValidSwapWeapon())
 		{
 			Combat->SwapWeapon();
 		}
