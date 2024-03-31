@@ -49,3 +49,59 @@ private:
 现在，如果武器本身被设置为不使用服务器端倒带，那么在服务器上，无论我们是否受到本地控制，我们仍然会产生一个复制的投射物。未启用服务器端倒带。因此，即使客户端发射武器，炮弹仍将在服务器上产生并复制到客户端。
 
 如果我们的武器没有设置为使用SSR，并且武器在客户端上开火，那么客户端上就不会产生炮弹，因为我们知道服务器最终会产生一个复制的炮弹，我们会在我们的机器上看到它。现在我们知道了什么时候产生复制的和非复制的射弹。
+
+
+
+# WithValidation
+
+**UFunction** 是虚幻引擎4（UE4）反射系统可识别的C++函数。 `UObject `或蓝图函数库可将成员函数声明为UFunction，方法是将 `UFUNCTION `宏放在头文件中函数声明上方的行中。宏将支持 **函数说明符** 更改UE4解译和使用函数的方式。
+
+```
+UFUNCTION([specifier1=setting1, specifier2, ...], [meta(key1="value1", key2, ...)])
+ReturnType FunctionName([Parameter1, Parameter2, ..., ParameterN1=DefaultValueN1, ParameterN2=DefaultValueN2]) [const];
+```
+
+可利用函数说明符将UFunction对 [蓝图可视化脚本 ](https://docs.unrealengine.com/4.27/zh-CN/ProgrammingAndScripting/Blueprints)图表公开，以便开发者从蓝图资源调用或扩展UFunction，而无需更改C++代码。在类的默认属性中，UFunction可绑定到 [委托 ](https://docs.unrealengine.com/4.27/zh-CN/ProgrammingAndScripting/ProgrammingWithCPP/UnrealArchitecture/Delegates)，从而能够执行一些操作（例如将操作与用户输入相关联）。它们还可以充当网络回调，这意味着当某个变量受网络更新影响时，用户可以将其用于接收通知并运行自定义代码。用户甚至可创建自己的控制台命令（通常也称 *debug* 、 *configuration* 或 *cheat code* 命令），并能在开发版本中从游戏控制台调用这些命令，或将拥有自定义功能的按钮添加到关卡编辑器中的游戏对象。
+
+WithValidation 用于声明名称与主函数相同的附加函数，但是末尾需要添加`_Validate`。此函数使用相同的参数，但是会返回`bool`，以指示是否应继续调用主函数。
+
+它可能作为函数调用或者类方法的一个选项出现，用来确保数据的有效性和完整性。
+
+例如，在处理资产导入、保存或加载时，带有“WithValidation”后缀的方法可能会执行额外的数据验证步骤，以确保数据结构符合预期规则，不包含无效引用或其他可能导致运行时错误的情况。这种验证机制对于避免潜在的游戏崩溃、资源丢失等问题至关重要。
+
+在UE5源代码或API中，开发者可能会看到类似这样的用法：
+
+- `SavePackageWithValidation()`: 这种函数调用会在保存关卡或 actor 包时进行严格的数据验证，确保所有关联的数据都是合法且可序列化的。
+- 在蓝图编译或更新过程中，也可能存在类似的验证环节，确保蓝图节点逻辑正确无误。
+
+```c++
+	// 创建server RPC
+	// 这个函数被设计为从客户端调用，然后再服务端进行执行
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerFire(const FVector_NetQuantize& TracerHitTarget, float FireDelay);
+```
+
+如上，添加了一WithValidation标识，就需要给该函数添加一个验证函数，返回bool，可以在cpp中或者直接在h中实现
+
+```c++
+void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TracerHitTarget, float FireDelay)
+{
+	MuticastFire(TracerHitTarget);
+}
+
+// 验证是否可以开火，这个函数是用来验证客户端发送给服务端的开火请求是否合法的
+bool UCombatComponent::ServerFire_Validate(const FVector_NetQuantize& TracerHitTarget, float FireDelay)
+{
+	if (EquippedWeapon)
+	{
+		// 如果当前客户端的武器和服务端的武器的开火延迟是一样的，那么就可以开火（延迟精度为0.001f）
+		if (FMath::IsNearlyEqual(EquippedWeapon->FireDelay, FireDelay, 0.001f))
+		{
+			return true;
+		}
+	}
+
+	return true;
+}
+```
+
