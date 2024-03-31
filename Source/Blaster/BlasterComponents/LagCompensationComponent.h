@@ -34,6 +34,12 @@ struct FFramePackage
 
 	UPROPERTY()
 	ABlasterCharacter* HitCharacter;	// 命中角色
+
+	UPROPERTY()
+	float Health;	// 血量
+
+	UPROPERTY()
+	FVector Location;	// 位置
 };
 
 // 普通武器的服务端倒带结果
@@ -103,6 +109,12 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerScoreRequest_Projectile(class ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, float HitTime, class AWeapon* DamageCauser);	// 服务器端请求得分，传入命中角色，投射起始位置，投射初始速度，命中时间, 伤害来源
 
+	/*
+	 * 设置回溯时间
+	 */
+	UFUNCTION(Server, Reliable)
+	void ServerBacktrackTime(float BacktrackTime, float CostTime);	// 服务器端回溯，传入回溯时间，回溯花费时间
+	
 
 protected:
 	virtual void BeginPlay() override;

@@ -18,8 +18,7 @@ void AJumpPickup::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(OtherActor);
 	if (BlasterCharacter)
 	{
-		UBuffComponent* Buff = BlasterCharacter->GetBuff();
-		if (Buff)
+		if (UBuffComponent* Buff = BlasterCharacter->GetBuff())
 		{
 			Buff->AddJump(JumpZVelocity, JumpBuffTime);
 		}

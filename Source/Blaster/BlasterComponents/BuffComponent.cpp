@@ -16,6 +16,29 @@ UBuffComponent::UBuffComponent()
 	// ...
 }
 
+
+// Called when the game starts
+void UBuffComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// ...
+
+}
+
+// Called every frame
+void UBuffComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	// 每帧调用HealRampUp()方法
+	HealRampUp(DeltaTime);
+
+	// 每帧调用ShieldRampUp()方法
+	ShieldRampUp(DeltaTime);
+
+}
+
 void UBuffComponent::AddHealth(float HealthAmount, float HealingTime)
 {
 	bHealing = true;		// 设置正在治疗为true
@@ -85,14 +108,17 @@ void UBuffComponent::ReplenishShield(float ShieldReplenishAmount, float ShieldRe
 	ShieldAmountToReplenish += ShieldReplenishAmount;		// 计算护盾补充量
 }
 
-
-// Called when the game starts
-void UBuffComponent::BeginPlay()
+void UBuffComponent::AddBacktracking(float BacktrackingTime, float BuffAliveTime, float BacktrackingCostTime)
 {
-	Super::BeginPlay();
+	if (Character == nullptr) return;		// 如果Character为空，就返回
 
-	// ...
-	
+	if (BacktrackingTimerHandle.IsValid())		// 如果计时器有效
+	{
+		Character->GetWorldTimerManager().ClearTimer(BacktrackingTimerHandle);		// 清除计时器
+	}
+	Character->GetWorldTimerManager().SetTimer(BacktrackingTimerHandle, this, &UBuffComponent::ResetBacktracking, BuffAliveTime);		// 设置计时器
+
+	Character->SetBacktrackingTime(BacktrackingTime, BacktrackingCostTime);		// 设置回溯时间
 }
 
 void UBuffComponent::HealRampUp(float DeltaTime)
@@ -135,6 +161,13 @@ void UBuffComponent::ShieldRampUp(float DeltaTime)
 	}
 }
 
+void UBuffComponent::BacktrackingRampUp(float DeltaTime)
+{
+	if (!bBacktracking || Character == nullptr || Character->IsElimmed()) return;		// 如果没有回溯或者Character为空，或者Character已经被淘汰，就返回
+
+	const float BacktrackingTimeThisFrame = BacktrackingRate * DeltaTime;		// 计算本帧回溯的时间节点
+}
+
 
 void UBuffComponent::ResetSpeed()
 {
@@ -163,6 +196,15 @@ void UBuffComponent::RestJump()
 	MulticastJumpBuff(InitialJumpZVelocity, 0.0f);		// 多播跳跃buff
 }
 
+void UBuffComponent::ResetBacktracking()
+{
+	if (Character == nullptr) return;		// 如果Character为空，就返回
+
+	Character->SetBacktrackingTime(0.0f, 0.f);		// 设置回溯时间
+
+	MulticastBacktracking(0.0f, 0.0f);		// 多播回溯buff
+}
+
 void UBuffComponent::MulticastJumpBuff_Implementation(float JumpZVelocity, float JumpTime)
 {
 	if (Character == nullptr || Character->GetCharacterMovement() == nullptr) return;		// 如果Character为空或者Character的CharacterMovement为空，就返回
@@ -170,16 +212,9 @@ void UBuffComponent::MulticastJumpBuff_Implementation(float JumpZVelocity, float
 	Character->GetCharacterMovement()->JumpZVelocity = JumpZVelocity;		// 设置跳跃速度
 }
 
-// Called every frame
-void UBuffComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UBuffComponent::MulticastBacktracking_Implementation(float BacktrackingTime, float BuffAliveTime)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// 每帧调用HealRampUp()方法
-	HealRampUp(DeltaTime);
-
-	// 每帧调用ShieldRampUp()方法
-	ShieldRampUp(DeltaTime);
+	if (Character == nullptr) return;		// 如果Character为空，就返回
 
 }
 

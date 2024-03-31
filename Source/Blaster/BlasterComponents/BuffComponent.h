@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Blaster/Pickups/BacktrackingPickup.h"
 #include "Blaster/Pickups/HealthPickup.h"
 #include "Blaster/Pickups/ShieldPickup.h"
 #include "Components/ActorComponent.h"
@@ -30,6 +31,7 @@ public:
 
 	void SetInitialJumpZVelocity(float JumpZVelocity);		// 设置初始跳跃速度
 	void ReplenishShield(float ShieldReplenishAmount, float ShieldReplenishTime);		// 增加护盾 传入护盾补充量和护盾补充时间
+	void AddBacktracking(float BacktrackingTime, float BuffAliveTime, float BacktrackingCostTime);					// 增加回溯时间 传入回溯时间和buff存活时间, 回溯消耗时间
 
 protected:
 	// Called when the game starts
@@ -38,6 +40,8 @@ protected:
 	void HealRampUp(float DeltaTime);		// 治疗速率上升, 传入DeltaTime, 用于计算治疗速率
 
 	void ShieldRampUp(float DeltaTime);		// 护盾速率上升, 传入DeltaTime, 用于计算护盾速率
+
+	void BacktrackingRampUp(float DeltaTime);		// 回溯速率上升, 传入DeltaTime, 用于计算回溯速率
 
 private:
 	UPROPERTY()
@@ -78,6 +82,18 @@ private:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastJumpBuff(float JumpZVelocity, float JumpTime);		// 跳跃buff多播函数
+
+	/*
+	 * 回溯buff
+	 */
+	FTimerHandle BacktrackingTimerHandle;		// 回溯buff计时器句柄
+	void ResetBacktracking();		// 重置回溯
+
+	bool bBacktracking = false;		// 是否正在回溯
+	float BacktrackingRate = 0.0f;	// 回溯速率
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastBacktracking(float BacktrackingTime, float BuffAliveTime);		// 回溯buff多播函数
 
 
 public:	

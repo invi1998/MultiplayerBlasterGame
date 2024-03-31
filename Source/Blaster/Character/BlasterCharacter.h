@@ -65,6 +65,7 @@ public:
 	virtual void Destroyed() override;
 
 	void SetAfterHealHealth(float Clamp) { AfterHealHealth = Clamp; }
+	void SetBacktrackingTime(float BacktrackingTime, float CostTime);		// 将玩家回溯到指定时间
 
 	UPROPERTY(Replicated)
 	bool bDisableGamePlay = false;

@@ -299,6 +299,14 @@ void ABlasterCharacter::Destroyed()
 	}
 }
 
+void ABlasterCharacter::SetBacktrackingTime(float BacktrackingTime, float CostTime)
+{
+	if (LagCompensation)
+	{
+		LagCompensation->ServerBacktrackTime(BacktrackingTime, CostTime);
+	}
+}
+
 // Called when the game starts or when spawned
 void ABlasterCharacter::BeginPlay()
 {

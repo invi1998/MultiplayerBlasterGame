@@ -31,6 +31,8 @@ void ULagCompensationComponent::SaveFramePackage(FFramePackage& Package)
 	{
 		Package.Time = GetWorld()->TimeSeconds;
 		Package.HitCharacter = Character;
+		Package.Health = Character->GetHealth();
+		Package.Location = Character->GetActorLocation();
 		for(auto& BoxPair : Character->HitCollisionBoxes)
 		{
 			FBoxInformation BoxInfo;
@@ -687,3 +689,17 @@ FServerSideRewindResult ULagCompensationComponent::ServerSideRewind_Projectile(
 
 	return CheckHit_Projectile(RewindFramePackage, HitCharacter, TraceStart, InitialVelocity);	// 检查命中
 }
+
+void ULagCompensationComponent::ServerBacktrackTime_Implementation(float BacktrackTime, float CostTime)
+{
+	if (Character == nullptr) return;
+
+	if (FrameHistory.Num() == 0) return;		// 历史帧数据为空，直接返回
+
+	const FFramePackage FramePackage = GetFrameToCheck(Character, BacktrackTime);	// 获取到达时间的帧数据
+
+	if (FramePackage.HitCharacter == nullptr) return;
+
+	
+}
+
