@@ -8,7 +8,7 @@ public class Blaster : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;	// PCHUsageMode是一个枚举类型，包含了UseExplicitOrSharedPCHs、UseSharedPCHs、Default等类型
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "Niagara" });	// PublicDependencyModuleNames是一个字符串数组，用于指定需要引用的模块名称 这里引用了Core、CoreUObject、Engine、InputCore、Niagara模块
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "Niagara", "MultiplayerSessions", "OnlineSubsystem", "OnlineSubsystemSteam" });	// PublicDependencyModuleNames是一个字符串数组，用于指定需要引用的模块名称 这里引用了Core、CoreUObject、Engine、InputCore、Niagara模块
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
