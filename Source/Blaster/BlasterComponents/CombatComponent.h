@@ -84,17 +84,17 @@ protected:
 
 	// 创建server RPC
 	// 这个函数被设计为从客户端调用，然后再服务端进行执行
-	UFUNCTION(Server, Reliable)
-	void ServerFire(const FVector_NetQuantize& TracerHitTarget);
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerFire(const FVector_NetQuantize& TracerHitTarget, float FireDelay);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MuticastFire(const FVector_NetQuantize& TracerHitTarget);
 
-	UFUNCTION(Server, Reliable)
-	void ServerShotgunFire(const TArray<FVector_NetQuantize>& TraceHitTargets);		// 服务器端霰弹枪开火
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerShotgunFire(const TArray<FVector_NetQuantize>& TraceHitTargets, float FireDelay);		// 服务器端霰弹枪开火
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastShotgunFire(const TArray<FVector_NetQuantize>& TraceHitTargets);		// 多播霰弹枪开火
+	void MulticastShotgunFire(const TArray<FVector_NetQuantize>& TraceHitTargets, float FireDelay);		// 多播霰弹枪开火
 
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 

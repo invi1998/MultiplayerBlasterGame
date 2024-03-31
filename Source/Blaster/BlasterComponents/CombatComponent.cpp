@@ -226,7 +226,7 @@ void UCombatComponent::FireProjectileWeapon()
 			LocalFire(HitTarget);
 		}
 		
-		ServerFire(HitTarget);
+		ServerFire(HitTarget, EquippedWeapon->FireDelay);
 	}
 }
 
@@ -242,7 +242,7 @@ void UCombatComponent::FireHitScanWeapon()
 			LocalFire(HitTarget);
 		}
 
-		ServerFire(HitTarget);
+		ServerFire(HitTarget, EquippedWeapon->FireDelay);
 	}
 }
 
@@ -259,7 +259,7 @@ void UCombatComponent::FireShotgun()
 			LocalShotgunFire(HitTargets);
 		}
 		
-		ServerShotgunFire(HitTargets);
+		ServerShotgunFire(HitTargets, Shotgun->FireDelay);
 	}
 }
 
@@ -383,17 +383,49 @@ void UCombatComponent::FireTimerFinished()
 	ReloadEmptyWeapon();
 }
 
-void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TracerHitTarget)
+void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TracerHitTarget, float FireDelay)
 {
 	MuticastFire(TracerHitTarget);
 }
 
-void UCombatComponent::ServerShotgunFire_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets)
+// 验证是否可以开火，这个函数是用来验证客户端发送给服务端的开火请求是否合法的
+bool UCombatComponent::ServerFire_Validate(const FVector_NetQuantize& TracerHitTarget, float FireDelay)
 {
-	MulticastShotgunFire(TraceHitTargets);
+	if (EquippedWeapon)
+	{
+		// 如果当前客户端的武器和服务端的武器的开火延迟是一样的，那么就可以开火（延迟精度为0.001f）
+		if (FMath::IsNearlyEqual(EquippedWeapon->FireDelay, FireDelay, 0.001f))
+		{
+			return true;
+		}
+	}
+
+	return true;
 }
 
-void UCombatComponent::MulticastShotgunFire_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets)
+void UCombatComponent::ServerShotgunFire_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets, float FireDelay)
+{
+	MulticastShotgunFire(TraceHitTargets, FireDelay);
+}
+
+// 验证是否可以开火，这个函数是用来验证客户端发送给服务端的开火请求是否合法的
+bool UCombatComponent::ServerShotgunFire_Validate(const TArray<FVector_NetQuantize>& TraceHitTargets,
+	float FireDelay)
+{
+	if (EquippedWeapon)
+	{
+		// 如果当前客户端的武器和服务端的武器的开火延迟是一样的，那么就可以开火（延迟精度为0.001f）
+		if (FMath::IsNearlyEqual(EquippedWeapon->FireDelay, FireDelay, 0.001f))
+		{
+			return true;
+		}
+	}
+	
+	return true;
+
+}
+
+void UCombatComponent::MulticastShotgunFire_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets, float FireDelay)
 {
 	if (Character && Character->IsLocallyControlled() && !Character->HasAuthority()) return;	// 如果是客户端，那么客户端不需要再次进行多播，因为客户端已经在本地进行了多播
 
