@@ -26,7 +26,7 @@ void UReturnToMainMenu::MenuSetup()
 		}
 	}
 
-	if (ReturnButton)
+	if (ReturnButton && !ReturnButton->OnClicked.IsBound())		// 如果返回按钮存在并且未绑定点击事件
 	{
 		ReturnButton->OnClicked.AddDynamic(this, &UReturnToMainMenu::ReturnButtonClicked);	// 绑定返回按钮点击事件
 	}
@@ -56,6 +56,16 @@ void UReturnToMainMenu::MenuTeardown()
 			PlayerController->SetInputMode(InputMode);	// 设置输入模式
 			PlayerController->SetShowMouseCursor(false);	// 隐藏鼠标
 		}
+	}
+
+	if (ReturnButton && ReturnButton->OnClicked.IsBound())		// 如果返回按钮存在并且绑定点击事件
+	{
+		ReturnButton->OnClicked.RemoveDynamic(this, &UReturnToMainMenu::ReturnButtonClicked);	// 取消绑定返回按钮点击事件
+	}
+
+	if (MultiplayerSessionsSubsystem && MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.IsBound())	// 如果多人游戏会话子系统存在并且绑定销毁会话完成事件
+	{
+		MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.RemoveDynamic(this, &UReturnToMainMenu::OnDestroySession);	// 取消绑定销毁会话完成事件
 	}
 }
 

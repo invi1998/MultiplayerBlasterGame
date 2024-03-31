@@ -42,6 +42,8 @@ public:
 	FHighPingDelegate HighPingDelegate;	// 高延迟委托
 
 protected:
+	void ShowReturnToMainMenu();	// 返回主菜单
+	virtual void SetupInputComponent() override;	// 设置输入组件
 	virtual void BeginPlay() override;	// 当游戏开始时，调用该函数
 	virtual void OnPossess(APawn* InPawn) override;		// 当玩家控制器开始控制一个Pawn时，调用该函数
 	void SetHUDTime();	// 设置HUD时间
@@ -88,10 +90,21 @@ protected:
 
 private:
 	UPROPERTY()
-		class ABlasterHUD* BlasterHUD;	// HUD
+	class ABlasterHUD* BlasterHUD;	// HUD
 
 	UPROPERTY()
-		class ABlasterGameMode* BlasterGameMode;	// 游戏模式
+	class ABlasterGameMode* BlasterGameMode;	// 游戏模式
+
+	/*
+	 * 返回主菜单
+	 */
+	UPROPERTY(EditAnywhere, Category=HUD)
+	TSubclassOf<class UUserWidget> ReturnToMainMenuWidget;	// 返回主菜单类
+
+	UPROPERTY()
+	class UReturnToMainMenu* ReturnToMainMenu;	// 返回主菜单
+
+	bool bReturnToMainMenuOpen = false;	// 返回主菜单是否打开
 
 	float LevelStartingTime = 0.f;	//	游戏开始时间
 	float MatchTime = 0.f;		// 游戏时间
