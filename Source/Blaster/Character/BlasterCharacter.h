@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NiagaraComponent.h"
 #include "Blaster/BlasterComponents/CombatComponent.h"
 #include "GameFramework/Character.h"
 #include "Blaster/BlasterTypes/TurningInPlace.h"
@@ -93,6 +94,12 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerLeftGame();	// 服务端离开游戏
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastGainedTheCrown();	// 多播获得王冠
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastLostTheCrown();	// 多播失去王冠
 
 protected:
 	// Called when the game starts or when spawned
@@ -349,7 +356,7 @@ private:
 	float ElimDelay = 3.f;
 
 	/*
-	 * 角色溶解效果
+	 * 角色溶解效果 Elim Dissolve Effect
 	 */
 	UPROPERTY(VisibleAnywhere)
 	UTimelineComponent* DissolveTimeline;
@@ -372,6 +379,16 @@ private:
 	// 将分配给角色蓝图的材质实例
 	UPROPERTY(EditAnywhere, Category = Elim)
 	UMaterialInstance* DissolveMaterialInstance;
+
+
+	/*
+	 * 排名王冠
+	 */
+	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* CrowSystem;
+
+	UPROPERTY()
+	UNiagaraComponent* CrowComponent;
 
 	/*
 	 * Elim Bot

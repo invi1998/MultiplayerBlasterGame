@@ -19,7 +19,7 @@ public:
 	void UpdateTopScore(class ABlasterPlayerState* ScoringPlayer);
 
 	UPROPERTY(Replicated)
-		TArray<class ABlasterPlayerState*> TopScoringPlayers;
+	TArray<class ABlasterPlayerState*> TopScoringPlayers;
 
 private:
 	float TopScore = 0.f;

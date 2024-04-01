@@ -22,6 +22,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "Blaster/GameState/BlasterGameState.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -234,6 +237,12 @@ void ABlasterCharacter::PollInit()
 		{
 			BlasterPlayerState->AddToScore(0.f);
 			BlasterPlayerState->AddToDefeats(0);
+
+			ABlasterGameState* BlasterGameState = Cast<ABlasterGameState>(UGameplayStatics::GetGameState(this));
+			if (BlasterGameState && BlasterGameState->TopScoringPlayers.Contains(BlasterPlayerState))
+			{
+				MulticastGainedTheCrown();
+			}
 		}
 	}
 }
@@ -304,6 +313,44 @@ void ABlasterCharacter::SetBacktrackingTime(float BacktrackingTime, float CostTi
 	if (LagCompensation)
 	{
 		LagCompensation->ServerBacktrackTime(BacktrackingTime, CostTime);
+	}
+}
+
+void ABlasterCharacter::MulticastGainedTheCrown_Implementation()
+{
+	if (!CrowSystem)
+	{
+		UKismetSystemLibrary::PrintString(this, "CrowSystem is null", true, true, FLinearColor::Red, 5.f);
+		return;	
+	}
+	if (CrowComponent == nullptr)
+	{
+		CrowComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			CrowSystem, 
+			GetCapsuleComponent(),
+			FName(),
+			GetActorLocation() + FVector(0.f, 0.f, 110.f),
+			GetActorRotation(),
+			EAttachLocation::KeepWorldPosition,		// 保持世界位置
+			false
+			);
+	}
+	if (CrowComponent)
+	{
+		UKismetSystemLibrary::PrintString(this, "CrowComponent is not null", true, true, FLinearColor::Green, 5.f);
+		CrowComponent->Activate();	// 激活
+	}
+	else
+	{
+		UKismetSystemLibrary::PrintString(this, "CrowComponent is null", true, true, FLinearColor::Red, 5.f);
+	}
+}
+
+void ABlasterCharacter::MulticastLostTheCrown_Implementation()
+{
+	if (CrowComponent)
+	{
+		CrowComponent->DestroyComponent();	// 销毁组件
 	}
 }
 
@@ -1034,6 +1081,11 @@ void ABlasterCharacter::MulticastElim_Implementation(bool bPlayerLeftGame)
 	if (bHideSniperScope)
 	{
 		ShowSniperScopeWidget(false);
+	}
+
+	if (CrowComponent)
+	{
+		CrowComponent->DestroyInstance();
 	}
 
 	// 设置复活倒计时
