@@ -139,7 +139,15 @@ void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* ElimmedCharacter, ABl
 			{
 				BlasterPlayer->BroadcastElimAnnouncement(AttackPlayerState, VictimPlayerState);
 			}
+			else
+			{
+				UKismetSystemLibrary::PrintString(this, "BlasterPlayer is nullptr", true, true, FLinearColor::Red, 5.f);
+			}
 		}
+	}
+	else
+	{
+		UKismetSystemLibrary::PrintString(this, "AttackPlayerState or VictimPlayerState is nullptr", true, true, FLinearColor::Red, 5.f);
 	}
 	
 }

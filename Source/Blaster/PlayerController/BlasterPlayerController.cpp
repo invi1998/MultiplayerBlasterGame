@@ -717,6 +717,10 @@ void ABlasterPlayerController::ClientElimAnnouncement_Implementation(APlayerStat
 			}
 		}
 	}
+	else
+	{
+		UKismetSystemLibrary::PrintString(this, FString("PlayerState is null"), true, true, FLinearColor::Red, 5.f);
+	}
 
 	
 }

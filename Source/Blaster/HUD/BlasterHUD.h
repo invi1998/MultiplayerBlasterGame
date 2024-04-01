@@ -71,6 +71,15 @@ private:
 	UPROPERTY()
 	class APlayerController* OwnerPlayerController;
 
+	UPROPERTY(EditAnywhere, Category = "ElimAnnoucement")
+	float ElimAnnouncementTime = 5.f;	// 击杀公告时间
+
+	UFUNCTION()
+	void ElimAnnouncementTimerFinished(UElimAnnouncement* MsgToRemove);	// 击杀公告时间结束
+
+	UPROPERTY()
+	TArray<UElimAnnouncement*> ElimMassages;	// 击杀公告消息
+
 public:
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
 };
