@@ -36,19 +36,26 @@ public:
 	virtual void DrawHUD() override;
 
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
-		TSubclassOf<class UUserWidget> CharacterOverlayClass;
+	TSubclassOf<class UUserWidget> CharacterOverlayClass;
 
 	UPROPERTY()
-		class UCharacterOverlay* CharacterOverlay;
+	class UCharacterOverlay* CharacterOverlay;
 
 	UPROPERTY(EditAnywhere, Category = "Announcement")
-		TSubclassOf<UUserWidget> AnnouncementClass;
+	TSubclassOf<UUserWidget> AnnouncementClass;
+
+	UPROPERTY(EditAnywhere, Category="ElimAnnoucement")
+	TSubclassOf<class UElimAnnouncement> ElimAnnouncementClass;
 
 	UPROPERTY()
-		class UAnnouncement* Announcement;
+	class UAnnouncement* Announcement;
+
+	//UPROPERTY()
+	//class UElimAnnouncement* ElimAnnouncement;
 
 	void AddCharacterOverlay();
 	void AddAnnouncement();
+	void AddElimAnnouncement(FString Attacker, FString Victim);
 
 protected:
 	virtual void BeginPlay() override;
@@ -59,7 +66,10 @@ private:
 	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor Color);
 
 	UPROPERTY(EditAnywhere)
-		float CrosshairSpreadMax = 16.f;
+	float CrosshairSpreadMax = 16.f;
+
+	UPROPERTY()
+	class APlayerController* OwnerPlayerController;
 
 public:
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }

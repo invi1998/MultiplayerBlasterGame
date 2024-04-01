@@ -129,6 +129,19 @@ void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* ElimmedCharacter, ABl
 	{
 		ElimmedCharacter->Elim(false);
 	}
+
+	// 通知所有玩家，谁击杀了谁
+	if (AttackPlayerState && VictimPlayerState)
+	{
+		for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+		{
+			if (ABlasterPlayerController* BlasterPlayer = Cast<ABlasterPlayerController>(*Iterator))
+			{
+				BlasterPlayer->BroadcastElimAnnouncement(AttackPlayerState, VictimPlayerState);
+			}
+		}
+	}
+	
 }
 
 void ABlasterGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AController* ElimmedController)

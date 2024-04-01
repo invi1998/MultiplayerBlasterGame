@@ -41,6 +41,8 @@ public:
 
 	FHighPingDelegate HighPingDelegate;	// 高延迟委托
 
+	void BroadcastElimAnnouncement(APlayerState* Attacker, APlayerState* Victim);	// 广播击杀公告
+
 protected:
 	void ShowReturnToMainMenu();	// 返回主菜单
 	virtual void SetupInputComponent() override;	// 设置输入组件
@@ -65,7 +67,7 @@ protected:
 
 	// 客户端与服务器同步时间的间隔（频率）
 	UPROPERTY(EditAnywhere, Category = Time)
-		float TimeSyncFrequency = 5.f;	// 时间同步频率
+	float TimeSyncFrequency = 5.f;	// 时间同步频率
 
 	float TimeSyncRunningTime = 0.f;	// 时间同步运行时间
 
@@ -75,11 +77,11 @@ protected:
 
 	// 服务器检查游戏状态
 	UFUNCTION(Server, Reliable)
-		void ServerCheckMatchState();
+	void ServerCheckMatchState();
 
 	// 客户端加入游戏
 	UFUNCTION(Client, Reliable)
-		void ClientJoinMidGame(FName StateOfMatch, float Warmup, float Match, float Cooldown, float StartingTime);	// 客户端在游戏中途加入
+	void ClientJoinMidGame(FName StateOfMatch, float Warmup, float Match, float Cooldown, float StartingTime);	// 客户端在游戏中途加入
 
 
 	void HighPingWarning();	// 高延迟警告
@@ -87,6 +89,9 @@ protected:
 	void StopHighPingWarning();	// 停止高延迟警告
 
 	void CheckHighPing(float DeltaSeconds);	// 检查高延迟
+
+	UFUNCTION(Client, Reliable)
+	void ClientElimAnnouncement(APlayerState* Attacker, APlayerState* Victim);	// 客户端击杀公告
 
 private:
 	UPROPERTY()
