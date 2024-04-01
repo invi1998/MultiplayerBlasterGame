@@ -42,6 +42,7 @@ void AProjectileWeapon::Fire(const FVector& HitTarget)
 					);
 					SpawnedProjectile->bUseServerSideRewind = false;
 					SpawnedProjectile->Damage = Damage;
+					SpawnedProjectile->HeadShotDamage = HeadShotDamage;	// 设置头部伤害
 				}
 				else	// 服务端，非本地控制，即客户端玩家，生成非属性复制的子弹，倒带
 				{
@@ -68,6 +69,7 @@ void AProjectileWeapon::Fire(const FVector& HitTarget)
 					SpawnedProjectile->TraceStart = SocketTransform.GetLocation();	// 设置倒带位置
 					SpawnedProjectile->InitialVelocity = SpawnedProjectile->GetActorForwardVector() * SpawnedProjectile->InitialSpeed;	// 设置倒带初始速度（精度为0.01）
 					SpawnedProjectile->Damage = Damage;	// 设置伤害
+					SpawnedProjectile->HeadShotDamage = HeadShotDamage;	// 设置头部伤害
 				}
 				else	// 客户端，非本地控制，即其他客户端机器玩家，生成非属性复制的子弹，不倒带，他会在自己的客户端进行倒带
 				{
@@ -93,6 +95,7 @@ void AProjectileWeapon::Fire(const FVector& HitTarget)
 				);
 				SpawnedProjectile->bUseServerSideRewind = false;
 				SpawnedProjectile->Damage = Damage;
+				SpawnedProjectile->HeadShotDamage = HeadShotDamage;	// 设置头部伤害
 			}
 		}
 		

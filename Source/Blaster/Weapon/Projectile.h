@@ -29,8 +29,14 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float InitialSpeed = 15000.f;		// 初始速度
-	
+
+	// 仅用于设置榴弹和火箭弹的伤害
+	UPROPERTY(EditAnywhere)
 	float Damage = 20.f;
+
+	// 对榴弹和火箭筒并不重要，因为对于爆炸伤害，没有头部伤害区分
+	UPROPERTY(EditAnywhere)
+	float HeadShotDamage = 50.f;
 
 protected:
 	// Called when the game starts or when spawned

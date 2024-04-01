@@ -46,8 +46,10 @@ void AProjectileBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 		{
 			if (OwnerCharacter->HasAuthority() && !bUseServerSideRewind)	// 服务端，不使用服务端倒带
 			{
+				const float FinalDamage = Hit.BoneName.ToString() == "head" ? HeadShotDamage : Damage;	// 如果是头部射击，造成头部伤害，否则造成普通伤害
+
 				// 服务端，不使用服务端倒带
-				UGameplayStatics::ApplyDamage(OtherActor, Damage, OwnerController, this, UDamageType::StaticClass());
+				UGameplayStatics::ApplyDamage(OtherActor, FinalDamage, OwnerController, this, UDamageType::StaticClass());
 				Super::OnHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 				return;
 			}
