@@ -45,9 +45,11 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 				// 如果是服务器，并且客户端不使用服务器倒带，那么就直接造成伤害
 				if (HasAuthority() && bCauseAuthDamage)
 				{
+					float finalDamage = FireHit.BoneName.ToString() == "head" ? HeadShotDamage : Damage;	// 如果是头部射击，造成头部伤害，否则造成普通伤害
+
 					UGameplayStatics::ApplyDamage(
 						BlasterCharacter,
-						Damage,
+						finalDamage,
 						InstigatorController,
 						this,
 						UDamageType::StaticClass()
@@ -70,8 +72,6 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 							this);
 					}
 				}
-
-				
 			}
 
 			if (ImpactParticles)
@@ -133,6 +133,10 @@ void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& Hi
 		if (OutHit.bBlockingHit)
 		{
 			BeamEnd = OutHit.ImpactPoint;
+		}
+		else
+		{
+			OutHit.ImpactPoint = End;
 		}
 
 		// Debug

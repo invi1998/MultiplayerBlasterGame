@@ -158,7 +158,10 @@ protected:
 		);
 
 	UPROPERTY(EditAnywhere)
-	float Damage = 20.f;
+	float Damage = 20.f;	// 武器伤害
+
+	UPROPERTY(EditAnywhere)
+	float HeadShotDamage = 50.f;	// 爆头伤害
 
 	UPROPERTY(Replicated, EditAnywhere)
 	bool bUseServerSideRewind = true;		// 是否使用服务器端倒带
@@ -241,4 +244,5 @@ public:
 	FORCEINLINE int32 GetMagCapacity() const { return MagCapacity; }
 
 	FORCEINLINE float GetDamage() const { return Damage; }
+	FORCEINLINE float GetHeadShotDamage() const { return HeadShotDamage; }
 };

@@ -31,7 +31,8 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 		// 因为霰弹枪子弹散射的缘故，它有可能同时命中多个角色，我们也需要处理这种情况
 		// 这里采用一个map结构处理，键为角色指针，值为子弹命中数量
 		// 击中角色和对应数量的map映射
-		TMap<ABlasterCharacter*, uint32> HitMap;
+		TMap<ABlasterCharacter*, uint32> HitMap;			// 用于存储击中角色和对应数量的map映射
+		TMap<ABlasterCharacter*, uint32> HeadShotHitMap;	// 用于存储击中角色和对应数量的map映射 (头部击中)
 
 		for (FVector_NetQuantize HitTarget : HitTargets)
 		{
@@ -41,14 +42,31 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());
 			if (BlasterCharacter)
 			{
-				if (HitMap.Contains(BlasterCharacter))
+				const bool bIsHeadShot = FireHit.BoneName.ToString() == "head";
+
+				if (bIsHeadShot)
 				{
-					HitMap[BlasterCharacter]++;
+					if (HeadShotHitMap.Contains(BlasterCharacter))
+					{
+						HeadShotHitMap[BlasterCharacter]++;
+					}
+					else
+					{
+						HeadShotHitMap.Emplace(BlasterCharacter, 1);
+					}
 				}
 				else
 				{
-					HitMap.Emplace(BlasterCharacter, 1);
+					if (HitMap.Contains(BlasterCharacter))
+					{
+						HitMap[BlasterCharacter]++;
+					}
+					else
+					{
+						HitMap.Emplace(BlasterCharacter, 1);
+					}
 				}
+				
 			}
 
 
@@ -76,30 +94,59 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 		}
 
 		TArray<ABlasterCharacter*> HitCharacters;
+		TMap<ABlasterCharacter*, float> HitDamageMap;
 
 		// 计算伤害并应用在角色身上
 		for (auto HitPair : HitMap)
 		{
-			if (HitPair.Key && InstigatorController)
+			if (HitPair.Key)
 			{
-				bool bCauseAuthDamage = !bUseServerSideRewind || OwnerPawn->IsLocallyControlled();	// 是否造成伤害，如果不使用服务器倒带，或者是本地控制，那么就造成伤害
-
-				if (HasAuthority() && bCauseAuthDamage)
+				if (HitDamageMap.Contains(HitPair.Key))
 				{
-					UGameplayStatics::ApplyDamage(
-						HitPair.Key,		// 被击中的角色
-						Damage * HitPair.Value,	// 伤害乘以命中数量
-						InstigatorController,
-						this,
-						UDamageType::StaticClass()
-					);
+					HitDamageMap[HitPair.Key] += Damage * HitPair.Value;
+				}
+				else
+				{
+					HitDamageMap.Emplace(HitPair.Key, Damage * HitPair.Value);
 				}
 				
-				HitCharacters.Add(HitPair.Key);
+				HitCharacters.AddUnique(HitPair.Key);
 			}
 		}
 
-		
+		// 计算爆头伤害并应用在角色身上
+		for (auto HitHeadPair : HeadShotHitMap)
+		{
+			if (HitHeadPair.Key)
+			{
+				if (HitDamageMap.Contains(HitHeadPair.Key))
+				{
+					HitDamageMap[HitHeadPair.Key] += HeadShotDamage * HitHeadPair.Value;
+				}
+				else
+				{
+					HitDamageMap.Emplace(HitHeadPair.Key, HeadShotDamage * HitHeadPair.Value);
+				}
+
+				HitCharacters.AddUnique(HitHeadPair.Key);
+			}
+		}
+
+		bool bCauseAuthDamage = !bUseServerSideRewind || OwnerPawn->IsLocallyControlled();	// 是否造成伤害，如果不使用服务器倒带，或者是本地控制，那么就造成伤害
+
+		for (auto DamagePair : HitDamageMap)
+		{
+			if (DamagePair.Key && HasAuthority() && bCauseAuthDamage && InstigatorController)
+			{
+				UGameplayStatics::ApplyDamage(
+					DamagePair.Key,			// 被击中的角色
+					DamagePair.Value,		// 伤害
+					InstigatorController,
+					this,
+					UDamageType::StaticClass()
+				);
+			}
+		}
 
 		if (!HasAuthority() && bUseServerSideRewind)
 		{
