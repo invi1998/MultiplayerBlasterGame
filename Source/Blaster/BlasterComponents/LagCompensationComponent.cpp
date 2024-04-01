@@ -482,10 +482,10 @@ FServerSideRewindResult_Shotgun ULagCompensationComponent::CheckHit_Shotgun(cons
 			);
 			if (ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(ConfirmHitResult.GetActor()))
 			{
-				if (UBoxComponent* HitBox = Cast<UBoxComponent>(ConfirmHitResult.Component.Get()))
+				/*if (UBoxComponent* HitBox = Cast<UBoxComponent>(ConfirmHitResult.Component.Get()))
 				{
 					DrawDebugBox(World, HitBox->GetComponentLocation(), HitBox->GetScaledBoxExtent(), HitBox->GetComponentRotation().Quaternion(), FColor::Blue, false, 5.0f);
-				}
+				}*/
 
 				if (ShotgunResult.BodyShots.Contains(BlasterCharacter))
 				{

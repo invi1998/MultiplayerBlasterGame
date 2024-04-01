@@ -2,6 +2,7 @@
 
 #include "Projectile.h"
 
+#include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
