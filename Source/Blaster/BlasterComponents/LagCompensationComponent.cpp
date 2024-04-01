@@ -600,14 +600,16 @@ void ULagCompensationComponent::ServerScoreRequest_Implementation(ABlasterCharac
 	if (HitCharacter == nullptr) return;
 
 	FServerSideRewindResult Result = ServerSideRewind(HitCharacter, TraceStart, HitLocation, HitTime);	// 服务器端倒带
-	if (Result.bHitConfirmed && DamageCauser && Character && Character->Controller)
+	if (Result.bHitConfirmed && Character && Character->Controller)
 	{
+		const float TotalDamage = Result.bHeadShot ? Character->GetEquippedWeapon()->GetHeadShotDamage() : Character->GetEquippedWeapon()->GetDamage();	// 计算总伤害
+
 		// 如果命中确认，就处理伤害
 		UGameplayStatics::ApplyDamage(
 			HitCharacter,	// 受击角色
-			DamageCauser->GetDamage(), // 伤害值
+			TotalDamage, // 伤害值
 			Character->Controller,	// 伤害来源
-			DamageCauser,	// 伤害来源
+			Character->GetEquippedWeapon(),	// 伤害来源
 			UDamageType::StaticClass()	// 伤害类型
 			);
 	}
@@ -640,7 +642,7 @@ void ULagCompensationComponent::ServerScoreRequest_Shotgun_Implementation(
 
 			if (Result.HeadShots.Contains(HitCharacter))
 			{
-				HeadDamage = Result.HeadShots[HitCharacter] * Character->GetEquippedWeapon()->GetDamage();	// 计算爆头伤害
+				HeadDamage = Result.HeadShots[HitCharacter] * Character->GetEquippedWeapon()->GetHeadShotDamage();	// 计算爆头伤害
 				// UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Head Damage: %f"), HeadDamage), true, false, FLinearColor::Red, 5.f);
 			}
 			if (Result.BodyShots.Contains(HitCharacter))
@@ -670,10 +672,12 @@ void ULagCompensationComponent::ServerScoreRequest_Projectile_Implementation(ABl
 	const FServerSideRewindResult Result = ServerSideRewind_Projectile(HitCharacter, TraceStart, InitialVelocity, HitTime);	// 服务器端倒带
 	if (Result.bHitConfirmed && Character && Character->Controller)
 	{
+		const float TotalDamage = Result.bHeadShot ? Character->GetEquippedWeapon()->GetHeadShotDamage() : Character->GetEquippedWeapon()->GetDamage();	// 计算总伤害
+
 		// 如果命中确认，就处理伤害
 		UGameplayStatics::ApplyDamage(
 			HitCharacter,	// 受击角色
-			Character->GetEquippedWeapon()->GetDamage(), // 伤害值
+			TotalDamage, // 伤害值
 			Character->Controller,	// 伤害来源
 			Character->GetEquippedWeapon(),	// 伤害来源
 			UDamageType::StaticClass()	// 伤害类型
