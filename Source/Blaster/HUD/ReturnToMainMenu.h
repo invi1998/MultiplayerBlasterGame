@@ -26,6 +26,9 @@ protected:
 	UFUNCTION()	// 创建会话完成
 	void OnDestroySession(bool bWasSuccessful);	// 销毁会话完成
 
+	UFUNCTION()	// 玩家离开游戏
+	void OnPlayerLeftGame();	// 玩家离开游戏
+
 private:
 	UPROPERTY(meta = (BindWidget))	// 绑定按钮
 	class UButton* ReturnButton;	// 返回主菜单按钮

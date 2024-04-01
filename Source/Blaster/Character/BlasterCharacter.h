@@ -11,6 +11,8 @@
 #include "Components/TimelineComponent.h"
 #include "BlasterCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftGame);	// 离开游戏委托
+
 UCLASS()
 class BLASTER_API ABlasterCharacter : public ACharacter, public IInteractWithCrosshairsInterface
 {
@@ -54,13 +56,13 @@ public:
 
 	virtual void OnRep_ReplicatedMovement() override;
 
-	void Elim();		// 角色被击败
+	void Elim(bool bPlayerLeftGame);		// 角色被击败
 
 	void DropOrDestroyWeapon();		// 丢弃或销毁武器
 	void DropOrDestroyWeapon(AWeapon* Weapon);		// 丢弃或销毁武器
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastElim();
+	void MulticastElim(bool bPlayerLeftGame);		// 多播击败
 
 	virtual void Destroyed() override;
 
@@ -86,6 +88,11 @@ public:
 	TMap<FName, class UBoxComponent*> HitCollisionBoxes;	// 命中盒子
 
 	bool bFinishedSwapping = false;	// 是否完成交换
+
+	FOnLeftGame OnLeftGame;	// 离开游戏委托
+
+	UFUNCTION(Server, Reliable)
+	void ServerLeftGame();	// 服务端离开游戏
 
 protected:
 	// Called when the game starts or when spawned
@@ -411,6 +418,11 @@ private:
 	float AmountToDamage = 0.0f;	// 扣血量
 
 	void DamageRampUp(float DeltaTime);	// 扣血速率上升
+
+	/*
+	 * 离开游戏
+	 */
+	bool bLeftGame = false;	// 是否离开游戏
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);

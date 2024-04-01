@@ -3,6 +3,7 @@
 
 #include "ReturnToMainMenu.h"
 
+#include "Blaster/Character/BlasterCharacter.h"
 #include "Components/Button.h"
 #include "GameFramework/GameModeBase.h"
 #include "MultiplayerSessions/Public/MultiplayerSessionsSubsystem.h"
@@ -105,12 +106,34 @@ void UReturnToMainMenu::OnDestroySession(bool bWasSuccessful)
 	}
 }
 
+void UReturnToMainMenu::OnPlayerLeftGame()
+{
+	if (MultiplayerSessionsSubsystem)
+	{
+		MultiplayerSessionsSubsystem->DestroySession();	// 销毁会话
+	}
+}
+
 void UReturnToMainMenu::ReturnButtonClicked()
 {
 	ReturnButton->SetIsEnabled(false);	// 禁用返回按钮
 
-	if (MultiplayerSessionsSubsystem)
+	if (UWorld* World = GetWorld())
 	{
-		MultiplayerSessionsSubsystem->DestroySession();	// 销毁会话
+		if (const APlayerController* FirstPlayerController = Cast<APlayerController>(World->GetFirstPlayerController()))
+		{
+			if (ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FirstPlayerController->GetPawn()))
+			{
+				if (!BlasterCharacter->OnLeftGame.IsBound())
+				{
+					BlasterCharacter->OnLeftGame.AddDynamic(this, &UReturnToMainMenu::OnPlayerLeftGame);	// 绑定玩家离开游戏事件
+				}
+				BlasterCharacter->ServerLeftGame();	// 玩家离开游戏
+			}
+			else
+			{
+				ReturnButton->SetIsEnabled(true);	// 启用返回按钮
+			}
+		}
 	}
 }

@@ -28,6 +28,8 @@ public:
 
 	virtual void RequestRespawn(class ACharacter* ElimmedCharacter, AController* ElimmedController);	// 请求重生
 
+	void PlayerLeftGame(class ABlasterPlayerState* PlayerLeaving);	// 玩家离开游戏
+
 	UPROPERTY(EditDefaultsOnly)
 		float WarmupTime = 10.f;	// 预热时间
 

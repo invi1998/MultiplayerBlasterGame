@@ -934,18 +934,11 @@ void ABlasterCharacter::OnRep_Shield(float LastShield)
 	}
 }
 
-void ABlasterCharacter::Elim()
+void ABlasterCharacter::Elim(bool bPlayerLeftGame)
 {
 	DropOrDestroyWeapon();
 
-	MulticastElim();
-	// 设置复活倒计时
-	GetWorldTimerManager().SetTimer(
-		ElimTimer,
-		this,
-		&ABlasterCharacter::ElimTimerFinished,
-		ElimDelay
-	);
+	MulticastElim(bPlayerLeftGame);
 }
 
 void ABlasterCharacter::DropOrDestroyWeapon()
@@ -978,18 +971,25 @@ void ABlasterCharacter::DropOrDestroyWeapon(AWeapon* Weapon)
 void ABlasterCharacter::ElimTimerFinished()
 {
 	ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
-	if (BlasterGameMode)
+	if (BlasterGameMode && !bLeftGame)
 	{
 		BlasterGameMode->RequestRespawn(this, Controller);
 	}
+	if (bLeftGame && IsLocallyControlled())
+	{
+		OnLeftGame.Broadcast();
+	}
 }
 
-void ABlasterCharacter::MulticastElim_Implementation()
+void ABlasterCharacter::MulticastElim_Implementation(bool bPlayerLeftGame)
 {
+	bLeftGame = bPlayerLeftGame;
+
 	if (BlasterPlayerController)
 	{
 		BlasterPlayerController->SetHUDWeaponAmmo(0);
 	}
+
 	bElimmed = true;
 	PlayElimMontage();
 
@@ -1030,11 +1030,19 @@ void ABlasterCharacter::MulticastElim_Implementation()
 		UGameplayStatics::SpawnSoundAtLocation(this, ElimBotSound, GetActorLocation());
 	}
 
-	bool bHideSniperScope = IsLocallyControlled() && Combat && Combat->bAiming && Combat->EquippedWeapon && Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
+	const bool bHideSniperScope = IsLocallyControlled() && Combat && Combat->bAiming && Combat->EquippedWeapon && Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
 	if (bHideSniperScope)
 	{
 		ShowSniperScopeWidget(false);
 	}
+
+	// 设置复活倒计时
+	GetWorldTimerManager().SetTimer(
+		ElimTimer,
+		this,
+		&ABlasterCharacter::ElimTimerFinished,
+		ElimDelay
+	);
 }
 
 void ABlasterCharacter::UpdateDissolveMaterial(float DissolveValue)
@@ -1064,6 +1072,16 @@ void ABlasterCharacter::DamageRampUp(float DeltaTime)
 	if (BeforeDamageHealth <= Health)
 	{
 		DamageRate = 0.f;
+	}
+}
+
+void ABlasterCharacter::ServerLeftGame_Implementation()
+{
+	ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
+	BlasterPlayerState = BlasterPlayerState == nullptr ? GetPlayerState<ABlasterPlayerState>() : BlasterPlayerState;
+	if (BlasterGameMode && BlasterPlayerState)
+	{
+		BlasterGameMode->PlayerLeftGame(BlasterPlayerState);
 	}
 }
 
