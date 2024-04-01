@@ -45,6 +45,26 @@ void ABlasterPlayerState::AddToDefeats(int32 DefeatsAmount)
 	}
 }
 
+void ABlasterPlayerState::SetTeam(ETeam NewTeam)
+{
+	Team = NewTeam;
+
+	Character = Character == nullptr ? Cast<ABlasterCharacter>(GetPawn()) : Character;
+	if (Character)
+	{
+		Character->SetTeamColor(Team);
+	}
+}
+
+void ABlasterPlayerState::OnRep_Team()
+{
+	Character = Character == nullptr ? Cast<ABlasterCharacter>(GetPawn()) : Character;
+	if (Character)
+	{
+		Character->SetTeamColor(Team);
+	}
+}
+
 void ABlasterPlayerState::OnRep_Score()
 {
 	Super::OnRep_Score();

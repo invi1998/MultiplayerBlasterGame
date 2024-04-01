@@ -181,6 +181,8 @@ ABlasterCharacter::ABlasterCharacter()
 		HitCollisionBox.Value->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);	// 设置碰撞响应，只响应我们自定义的碰撞通道
 		HitCollisionBox.Value->SetCollisionEnabled(ECollisionEnabled::NoCollision);	// 设置碰撞启用，不启用碰撞
 	}
+
+	// ImpulseCharacter();	// 给角色添加冲量
 }
 
 void ABlasterCharacter::UpdateHUDHealth()
@@ -237,6 +239,7 @@ void ABlasterCharacter::PollInit()
 		{
 			BlasterPlayerState->AddToScore(0.f);
 			BlasterPlayerState->AddToDefeats(0);
+			SetTeamColor(BlasterPlayerState->GetTeam());
 
 			ABlasterGameState* BlasterGameState = Cast<ABlasterGameState>(UGameplayStatics::GetGameState(this));
 			if (BlasterGameState && BlasterGameState->TopScoringPlayers.Contains(BlasterPlayerState))
@@ -345,12 +348,42 @@ void ABlasterCharacter::MulticastLostTheCrown_Implementation()
 	}
 }
 
+void ABlasterCharacter::SetTeamColor(ETeam Team)
+{
+	if (GetMesh() == nullptr || DefaultMaterialInstance == nullptr) return;
+
+	switch (Team)
+	{
+		case ETeam::ET_NoTeam:
+			GetMesh()->SetMaterial(0, DefaultMaterialInstance);	// 设置默认材质
+			DissolveMaterialInstance = DefaultDissolveMaterialInstance;		// 设置溶解材质
+			break;
+		case ETeam::ET_RedTeam:
+			GetMesh()->SetMaterial(0, RedMaterialInstance);		// 设置红队材质
+			DissolveMaterialInstance = RedDissolveMaterialInstance;			// 设置红队溶解材质
+			break;
+		case ETeam::ET_BlueTeam:
+			GetMesh()->SetMaterial(0, BlueMaterialInstance);		// 设置蓝队材质
+			DissolveMaterialInstance = BlueDissolveMaterialInstance;		// 设置蓝队溶解材质
+			break;
+		default: break;
+	}
+}
+
+void ABlasterCharacter::ImpulseCharacter()
+{
+	if (GetCharacterMovement() == nullptr) return;
+
+	// 计算角色的速度
+	FVector Impulse = GetActorForwardVector() * 1000.f;
+	// 添加冲量
+	GetCharacterMovement()->AddImpulse(Impulse, true);
+}
+
 // Called when the game starts or when spawned
 void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	
 
 	SpawnDefaultWeapon();	// 角色生成默认武器
 

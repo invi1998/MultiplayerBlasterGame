@@ -36,10 +36,13 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_Defeats)
 	int32 Defeats;	// 击败数
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_Team)
 	ETeam Team = ETeam::ET_NoTeam;		// 当前游戏的队伍
+
+	UFUNCTION()
+	void OnRep_Team();	// 重写队伍复制属性函数
 
 public:
 	FORCEINLINE ETeam GetTeam() const { return Team; }
-	FORCEINLINE void SetTeam(ETeam NewTeam) { Team = NewTeam; }
+	void SetTeam(ETeam NewTeam);
 };

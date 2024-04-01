@@ -24,7 +24,7 @@ void ATeamsGameMode::PostLogin(APlayerController* NewPlayer)
 			else
 			{
 				BlasterPlayerState->SetTeam(ETeam::ET_BlueTeam);
-				BlasterGameState->BlackTeam.AddUnique(BlasterPlayerState);
+				BlasterGameState->BlueTeam.AddUnique(BlasterPlayerState);
 			}
 		}
 	}

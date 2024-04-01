@@ -5,6 +5,7 @@
 #include "Blaster/GameState/BlasterGameState.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Blaster/PlayerState/BlasterPlayerState.h"
+#include "Engine/PawnIterator.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -49,7 +50,6 @@ void ABlasterGameMode::Tick(float DeltaSeconds)
 		if (CountdownTime <= 0.f)
 		{
 			RestartGame();
-
 		}
 	}
 }
@@ -59,8 +59,6 @@ void ABlasterGameMode::BeginPlay()
 	Super::BeginPlay();
 
 	LevelStartingTime = GetWorld()->GetTimeSeconds();
-
-
 }
 
 void ABlasterGameMode::OnMatchStateSet()
@@ -149,7 +147,7 @@ void ABlasterGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AController*
 	// 销毁玩家实体
 	if (ElimmedCharacter)
 	{
-		ElimmedCharacter->Restart();
+		ElimmedCharacter->Reset();
 		ElimmedCharacter->Destroy();
 	}
 
@@ -160,8 +158,41 @@ void ABlasterGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AController*
 		TArray<AActor*> PlayerStarts;
 		UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
 		int32 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
+		// RestartPlayerAtPlayerStart(ElimmedController, PlayerStarts[Selection]);
+
+		// 推开周围的玩家
+
+		// 先获取出生点的位置
+		FVector PlayerStartLocation = PlayerStarts[Selection]->GetActorLocation();
+
+		// 获取出点已经存在的玩家列表
+		TArray<FOverlapResult> OverlappingActors;
+		if (UWorld* World = GetWorld())
+		{
+			// 获取出生点周围的玩家
+			World->OverlapMultiByObjectType(
+				OverlappingActors, 
+				PlayerStartLocation, 
+				FQuat::Identity, 
+				FCollisionObjectQueryParams(FCollisionObjectQueryParams::AllDynamicObjects),
+				FCollisionShape::MakeSphere(100.f));
+
+			// 遍历玩家列表，然后推开他们
+			for (auto OverlappingActor : OverlappingActors)
+			{
+				if (ACharacter* OverlappingCharacter = Cast<ACharacter>(OverlappingActor.GetActor()))
+				{
+					FVector LaunchDirection = OverlappingCharacter->GetActorLocation() - PlayerStartLocation;
+					LaunchDirection.Normalize();
+					LaunchDirection.Z = 0.f;
+					LaunchDirection *= 1000.f;
+					OverlappingCharacter->LaunchCharacter(LaunchDirection, true, true);
+				}
+			}
+		}
 
 		RestartPlayerAtPlayerStart(ElimmedController, PlayerStarts[Selection]);
+
 	}
 }
 

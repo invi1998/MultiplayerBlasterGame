@@ -9,6 +9,7 @@
 #include "Blaster/BlasterTypes/TurningInPlace.h"
 #include "Blaster/Interface/InteractWithCrosshairsInterface.h"
 #include "Blaster/BlasterTypes/CombatState.h"
+#include "Blaster/BlasterTypes/Team.h"
 #include "Components/TimelineComponent.h"
 #include "BlasterCharacter.generated.h"
 
@@ -100,6 +101,11 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastLostTheCrown();	// 多播失去王冠
+
+	UFUNCTION()
+	void SetTeamColor(ETeam Team);	// 设置队伍颜色
+
+	void ImpulseCharacter();	// 推开周围的角色
 
 protected:
 	// Called when the game starts or when spawned
@@ -377,9 +383,29 @@ private:
 	UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
 
 	// 将分配给角色蓝图的材质实例
-	UPROPERTY(EditAnywhere, Category = Elim)
+	UPROPERTY(VisibleAnywhere, Category = Elim)
 	UMaterialInstance* DissolveMaterialInstance;
 
+	/*
+	 * 队伍颜色
+	 */
+	UPROPERTY(EditAnywhere, Category = Elim)
+	UMaterialInstance* RedDissolveMaterialInstance;		// 红队溶解材质实例
+
+	UPROPERTY(EditAnywhere, Category = Elim)
+	UMaterialInstance* RedMaterialInstance;		// 红队材质实例
+
+	UPROPERTY(EditAnywhere, Category = Elim)
+	UMaterialInstance* BlueDissolveMaterialInstance;	// 蓝队溶解材质实例
+
+	UPROPERTY(EditAnywhere, Category = Elim)
+	UMaterialInstance* BlueMaterialInstance;		// 蓝队材质实例
+
+	UPROPERTY(EditAnywhere, Category = Elim)
+	UMaterialInstance* DefaultDissolveMaterialInstance;		// 默认溶解材质实例
+
+	UPROPERTY(EditAnywhere, Category = Elim)
+	UMaterialInstance* DefaultMaterialInstance;		// 默认材质实例
 
 	/*
 	 * 排名王冠
