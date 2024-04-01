@@ -318,11 +318,7 @@ void ABlasterCharacter::SetBacktrackingTime(float BacktrackingTime, float CostTi
 
 void ABlasterCharacter::MulticastGainedTheCrown_Implementation()
 {
-	if (!CrowSystem)
-	{
-		UKismetSystemLibrary::PrintString(this, "CrowSystem is null", true, true, FLinearColor::Red, 5.f);
-		return;	
-	}
+	if (!CrowSystem) return;
 	if (CrowComponent == nullptr)
 	{
 		CrowComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
@@ -337,12 +333,7 @@ void ABlasterCharacter::MulticastGainedTheCrown_Implementation()
 	}
 	if (CrowComponent)
 	{
-		UKismetSystemLibrary::PrintString(this, "CrowComponent is not null", true, true, FLinearColor::Green, 5.f);
 		CrowComponent->Activate();	// ¼¤»î
-	}
-	else
-	{
-		UKismetSystemLibrary::PrintString(this, "CrowComponent is null", true, true, FLinearColor::Red, 5.f);
 	}
 }
 

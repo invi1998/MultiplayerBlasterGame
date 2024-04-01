@@ -86,9 +86,6 @@ void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* ElimmedCharacter, ABl
 	ABlasterPlayerState* VictimPlayerState = VictimController ? Cast<ABlasterPlayerState>(VictimController->PlayerState) : nullptr;
 
 	ABlasterGameState* BlasterGameState = GetGameState<ABlasterGameState>();
-	// ABlasterGameState* BlasterGameState = Cast<ABlasterGameState>(UGameplayStatics::GetGameState(this));
-
-	UKismetSystemLibrary::PrintString(this, "Player Eliminated", true, false, FLinearColor::Red, 5.f);
 
 	if (AttackPlayerState && AttackPlayerState != VictimPlayerState && BlasterGameState)
 	{
@@ -108,14 +105,6 @@ void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* ElimmedCharacter, ABl
 			{
 				WinnerCharacter->MulticastGainedTheCrown();	// 获得王冠
 			}
-			else
-			{
-				UKismetSystemLibrary::PrintString(this, "Player is not a character", true, false, FLinearColor::Red, 5.f);
-			}
-		}
-		else
-		{
-			UKismetSystemLibrary::PrintString(this, "Player is not in the lead", true, false, FLinearColor::Red, 5.f);
 		}
 
 		for (int32 i = 0; i < PlayersCurrentlyInTheLead.Num(); i++)
@@ -129,14 +118,6 @@ void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* ElimmedCharacter, ABl
 				}
 			}
 		}
-	}
-	else
-	{
-		UKismetSystemLibrary::PrintString(this, "失去王冠 Player is not a player state", true, false, FLinearColor::Red, 5.f);
-		UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("AttackPlayerState != VictimPlayerState %d"), AttackPlayerState != VictimPlayerState), true, false, FLinearColor::Red, 5.f);
-		UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("BlasterGameState %d"), BlasterGameState != nullptr), true, false, FLinearColor::Red, 5.f);
-		// UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("BlasterGameState->TopScoringPlayers.Num() %d"), BlasterGameState->TopScoringPlayers.Num()), true, false, FLinearColor::Red, 5.f);
-		UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("AttackPlayerState %d"), AttackPlayerState != nullptr), true, false, FLinearColor::Red, 5.f);
 	}
 
 	if (VictimPlayerState)

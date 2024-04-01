@@ -103,13 +103,13 @@ FServerSideRewindResult ULagCompensationComponent::CheckHit(const FFramePackage&
 
 		if (HitResult.bBlockingHit)		// 命中
 		{
-			if (HitResult.Component.IsValid())
+			/*if (HitResult.Component.IsValid())
 			{
 				if (UBoxComponent* HitBox = Cast<UBoxComponent>(HitResult.Component.Get()))
 				{
 					DrawDebugBox(World, HitBox->GetComponentLocation(), HitBox->GetScaledBoxExtent(), HitBox->GetComponentRotation().Quaternion(), FColor::Red, false, 5.0f);
 				}
-			}
+			}*/
 
 			ResetHitBoxes(HitCharacter, CurrentFrame);	// 重置命中框
 			EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);	// 启用角色的碰撞
@@ -130,13 +130,13 @@ FServerSideRewindResult ULagCompensationComponent::CheckHit(const FFramePackage&
 			World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_HitBox);	// 射线检测
 			if (HitResult.bBlockingHit)		// 命中
 			{
-				if (HitResult.Component.IsValid())
+				/*if (HitResult.Component.IsValid())
 				{
 					if (UBoxComponent* HitBox = Cast<UBoxComponent>(HitResult.Component.Get()))
 					{
 						DrawDebugBox(World, HitBox->GetComponentLocation(), HitBox->GetScaledBoxExtent(), HitBox->GetComponentRotation().Quaternion(), FColor::Blue, false, 5.0f);
 					}
-				}
+				}*/
 
 				ResetHitBoxes(HitCharacter, CurrentFrame);	// 重置命中框
 				EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);	// 启用角色的碰撞
@@ -435,10 +435,10 @@ FServerSideRewindResult_Shotgun ULagCompensationComponent::CheckHit_Shotgun(cons
 			);
 			if (ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(ConfirmHitResult.GetActor()))
 			{
-				if (UBoxComponent* HitBox = Cast<UBoxComponent>(ConfirmHitResult.Component.Get()))
+				/*if (UBoxComponent* HitBox = Cast<UBoxComponent>(ConfirmHitResult.Component.Get()))
 				{
 					DrawDebugBox(World, HitBox->GetComponentLocation(), HitBox->GetScaledBoxExtent(), HitBox->GetComponentRotation().Quaternion(), FColor::Red, false, 5.0f);
-				}
+				}*/
 
 				if (ShotgunResult.HeadShots.Contains(BlasterCharacter))
 				{
