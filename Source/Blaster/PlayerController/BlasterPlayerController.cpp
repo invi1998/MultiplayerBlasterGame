@@ -315,7 +315,7 @@ void ABlasterPlayerController::CheckHighPing(float DeltaSeconds)
 		PlayerState = PlayerState == nullptr ? GetPlayerState<ABlasterPlayerState>() : PlayerState;
 		if (PlayerState)
 		{
-			UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("Ping: %d"), static_cast<int>(PlayerState->GetPingInMilliseconds())));
+			// UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("Ping: %d"), static_cast<int>(PlayerState->GetPingInMilliseconds())));
 			if (PlayerState->GetPingInMilliseconds() > HighPingThreshold)
 			{
 				HighPingWarning();
@@ -692,7 +692,7 @@ void ABlasterPlayerController::ClientElimAnnouncement_Implementation(APlayerStat
 		BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 		if (BlasterHUD)
 		{
-			if (BlasterHUD->Announcement)
+			if (BlasterHUD->AnnouncementClass)
 			{
 				if (Attacker == Self && Victim != Self)
 				{
@@ -716,10 +716,6 @@ void ABlasterPlayerController::ClientElimAnnouncement_Implementation(APlayerStat
 				}
 			}
 		}
-	}
-	else
-	{
-		UKismetSystemLibrary::PrintString(this, FString("PlayerState is null"), true, true, FLinearColor::Red, 5.f);
 	}
 
 	

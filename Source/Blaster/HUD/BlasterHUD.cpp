@@ -53,7 +53,7 @@ void ABlasterHUD::AddElimAnnouncement(FString Attacker, FString Victim)
 			ElimAnnouncementWidget->SetElimAnnouncementText(Attacker, Victim);
 			ElimAnnouncementWidget->AddToViewport();
 
-			ElimMassages.Add(ElimAnnouncementWidget);	// 将该消息添加到数组中，以便在一段时间后移除
+			
 
 			for (auto ElimMsg : ElimMassages)
 			{
@@ -64,23 +64,19 @@ void ABlasterHUD::AddElimAnnouncement(FString Attacker, FString Victim)
 					if (CanvasSlot)
 					{
 						FVector2D ElimMsgPosition = CanvasSlot->GetPosition();	// 消息的位置
-						FVector2D NewPosition = FVector2D(ElimMsgPosition.X, ElimMsgPosition.Y + (ElimMassages.Num() - 1) * 50.f);	// 新的位置
+						FVector2D NewPosition = FVector2D(ElimMsgPosition.X, ElimMsgPosition.Y - CanvasSlot->GetSize().Y);	// 新的位置
 						CanvasSlot->SetPosition(NewPosition);	// 设置新的位置
-						UKismetSystemLibrary::PrintString(this, "ElimMsgPosition: " + ElimMsgPosition.ToString() + " NewPosition: " + NewPosition.ToString(), true, true, FLinearColor::Red, 5.f);	// 打印消息位置
 					}
-					
 				}
 			}
+
+			ElimMassages.Add(ElimAnnouncementWidget);	// 将该消息添加到数组中，以便在一段时间后移除
 
 			// 为了在一段时间后移除该消息，我们需要一个计时器
 			FTimerHandle ElimAnnouncementTimer;
 			FTimerDelegate ElimAnnouncementTimerDelegate;	// 代理，用于绑定函数，当计时器结束时调用
 			ElimAnnouncementTimerDelegate.BindUFunction(this, FName("ElimAnnouncementTimerFinished"), ElimAnnouncementWidget);		// 绑定函数, 传递的参数是ElimAnnouncement
 			GetWorldTimerManager().SetTimer(ElimAnnouncementTimer, ElimAnnouncementTimerDelegate, ElimAnnouncementTime, false);	// 设置计时器
-		}
-		else
-		{
-			UKismetSystemLibrary::PrintString(this, "ElimAnnouncementWidget is nullptr", true, true, FLinearColor::Red, 5.f);
 		}
 	}
 }
