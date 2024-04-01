@@ -11,7 +11,15 @@ void ABlasterGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ABlasterGameState, TopScoringPlayers);
-	DOREPLIFETIME(ABlasterGameState, TeamScores);
+	DOREPLIFETIME(ABlasterGameState, RedTeamScore);
+	DOREPLIFETIME(ABlasterGameState, BlueTeamScore);
+	DOREPLIFETIME(ABlasterGameState, GreenTeamScore);
+	DOREPLIFETIME(ABlasterGameState, YellowTeamScore);
+	DOREPLIFETIME(ABlasterGameState, PurpleTeamScore);
+	DOREPLIFETIME(ABlasterGameState, OrangeTeamScore);
+	DOREPLIFETIME(ABlasterGameState, PinkTeamScore);
+	DOREPLIFETIME(ABlasterGameState, BlackTeamScore);
+	DOREPLIFETIME(ABlasterGameState, WhiteTeamScore);
 }
 
 void ABlasterGameState::UpdateTopScore(ABlasterPlayerState* ScoringPlayer)
@@ -33,6 +41,39 @@ void ABlasterGameState::UpdateTopScore(ABlasterPlayerState* ScoringPlayer)
 	}
 }
 
-void ABlasterGameState::OnRepETeamScore(ETeam Team)
+void ABlasterGameState::OnRepRedTeamScore()
 {
 }
+
+void ABlasterGameState::OnRepBlueTeamScore()
+{
+}
+
+void ABlasterGameState::OnRepGreenTeamScore()
+{
+}
+
+void ABlasterGameState::OnRepYellowTeamScore()
+{
+}
+
+void ABlasterGameState::OnRepPurpleTeamScore()
+{
+}
+
+void ABlasterGameState::OnRepOrangeTeamScore()
+{
+}
+
+void ABlasterGameState::OnRepPinkTeamScore()
+{
+}
+
+void ABlasterGameState::OnRepBlackTeamScore()
+{
+}
+
+void ABlasterGameState::OnRepWhiteTeamScore()
+{
+}
+
