@@ -131,13 +131,13 @@ private:
 	uint32 CountdownInt = 0;	// 倒计时整数部分
 
 	UPROPERTY(ReplicatedUsing = OnRep_MatchState)
-		FName MatchState;	// 当前游戏状态
+	FName MatchState;	// 当前游戏状态
 
 	UFUNCTION()
-		void OnRep_MatchState();	// 当MatchState发生变化时，调用该函数
+	void OnRep_MatchState();	// 当MatchState发生变化时，调用该函数
 
 	UPROPERTY()
-		class UCharacterOverlay* CharacterOverlay;	// 角色覆盖层
+	class UCharacterOverlay* CharacterOverlay;	// 角色覆盖层
 		
 	float HUDHealth;	// 生命值
 	bool bInitializeHealth = false;	// 是否初始化生命值
@@ -158,6 +158,7 @@ private:
 	bool bInitializeCarriedAmmo = false;	// 是否初始化携带弹药
 	float HUDWeaponAmmo;	// 武器弹药
 	bool bInitializeWeaponAmmo = false;	// 是否初始化武器弹药
+	bool bInitializeTeamScores = false;	// 是否初始化队伍分数
 
 	UPROPERTY(EditAnywhere)
 	float HighPingWarningTime = 0.f;		// 高延迟警告时间

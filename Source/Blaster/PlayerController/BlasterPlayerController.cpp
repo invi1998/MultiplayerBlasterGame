@@ -90,6 +90,11 @@ void ABlasterPlayerController::InitializeTeamScores()
 		BlasterHUD->CharacterOverlay->BlueTeamScore->SetText(FText::FromString(BlueTeamScoreString));
 		BlasterHUD->CharacterOverlay->RedTeamScore->SetVisibility(ESlateVisibility::Visible);
 		BlasterHUD->CharacterOverlay->BlueTeamScore->SetVisibility(ESlateVisibility::Visible);
+		bInitializeTeamScores = false;
+	}
+	else
+	{
+		bInitializeTeamScores = true;
 	}
 }
 
@@ -252,6 +257,7 @@ void ABlasterPlayerController::PollInit()
 				if (bInitializeWeaponAmmo) SetHUDWeaponAmmo(HUDWeaponAmmo);
 				if (bInitializeCarriedAmmo) SetHUDCarriedAmmo(HUDCarriedAmmo);
 				if (bInitializeBeforeHealth) SetHUDHealthNative(HUDHealth, HUDMaxHealth, HUDHealth, HUDHealth);
+				if (!HasAuthority() && bInitializeTeamScores && bShowTeamScores) InitializeTeamScores();
 
 				ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(GetPawn());
 				if (BlasterCharacter && BlasterCharacter->GetCombat())
