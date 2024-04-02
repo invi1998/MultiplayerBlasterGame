@@ -47,6 +47,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);	// 携带的弹药数量
 	DOREPLIFETIME(UCombatComponent, CombatState); // 战斗状态
 	DOREPLIFETIME(UCombatComponent, GrenadeCount);	// 手榴弹数量
+	DOREPLIFETIME(UCombatComponent, bHoldingFlag);	// 是否持有旗帜
 }
 
 void UCombatComponent::PickupAmmo(EWeaponType WeaponType, int32 Amount)
@@ -455,23 +456,39 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	if (Character == nullptr || WeaponToEquip == nullptr) return;
 	if (CombatState != ECombatState::ECS_Unoccupied) return;
 
-	if (EquippedWeapon != nullptr && SecondaryWeapon == nullptr)
+	if (WeaponToEquip->GetWeaponType() == EWeaponType::EWT_Flag)
 	{
-		// 如果当前角色主武器装备，次要武器没有装备，那么就装备次要武器
-		EquipSecondaryWeapon(WeaponToEquip);
+		Character->Crouch();
+		bHoldingFlag = true;
+		// 如果是旗帜
+		AttachFlagToLeftHand(WeaponToEquip);
+		/*Character->GetCharacterMovement()->bOrientRotationToMovement = true;
+		Character->bUseControllerRotationYaw = false;*/
+		WeaponToEquip->SetWeaponState(EWeaponState::EWS_Equipped);
+		WeaponToEquip->SetOwner(Character);
 	}
 	else
 	{
-		// 如果当前角色主武器没有装备，或者主幅武器都装备了，那么就装备主武器
-		EquipPrimaryWeapon(WeaponToEquip);
+		if (EquippedWeapon != nullptr && SecondaryWeapon == nullptr)
+		{
+			// 如果当前角色主武器装备，次要武器没有装备，那么就装备次要武器
+			EquipSecondaryWeapon(WeaponToEquip);
+		}
+		else
+		{
+			// 如果当前角色主武器没有装备，或者主幅武器都装备了，那么就装备主武器
+			EquipPrimaryWeapon(WeaponToEquip);
+		}
+
+		// 一旦bOrientRotationToMovement设置为True后，角色的朝向会转向移动的方向
+		// 一旦bOrientRotationToMovement 为False，但是bUseControllerDesiredRotation设置为True。
+		// 那么在角色移动中，如果Controller的朝向和角色朝向不一致，
+		// 角色朝向就会平滑的按照RotationRate里配置的各个轴的旋转速率来旋转角色的Rotation到Controller的朝向。
+		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+		Character->bUseControllerRotationYaw = true;
 	}
 
-	// 一旦bOrientRotationToMovement设置为True后，角色的朝向会转向移动的方向
-	// 一旦bOrientRotationToMovement 为False，但是bUseControllerDesiredRotation设置为True。
-	// 那么在角色移动中，如果Controller的朝向和角色朝向不一致，
-	// 角色朝向就会平滑的按照RotationRate里配置的各个轴的旋转速率来旋转角色的Rotation到Controller的朝向。
-	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
-	Character->bUseControllerRotationYaw = true;
+	
 }
 
 void UCombatComponent::SwapWeapon()
@@ -577,6 +594,18 @@ void UCombatComponent::AttachActorToLeftHand(AActor* ActorToAttach)
 	if (HandSocket)
 	{
 		HandSocket->AttachActor(ActorToAttach, Character->GetMesh());
+	}
+}
+
+void UCombatComponent::AttachFlagToLeftHand(AWeapon* Flag)
+{
+	if (Character == nullptr || Character->GetMesh() == nullptr || Flag == nullptr) return;
+
+	const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("FlagSocket"));
+
+	if (HandSocket)
+	{
+		HandSocket->AttachActor(Flag, Character->GetMesh());
 	}
 }
 
@@ -890,6 +919,14 @@ void UCombatComponent::UpdateGrenadeCount()
 	if (Controller)
 	{
 		Controller->SetHUDGrenades(GrenadeCount);
+	}
+}
+
+void UCombatComponent::OnRep_HoldingFlag()
+{
+	if (Character && bHoldingFlag && Character->IsLocallyControlled())
+	{
+		Character->Crouch();
 	}
 }
 

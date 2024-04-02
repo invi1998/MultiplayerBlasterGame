@@ -120,6 +120,7 @@ protected:
 	void DropEquippedWeapon();		// 丢弃当前装备的武器
 	void AttachActorToRightHand(AActor* ActorToAttach);		// 将ActorToAttach附加到右手
 	void AttachActorToLeftHand(AActor* ActorToAttach);		// 将ActorToAttach附加到左手
+	void AttachFlagToLeftHand(AWeapon* Flag);				// 将Flag附加到左手
 	void AttachActorToBack(AActor* ActorToAttach);			// 将ActorToAttach附加到背部
 	void UpdateCarriedAmmo();		// 更新携带的弹药
 	void PlayEquipWeaponSound(AWeapon* WeaponToEquip);	// 播放装备武器的声音	
@@ -279,7 +280,7 @@ private:
 	void InitializeCarriedAmmo();
 
 	UPROPERTY(ReplicatedUsing = OnRep_CombatState)
-		ECombatState CombatState = ECombatState::ECS_Unoccupied;
+	ECombatState CombatState = ECombatState::ECS_Unoccupied;
 
 	UFUNCTION()
 	void OnRep_CombatState();
@@ -299,7 +300,11 @@ private:
 
 	void UpdateGrenadeCount();
 
+	UPROPERTY(ReplicatedUsing = OnRep_HoldingFlag)
 	bool bHoldingFlag = false;	// 是否持有旗帜
+
+	UFUNCTION()
+	void OnRep_HoldingFlag();
 
 public:
 	FORCEINLINE int32 GetGrenadeCount() const { return GrenadeCount; }

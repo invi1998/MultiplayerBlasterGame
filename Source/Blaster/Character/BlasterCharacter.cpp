@@ -252,6 +252,13 @@ void ABlasterCharacter::PollInit()
 
 void ABlasterCharacter::RotatePlace(float DeltaTime)
 {
+	if (Combat && Combat->bHoldingFlag)
+	{
+		bUseControllerRotationYaw = false;		// 不使用控制器旋转Yaw
+		GetCharacterMovement()->bOrientRotationToMovement = true;	// 朝向移动方向
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;	// 不转弯
+		return;
+	}
 	if (bDisableGamePlay)
 	{
 		bUseControllerRotationYaw = false;
