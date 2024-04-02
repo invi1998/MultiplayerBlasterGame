@@ -567,6 +567,7 @@ void ABlasterCharacter::GrenadeButtonPressed()
 {
 	if (Combat)
 	{
+		if (Combat->bHoldingFlag) return;	// 如果角色正在持有旗帜，那么就不允许扔手榴弹
 		Combat->ThrowGrenade();
 	}
 }
@@ -678,6 +679,8 @@ void ABlasterCharacter::EquipButtonPressed()
 
 	if (Combat)
 	{
+		if (Combat->bHoldingFlag) return;	// 如果角色正在持有旗帜，那么就不允许切换武器
+
 		if (Combat->CombatState == ECombatState::ECS_Unoccupied)
 		{
 			ServerEquipButtonPressed();
@@ -695,6 +698,7 @@ void ABlasterCharacter::EquipButtonPressed()
 void ABlasterCharacter::CrouchButtonPressed()
 {
 	if (bDisableGamePlay) return;
+	if (Combat && Combat->bHoldingFlag) return;	// 如果角色正在持有旗帜，那么就不允许切换是否蹲伏
 	if (bIsCrouched)
 	{
 		UnCrouch();
@@ -710,6 +714,7 @@ void ABlasterCharacter::ReloadButtonPressed()
 	if (bDisableGamePlay) return;
 	if (Combat)
 	{
+		if (Combat->bHoldingFlag) return;	// 如果角色正在持有旗帜，那么就不允许重新装填
 		Combat->Reload();
 	}
 }
@@ -719,6 +724,7 @@ void ABlasterCharacter::AimButtonPressed()
 	if (bDisableGamePlay) return;
 	if (Combat)
 	{
+		if (Combat->bHoldingFlag) return;	// 如果角色正在持有旗帜，那么就不允许瞄准
 		Combat->SetAiming(true);
 	}
 }
@@ -728,6 +734,7 @@ void ABlasterCharacter::AimButtonReleased()
 	if (bDisableGamePlay) return;
 	if (Combat)
 	{
+		if (Combat->bHoldingFlag) return;	// 如果角色正在持有旗帜，那么就不允许瞄准
 		Combat->SetAiming(false);
 	}
 }
@@ -875,6 +882,7 @@ void ABlasterCharacter::SimProxiesTurn()
 void ABlasterCharacter::Jump()
 {
 	if (bDisableGamePlay) return;
+	if (Combat && Combat->bHoldingFlag) return;	// 如果角色正在持有旗帜，那么就不允许跳跃
 	if (bIsCrouched)
 	{
 		UnCrouch();
@@ -890,6 +898,7 @@ void ABlasterCharacter::FireButtonPressed()
 	if (bDisableGamePlay) return;
 	if (Combat)
 	{
+		if (Combat->bHoldingFlag) return;	// 如果角色正在持有旗帜，那么就不允许开火
 		Combat->FireButtonPressed(true);
 	}
 }
@@ -899,6 +908,7 @@ void ABlasterCharacter::FireButtonReleased()
 	if (bDisableGamePlay) return;
 	if (Combat)
 	{
+		if (Combat->bHoldingFlag) return;	// 如果角色正在持有旗帜，那么就不允许开火
 		Combat->FireButtonPressed(false);
 	}
 }
