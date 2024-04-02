@@ -1227,3 +1227,10 @@ bool ABlasterCharacter::IsLocalReloading() const
 
 	return Combat->bLocalReloading;;
 }
+
+bool ABlasterCharacter::IsHoldingFlag() const
+{
+	if (Combat == nullptr) return false;
+
+	return Combat->bHoldingFlag;
+}

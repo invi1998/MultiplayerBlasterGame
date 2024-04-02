@@ -24,76 +24,81 @@ private:
 	// 需要从动画蓝图访问它，并且希望设置为蓝图只读，分类为Character
 	// 因为这是一个私有变量，我们不能在私有变量上设置 BlueprintReadOnly ， 所以可以设置 meta ，AllowPrivateAccess 设置为true
 	UPROPERTY(BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = "true"))
-		class ABlasterCharacter* BlasterCharacter;
+	class ABlasterCharacter* BlasterCharacter;
 
 	// 速度
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		float Spead;
+	float Spead;
 
 	// 是否在空中
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		bool bIsInAir;
+	bool bIsInAir;
 
 	// 是否加速, 用于驱动动画
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		bool bIsAccelerating;
+	bool bIsAccelerating;
 
 	// 检测是否有当前装备的武器
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		bool bWeaponEquipped;
+	bool bWeaponEquipped;
 
+	UPROPERTY()
 	class AWeapon* EquippedWeapon;
 
 	// 检测是否蹲下
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		bool bIsCrouched;
+	bool bIsCrouched;
 
 	// 检测瞄准
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		bool bAiming;
+	bool bAiming;
 
 	// 水平偏移(用于驱动扫射动作)
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		float YawOffset;
+	float YawOffset;
 
 	// 倾斜角
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		float Lean;
+	float Lean;
 
 	FRotator CharacterRotationLastFrame;
 	FRotator CharacterRotation;
 	FRotator DeltaRotation;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		float AO_Yaw;
+	float AO_Yaw;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		float AO_Pitch;
+	float AO_Pitch;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		FTransform LeftHandTransform;
+	FTransform LeftHandTransform;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		ETurningInPlace TurningInPlace;
+	ETurningInPlace TurningInPlace;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		FRotator RightHandRotation;
+	FRotator RightHandRotation;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		bool bLocallyControlled;
+	bool bLocallyControlled;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		bool bRotateRootBone;
+	bool bRotateRootBone;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		bool bElimmed;
+	bool bElimmed;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		bool bUseFABRIK;
+	bool bUseFABRIK;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		bool bUseAimOffsets;
+	bool bUseAimOffsets;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		bool bTransformRightHand;
+	bool bTransformRightHand;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	bool bHoldingFlag;
+
 };

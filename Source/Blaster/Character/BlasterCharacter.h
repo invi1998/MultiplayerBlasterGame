@@ -497,4 +497,5 @@ public:
 	FORCEINLINE void SetShield(float NewShield) { Shield = NewShield; }
 	bool IsLocalReloading() const;
 	FORCEINLINE ULagCompensationComponent* GetLagCompensation() const { return LagCompensation; }
+	bool IsHoldingFlag() const;
 };

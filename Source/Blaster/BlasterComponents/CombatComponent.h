@@ -299,6 +299,8 @@ private:
 
 	void UpdateGrenadeCount();
 
+	bool bHoldingFlag = false;	// ÊÇ·ñ³ÖÓĞÆìÖÄ
+
 public:
 	FORCEINLINE int32 GetGrenadeCount() const { return GrenadeCount; }
 
