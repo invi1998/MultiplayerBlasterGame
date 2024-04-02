@@ -38,6 +38,9 @@ public:
 	
 	TMap<ETeam, float> TeamScores;
 
+	void RedTeamScored();
+	void BlueTeamScored();
+
 	UPROPERTY(ReplicatedUsing=OnRepRedTeamScore)
 	float RedTeamScore = 0.f;
 

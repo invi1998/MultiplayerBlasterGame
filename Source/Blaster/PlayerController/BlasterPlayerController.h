@@ -17,6 +17,9 @@ class BLASTER_API ABlasterPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
+	virtual void Tick(float DeltaSeconds) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	void SetHUDHealth(float Health, float MaxHealth);	// 设置生命值
 	void SetHUDHealthNative(float Health, float MaxHealth, float BeforeDamage, float AfterHealHealth);	// 设置生命值
 	void SetHUDShield(float Shield, float MaxShield);	// 设置护盾
@@ -28,14 +31,18 @@ public:
 	void SetHUDMatchCountdown(float CountdownTime);
 	void SetHUDAnnouncementCountdown(float CountdownTime);
 	void SetHUDGrenades(int32 Grenades);
-	virtual void Tick(float DeltaSeconds) override;
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	// Team Scores
+	void HideTeamScores();	// 隐藏队伍分数
+	void InitializeTeamScores();	// 初始化队伍分数
+	void SetHUDRedTeamScores(int32 Scores);	// 设置红色队伍分数
+	void SetHUDBlueTeamScores(int32 Scores);	// 设置蓝色队伍分数
 
 	virtual float GetServerTime();
 
 	virtual void ReceivedPlayer() override;		// 在玩家加入的时候，尽快与与服务器进行时间同步
 
-	void OnMatchStateSet(FName state);	// 当游戏状态发生变化时，调用该函数
+	void OnMatchStateSet(FName state, bool bTeamMatch = false);	// 当游戏状态发生变化时，调用该函数
 
 	float SingleTripTime = 0.0f;	// 单程时间
 
@@ -72,7 +79,7 @@ protected:
 	float TimeSyncRunningTime = 0.f;	// 时间同步运行时间
 
 	void CheckTimeSync(float DeltaTime);	// 检查时间同步
-	void HandleMatchHasStarted();	// 处理游戏开始
+	void HandleMatchHasStarted(bool bTeamMatch = false);	// 处理游戏开始
 	void HandleCooldown();	// 处理冷却时间
 
 	// 服务器检查游戏状态
@@ -92,6 +99,12 @@ protected:
 
 	UFUNCTION(Client, Reliable)
 	void ClientElimAnnouncement(APlayerState* Attacker, APlayerState* Victim);	// 客户端击杀公告
+
+	UPROPERTY(ReplicatedUsing= OnRep_ShowTeamScores)
+	bool bShowTeamScores = false;	// 是否显示队伍分数
+
+	UFUNCTION()
+	void OnRep_ShowTeamScores();	// 当bShowTeamScores发生变化时，调用该函数
 
 private:
 	UPROPERTY()

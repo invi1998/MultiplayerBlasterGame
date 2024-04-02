@@ -41,6 +41,16 @@ void ABlasterGameState::UpdateTopScore(ABlasterPlayerState* ScoringPlayer)
 	}
 }
 
+void ABlasterGameState::RedTeamScored()
+{
+	++RedTeamScore;
+}
+
+void ABlasterGameState::BlueTeamScored()
+{
+	++BlueTeamScore;
+}
+
 void ABlasterGameState::OnRepRedTeamScore()
 {
 }

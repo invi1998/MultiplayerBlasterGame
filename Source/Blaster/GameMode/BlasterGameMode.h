@@ -43,6 +43,8 @@ public:
 
 	float LevelStartingTime = 0.f;		// 关卡开始时间
 
+	bool bTeamMatch = false;	// 是否是团队比赛
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void OnMatchStateSet() override;

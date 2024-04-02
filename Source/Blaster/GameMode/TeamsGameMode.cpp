@@ -6,6 +6,14 @@
 #include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "Kismet/GameplayStatics.h"
 
+ATeamsGameMode::ATeamsGameMode()
+{
+	// 将其设置为true时，游戏模式将会停留在等待开始的状态，它会为所有玩家生成一个默认设置，他们可以使用它在地图中飞行，没有网格
+	bDelayedStart = true;
+
+	bTeamMatch = true;	// 设置为true时，游戏模式将会在团队之间进行比赛
+}
+
 void ATeamsGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);

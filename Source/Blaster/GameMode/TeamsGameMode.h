@@ -15,6 +15,7 @@ class BLASTER_API ATeamsGameMode : public ABlasterGameMode
 	GENERATED_BODY()
 
 public:
+	ATeamsGameMode();
 	virtual void PostLogin(APlayerController* NewPlayer) override;	// 在玩家登录时调用
 
 	virtual void Logout(AController* Exiting) override;				// 在玩家退出时调用
