@@ -278,7 +278,7 @@ void ABlasterCharacter::RotatePlace(float DeltaTime)
 
 void ABlasterCharacter::SpawnDefaultWeapon()
 {
-	ABlasterGameMode* BlasterGameMode = Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this));
+	BlasterGameMode = BlasterGameMode == nullptr ? Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this)) : BlasterGameMode;
 	UWorld* World = GetWorld();
 	if (World && !bElimmed && BlasterGameMode && DefaultWeaponClass)
 	{
@@ -302,8 +302,8 @@ void ABlasterCharacter::Destroyed()
 		ElimBotComponent->DestroyComponent();
 	}
 
-	ABlasterGameMode* BlasterGameMode = Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this));
-	bool bMatchNotInProgress = BlasterGameMode && BlasterGameMode->GetMatchState() != MatchState::InProgress;
+	BlasterGameMode = BlasterGameMode == nullptr ? Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this)) : BlasterGameMode;
+	const bool bMatchNotInProgress = BlasterGameMode && BlasterGameMode->GetMatchState() != MatchState::InProgress;
 
 	if (Combat && Combat->EquippedWeapon && bMatchNotInProgress)
 	{
@@ -569,28 +569,31 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const U
 {
 	if (bElimmed) return;	// 如果已经被淘汰，那么就不再接受伤害
 
-	float DamageToHealth = Damage;	// 伤害值
-	if (Shield > 0.f)
+	BlasterGameMode = BlasterGameMode == nullptr ? GetWorld()->GetAuthGameMode<ABlasterGameMode>() : BlasterGameMode;
+
+	if (BlasterGameMode)
 	{
-		// 如果护盾大于0，那么就先扣除护盾
-		const float DamageToShield = FMath::Clamp(Damage, 0.f, Shield);
-		Shield -= DamageToShield;
-		DamageToHealth = FMath::Clamp(Damage - DamageToShield, 0.f, Health);
-	}
+		Damage = BlasterGameMode->CalculateDamage(Controller, InstigatorController, Damage);
 
-	BeforeDamageHealth = Health;
-	Health = FMath::Clamp(Health - DamageToHealth, 0.f, MaxHealth);
-	DamageRate = DamageToHealth / 1.f;	// 伤害速率
+		float DamageToHealth = Damage;	// 伤害值
+		if (Shield > 0.f)
+		{
+			// 如果护盾大于0，那么就先扣除护盾
+			const float DamageToShield = FMath::Clamp(Damage, 0.f, Shield);
+			Shield -= DamageToShield;
+			DamageToHealth = FMath::Clamp(Damage - DamageToShield, 0.f, Health);
+		}
 
-	UpdateHUDHealthNative();
-	UpdateHUDHealth();
-	UpdateHUDShield();
-	PlayHitReactMontage();
+		BeforeDamageHealth = Health;
+		Health = FMath::Clamp(Health - DamageToHealth, 0.f, MaxHealth);
+		DamageRate = DamageToHealth / 1.f;	// 伤害速率
 
-	if (Health == 0.f)
-	{
-		ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
-		if (BlasterGameMode)
+		UpdateHUDHealthNative();
+		UpdateHUDHealth();
+		UpdateHUDShield();
+		PlayHitReactMontage();
+
+		if (Health == 0.f)
 		{
 			BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
 			ABlasterPlayerController* AttackerController = Cast<ABlasterPlayerController>(InstigatorController);
@@ -1049,7 +1052,7 @@ void ABlasterCharacter::DropOrDestroyWeapon(AWeapon* Weapon)
 
 void ABlasterCharacter::ElimTimerFinished()
 {
-	ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
+	BlasterGameMode = BlasterGameMode == nullptr ? GetWorld()->GetAuthGameMode<ABlasterGameMode>() : BlasterGameMode;
 	if (BlasterGameMode && !bLeftGame)
 	{
 		BlasterGameMode->RequestRespawn(this, Controller);
@@ -1162,7 +1165,7 @@ void ABlasterCharacter::DamageRampUp(float DeltaTime)
 
 void ABlasterCharacter::ServerLeftGame_Implementation()
 {
-	ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
+	BlasterGameMode = BlasterGameMode == nullptr ? GetWorld()->GetAuthGameMode<ABlasterGameMode>() : BlasterGameMode;
 	BlasterPlayerState = BlasterPlayerState == nullptr ? GetPlayerState<ABlasterPlayerState>() : BlasterPlayerState;
 	if (BlasterGameMode && BlasterPlayerState)
 	{

@@ -19,6 +19,8 @@ public:
 
 	virtual void Logout(AController* Exiting) override;				// 在玩家退出时调用
 
+	virtual float CalculateDamage(AController* VictimController, AController* AttackerController, float Damage) override;	// 计算伤害
+
 protected:
 	virtual void HandleMatchHasStarted() override;	// 在比赛开始时调用
 	

@@ -30,6 +30,8 @@ public:
 
 	void PlayerLeftGame(class ABlasterPlayerState* PlayerLeaving);	// 玩家离开游戏
 
+	virtual float CalculateDamage(class AController* VictimController, class AController* AttackerController, float Damage);	// 计算伤害
+
 	UPROPERTY(EditDefaultsOnly)
 		float WarmupTime = 10.f;	// 预热时间
 

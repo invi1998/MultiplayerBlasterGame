@@ -467,6 +467,9 @@ private:
 	 */
 	bool bLeftGame = false;	// 是否离开游戏
 
+	UPROPERTY()
+	class ABlasterGameMode* BlasterGameMode;	// 游戏模式
+
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	// 是否装备武器

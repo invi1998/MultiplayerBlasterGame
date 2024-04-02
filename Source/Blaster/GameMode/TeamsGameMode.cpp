@@ -50,6 +50,23 @@ void ATeamsGameMode::Logout(AController* Exiting)
 	}
 }
 
+float ATeamsGameMode::CalculateDamage(AController* VictimController, AController* AttackerController, float Damage)
+{
+	// 如果受害者和攻击者都在同一队伍，那么就不会造成伤害
+	if (VictimController && AttackerController)
+	{
+		const ABlasterPlayerState* VictimPlayerState = VictimController->GetPlayerState<ABlasterPlayerState>();
+		const ABlasterPlayerState* AttackerPlayerState = AttackerController->GetPlayerState<ABlasterPlayerState>();
+
+		if (VictimPlayerState && AttackerPlayerState && VictimPlayerState->GetTeam() == AttackerPlayerState->GetTeam())
+		{
+			return 0.f;
+		}
+	}
+
+	return Damage;
+}
+
 void ATeamsGameMode::HandleMatchHasStarted()
 {
 	Super::HandleMatchHasStarted();
