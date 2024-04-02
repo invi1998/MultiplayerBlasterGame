@@ -106,6 +106,9 @@ protected:
 	UFUNCTION()
 	void OnRep_ShowTeamScores();	// 当bShowTeamScores发生变化时，调用该函数
 
+	FString GetInfoText(const TArray<class ABlasterPlayerState*>& Players);	// 获取信息文本
+	FString GetTeamsInfoText(class ABlasterGameState* BlasterGameState);	// 获取队伍信息文本
+
 private:
 	UPROPERTY()
 	class ABlasterHUD* BlasterHUD;	// HUD
