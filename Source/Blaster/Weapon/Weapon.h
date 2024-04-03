@@ -41,37 +41,37 @@ public:
 	 * 这里有几个变量，因为我想要控制左右上下以及中心的纹理
 	 */
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
-		class UTexture2D* CrosshairsCenter;
+	class UTexture2D* CrosshairsCenter;
 
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
-		class UTexture2D* CrosshairsLeft;
+	class UTexture2D* CrosshairsLeft;
 
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
-		class UTexture2D* CrosshairsRight;
+	class UTexture2D* CrosshairsRight;
 
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
-		class UTexture2D* CrosshairsTop;
+	class UTexture2D* CrosshairsTop;
 
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
-		class UTexture2D* CrosshairsBottom;
+	class UTexture2D* CrosshairsBottom;
 
 	// 瞄准时的武器缩放 FOV
 	UPROPERTY(EditAnywhere)
-		float ZoomedFOV = 30.f;
+	float ZoomedFOV = 30.f;
 
 	UPROPERTY(EditAnywhere)
-		float ZoomInterpSpeed = 20.f;
+	float ZoomInterpSpeed = 20.f;
 
 	/*
 	 * 自动开火
 	 */
 
 	UPROPERTY(EditAnywhere, Category = Combat)
-		float FireDelay = 0.15f;
+	float FireDelay = 0.15f;
 
 	// 标志是否是自动武器（自动开火的武器）
 	UPROPERTY(EditAnywhere, Category = Combat)
-		bool bAutomatic = true;
+	bool bAutomatic = true;
 
 	UPROPERTY(EditAnywhere, Category = Weapon)
 	class USoundCue* EquipSound;
@@ -82,9 +82,11 @@ public:
 	void EnableCustomDepth(bool bEnable);
 
 	// 武器是否被销毁当被丢弃时
+	UPROPERTY(Replicated)
 	bool bDestroyOnDrop = false;
 
 	// 武器是否会被销毁
+	UPROPERTY(Replicated)
 	bool bDestroyWeapon = false;
 
 	UPROPERTY(EditAnywhere)
@@ -113,7 +115,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Fire(const FVector& HitTarget);
 	// 丢弃武器 / 死亡掉落武器
-	void Dropped();
+	virtual void Dropped();
 	void AddAmmo(int32 Amount);
 
 	FVector TraceEndWithScatter(const FVector& HitTarget) const;	// 跟踪结束位置
@@ -125,7 +127,7 @@ protected:
 
 	virtual void OnWeaponStateSet();
 
-	virtual void OnEquiped();
+	virtual void OnEquipped();
 
 	virtual void OnDropped();
 

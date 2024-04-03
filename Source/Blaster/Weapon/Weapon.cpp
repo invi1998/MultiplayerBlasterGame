@@ -104,6 +104,8 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 
 	DOREPLIFETIME(AWeapon, WeaponState);
 	DOREPLIFETIME_CONDITION(AWeapon, bUseServerSideRewind, COND_OwnerOnly);		// 只在拥有者端复制
+	DOREPLIFETIME(AWeapon, bDestroyOnDrop);		// 丢弃时销毁
+	DOREPLIFETIME(AWeapon, bDestroyWeapon);		// 销毁武器
 }
 
 void AWeapon::OnWeaponStateSet()
@@ -112,7 +114,7 @@ void AWeapon::OnWeaponStateSet()
 	switch (WeaponState)
 	{
 	case EWeaponState::EWS_Equipped:
-		OnEquiped();
+		OnEquipped();
 		break;
 	case EWeaponState::EWS_Dropped:
 		OnDropped();
@@ -124,7 +126,7 @@ void AWeapon::OnWeaponStateSet()
 	}
 }
 
-void AWeapon::OnEquiped()
+void AWeapon::OnEquipped()
 {
 	ShowPickupWidget(false);
 	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);

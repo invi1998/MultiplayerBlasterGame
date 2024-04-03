@@ -276,7 +276,6 @@ private:
 	UPROPERTY(EditAnywhere)
 	int32 StartingGrenadeLauncherAmmo = 0;
 
-
 	void InitializeCarriedAmmo();
 
 	UPROPERTY(ReplicatedUsing = OnRep_CombatState)
@@ -304,7 +303,10 @@ private:
 	bool bHoldingFlag = false;	// 是否持有旗帜
 
 	UFUNCTION()
-	void OnRep_HoldingFlag();
+	void OnRep_HoldingFlag();	// 持有旗帜通知函数
+
+	UPROPERTY()
+	AWeapon* TheFlag;	// 旗帜
 
 public:
 	FORCEINLINE int32 GetGrenadeCount() const { return GrenadeCount; }

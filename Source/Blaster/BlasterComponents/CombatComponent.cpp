@@ -461,11 +461,10 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 		Character->Crouch();
 		bHoldingFlag = true;
 		// Èç¹ûÊÇÆìÖÄ
-		AttachFlagToLeftHand(WeaponToEquip);
-		/*Character->GetCharacterMovement()->bOrientRotationToMovement = true;
-		Character->bUseControllerRotationYaw = false;*/
 		WeaponToEquip->SetWeaponState(EWeaponState::EWS_Equipped);
+		AttachFlagToLeftHand(WeaponToEquip);
 		WeaponToEquip->SetOwner(Character);
+		TheFlag = WeaponToEquip;
 	}
 	else
 	{
