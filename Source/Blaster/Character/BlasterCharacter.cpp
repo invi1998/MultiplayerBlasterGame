@@ -25,6 +25,7 @@
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Blaster/GameState/BlasterGameState.h"
+#include "Blaster/PlayerStart/TeamPlayerStart.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -237,9 +238,7 @@ void ABlasterCharacter::PollInit()
 		BlasterPlayerState = GetPlayerState<ABlasterPlayerState>();
 		if (BlasterPlayerState)
 		{
-			BlasterPlayerState->AddToScore(0.f);
-			BlasterPlayerState->AddToDefeats(0);
-			SetTeamColor(BlasterPlayerState->GetTeam());
+			OnPlayerInitialized();
 
 			ABlasterGameState* BlasterGameState = Cast<ABlasterGameState>(UGameplayStatics::GetGameState(this));
 			if (BlasterGameState && BlasterGameState->TopScoringPlayers.Contains(BlasterPlayerState))
@@ -248,6 +247,42 @@ void ABlasterCharacter::PollInit()
 			}
 		}
 	}
+}
+
+void ABlasterCharacter::SetSpawnPoint()
+{
+	if (HasAuthority() && BlasterPlayerState && BlasterPlayerState->GetTeam() != ETeam::ET_NoTeam)
+	{
+		TArray<AActor*> PlayerStarts;	// 玩家出生点数组
+		UGameplayStatics::GetAllActorsOfClass(this, ATeamPlayerStart::StaticClass(), PlayerStarts);	// 获取所有的玩家出生点
+
+		TArray<ATeamPlayerStart*> TeamPlayerStarts;	// 队伍玩家出生点数组
+		for (AActor* PlayerStart : PlayerStarts)
+		{
+			ATeamPlayerStart* TeamPlayerStart = Cast<ATeamPlayerStart>(PlayerStart);
+			if (TeamPlayerStart && TeamPlayerStart->GetTeam() == BlasterPlayerState->GetTeam())
+			{
+				TeamPlayerStarts.Add(TeamPlayerStart);		// 将相同队伍的玩家出生点添加到队伍玩家出生点数组中
+			}
+		}
+
+		if (TeamPlayerStarts.Num() > 0)
+		{
+			const int32 RandomIndex = FMath::RandRange(0, TeamPlayerStarts.Num() - 1);	// 随机索引
+			const FVector SpawnLocation = TeamPlayerStarts[RandomIndex]->GetActorLocation();	// 随机生成的位置
+			const FRotator SpawnRotation = TeamPlayerStarts[RandomIndex]->GetActorRotation();	// 随机生成的旋转
+			SetActorLocation(SpawnLocation);	// 设置角色位置
+			SetActorRotation(SpawnRotation);	// 设置角色旋转
+		}
+	}
+}
+
+void ABlasterCharacter::OnPlayerInitialized()
+{
+	BlasterPlayerState->AddToScore(0.f);
+	BlasterPlayerState->AddToDefeats(0);
+	SetTeamColor(BlasterPlayerState->GetTeam());
+	SetSpawnPoint();
 }
 
 void ABlasterCharacter::RotatePlace(float DeltaTime)

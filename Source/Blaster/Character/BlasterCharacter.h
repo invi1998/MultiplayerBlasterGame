@@ -107,6 +107,10 @@ public:
 
 	void ImpulseCharacter();	// 推开周围的角色
 
+	void SetSpawnPoint();		// 设置出生点
+
+	void OnPlayerInitialized();	// 玩家初始化
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
