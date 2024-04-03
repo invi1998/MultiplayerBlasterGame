@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "WeaponTypes.h"
+#include "Blaster/BlasterTypes/Team.h"
 #include "Weapon.generated.h"
 
 // 武器状态枚举，其枚举常量是无符号八位整数，同时这个也是一个蓝图类型
@@ -141,6 +142,7 @@ protected:
 	UPROPERTY()
 	class ABlasterPlayerController* BlasterOwnerController;
 
+	// 在和武器的碰撞检测球体重叠的时候调用
 	UFUNCTION()
 	virtual void OnSphereOverlap(
 			UPrimitiveComponent* OverlappedComponent,	// 原始组件
@@ -151,6 +153,7 @@ protected:
 			const FHitResult& SweepResult
 		);
 
+	// 在和武器的碰撞检测球体结束重叠的时候调用
 	UFUNCTION()
 	void OnSphereEndOverlap(
 			UPrimitiveComponent* OverlappedComponent,	// 原始组件
@@ -224,6 +227,9 @@ private:
 	// 武器类型
 	UPROPERTY(EditAnywhere)
 	EWeaponType WeaponType;
+
+	UPROPERTY(EditAnywhere)
+	ETeam Team;
 
 public:
 	// Called every frame
