@@ -61,6 +61,7 @@ void AFlag::ResetFlag()
 	BlasterOwnerController = nullptr;
 
 	SetActorTransform(InitialTransform);
+
 }
 
 void AFlag::BeginPlay()
@@ -79,8 +80,6 @@ void AFlag::OnEquipped()
 	FlagMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);		// 设置FlagMesh开启碰撞	
 	FlagMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);	// 设置对WorldDynamic的碰撞响应为重叠
 
-	UKismetSystemLibrary::PrintString(this, TEXT("Flag OnEquipped"), true, true, FLinearColor::Red, 5.0f);
-	
 	EnableCustomDepth(false);
 
 }
