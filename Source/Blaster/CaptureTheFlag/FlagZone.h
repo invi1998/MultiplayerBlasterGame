@@ -27,8 +27,6 @@ protected:
 
 	virtual void OnStartOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);		// 开始重叠
 
-	virtual void OnEndOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);		// 结束重叠
-
 private:
 	UPROPERTY(EditAnywhere)
 	class USphereComponent* ZoneSphere;		// 区域球体

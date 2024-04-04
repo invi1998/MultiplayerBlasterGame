@@ -6,6 +6,7 @@
 #include "Blaster/Weapon/Flag.h"
 #include "Components/SphereComponent.h"
 #include "Blaster/GameMode/CaptureTheFlagGameMode.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 AFlagZone::AFlagZone()
 {
@@ -37,10 +38,4 @@ void AFlagZone::OnStartOverlap(UPrimitiveComponent* OverlappedComp, AActor* Othe
 		}
 	}
 }
-
-void AFlagZone::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex)
-{
-}
-
 
