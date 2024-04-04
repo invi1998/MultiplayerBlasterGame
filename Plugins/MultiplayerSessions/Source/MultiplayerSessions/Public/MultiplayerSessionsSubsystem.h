@@ -45,6 +45,9 @@ public:
 	FMultiplayerOnDestroySessionComplete MultiplayerOnDestroySessionComplete;
 	FMultiplayerOnStartSessionComplete MultiplayerOnStartSessionComplete;
 
+	FORCEINLINE int32 GetDesiredNumPublicConnections() const { return DesiredNumPublicConnections; }
+	FORCEINLINE FString GetDesiredMatchType() const { return DesiredMatchType; }
+
 protected:
 
 	//
@@ -80,4 +83,7 @@ private:
 	bool bCreateSessionOnDestroy{ false };
 	int32 LastNumPublicConnections;
 	FString LastMatchType;
+
+	int32 DesiredNumPublicConnections{};	// 我们想要的公共连接数
+	FString DesiredMatchType{};	// 我们想要的比赛类型
 };
