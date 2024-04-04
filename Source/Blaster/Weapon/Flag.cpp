@@ -46,6 +46,8 @@ void AFlag::ResetFlag()
 		Player->UnCrouch();	// Õ¾Á¢
 	}
 
+	SetActorTransform(InitialTransform);
+
 	if (!HasAuthority()) return;
 
 	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
@@ -59,8 +61,6 @@ void AFlag::ResetFlag()
 	SetOwner(nullptr);
 	BlasterOwnerCharacter = nullptr;
 	BlasterOwnerController = nullptr;
-
-	SetActorTransform(InitialTransform);
 
 }
 
