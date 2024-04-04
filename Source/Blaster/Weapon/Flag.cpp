@@ -76,8 +76,8 @@ void AFlag::OnEquipped()
 	GetAreaSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision);	// 设置区域球体关闭碰撞
 	FlagMesh->SetSimulatePhysics(false);		// 关闭FlagMesh的物理模拟
 	FlagMesh->SetEnableGravity(false);		// 关闭FlagMesh的重力
-	FlagMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);	// 设置FlagMesh的碰撞为查询
-	FlagMesh->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);	// 设置对动态物体的碰撞响应为重叠
+	FlagMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);		// 设置FlagMesh开启碰撞	
+	FlagMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);	// 设置对WorldDynamic的碰撞响应为重叠
 
 	UKismetSystemLibrary::PrintString(this, TEXT("Flag OnEquipped"), true, true, FLinearColor::Red, 5.0f);
 	
@@ -102,6 +102,7 @@ void AFlag::OnDropped()
 	FlagMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	FlagMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
 	FlagMesh->MarkRenderStateDirty();
+	UKismetSystemLibrary::PrintString(this, TEXT("Flag OnDropped"), true, true, FLinearColor::Red, 5.0f);
 	EnableCustomDepth(true);
 
 }
