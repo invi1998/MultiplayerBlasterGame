@@ -5,7 +5,8 @@
 #include "Components/Button.h"
 #include "MultiplayerSessionsSubsystem.h"
 #include "OnlineSessionSettings.h"
-#include "OnlineSubsystem.h"
+#include "OnlineSubsystem.h"	// 从 5.2 版本开始， OnlineSessionSettings.h 的包含已被弃用
+// #include "Online/OnlineSessionNames.h"
 
 void UMenu::MenuSetup(int32 NumberOfPublicConnections, FString TypeOfMatch, FString LobbyPath)
 {

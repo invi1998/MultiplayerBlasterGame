@@ -269,6 +269,10 @@ void ABlasterCharacter::SetSpawnPoint()
 		if (TeamPlayerStarts.Num() > 0)
 		{
 			const int32 RandomIndex = FMath::RandRange(0, TeamPlayerStarts.Num() - 1);	// 随机索引
+
+			// 打印RandomIndex到屏幕上
+			UKismetSystemLibrary::PrintString(this, FString::FromInt(RandomIndex), true, false, FLinearColor::Red, 0.f);
+
 			const FVector SpawnLocation = TeamPlayerStarts[RandomIndex]->GetActorLocation();	// 随机生成的位置
 			const FRotator SpawnRotation = TeamPlayerStarts[RandomIndex]->GetActorRotation();	// 随机生成的旋转
 			SetActorLocation(SpawnLocation);	// 设置角色位置
