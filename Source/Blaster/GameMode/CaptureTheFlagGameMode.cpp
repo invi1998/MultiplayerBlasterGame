@@ -11,8 +11,6 @@ void ACaptureTheFlagGameMode::PlayerEliminated(ABlasterCharacter* ElimmedCharact
 {
 	// 夺旗模式下，我们不希望记录队伍的得分，所以我们不调用父类的PlayerEliminated函数
 	ABlasterGameMode::PlayerEliminated(ElimmedCharacter, VictimController, AttackerController);
-
-
 }
 
 void ACaptureTheFlagGameMode::FlagCaptured(AFlag* Flag, AFlagZone* Zone)
