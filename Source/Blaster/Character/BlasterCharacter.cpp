@@ -294,6 +294,11 @@ void ABlasterCharacter::RotatePlace(float DeltaTime)
 		TurningInPlace = ETurningInPlace::ETIP_NotTurning;	// 不转弯
 		return;
 	}
+	if (Combat && Combat->EquippedWeapon)
+	{
+		bUseControllerRotationYaw = false;		// 不使用控制器旋转Yaw
+		GetCharacterMovement()->bOrientRotationToMovement = true;	// 朝向移动方向
+	}
 	if (bDisableGamePlay)
 	{
 		bUseControllerRotationYaw = false;
@@ -1300,4 +1305,12 @@ ETeam ABlasterCharacter::GetTeam()
 		return BlasterPlayerState->GetTeam();
 	}
 	return ETeam::ET_NoTeam;
+}
+
+void ABlasterCharacter::SetIsHoldingFlag(bool bCond)
+{
+	if (Combat)
+	{
+		Combat->bHoldingFlag = bCond;
+	}
 }

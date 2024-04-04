@@ -36,13 +36,47 @@ void AFlag::Dropped()
 	}
 }
 
+void AFlag::ResetFlag()
+{
+	if (ABlasterCharacter* Player = Cast<ABlasterCharacter>(GetOwner()))
+	{
+		Player->SetIsHoldingFlag(false);	// 设置玩家不持有旗帜
+		Player->SetOverlappingWeapon(nullptr);	// 设置玩家不重叠武器
+		Player->UnCrouch();	// 站立
+	}
+
+	if (!HasAuthority()) return;
+
+	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
+	FlagMesh->DetachFromComponent(DetachRules);
+
+	SetWeaponState(EWeaponState::EWS_Initial);
+
+	GetAreaSphere()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);	// 设置区域球体开启碰撞
+	GetAreaSphere()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);	// 设置对Pawn的碰撞响应为重叠
+
+	SetOwner(nullptr);
+	BlasterOwnerCharacter = nullptr;
+	BlasterOwnerController = nullptr;
+
+	SetActorTransform(InitialTransform);
+}
+
+void AFlag::BeginPlay()
+{
+	Super::BeginPlay();
+
+	InitialTransform = GetActorTransform();
+}
+
 void AFlag::OnEquipped()
 {
 	ShowPickupWidget(false);
 	GetAreaSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	FlagMesh->SetSimulatePhysics(false);
 	FlagMesh->SetEnableGravity(false);
-	FlagMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	FlagMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	FlagMesh->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);	// 设置对动态物体的碰撞响应为重叠
 	
 	EnableCustomDepth(false);
 

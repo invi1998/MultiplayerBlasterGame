@@ -503,4 +503,5 @@ public:
 	FORCEINLINE ULagCompensationComponent* GetLagCompensation() const { return LagCompensation; }
 	bool IsHoldingFlag() const;
 	ETeam GetTeam();
+	void SetIsHoldingFlag(bool bCond);		// 设置是否持有旗帜
 };
