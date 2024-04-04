@@ -6,6 +6,7 @@
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 AFlag::AFlag()
 {
@@ -72,11 +73,13 @@ void AFlag::BeginPlay()
 void AFlag::OnEquipped()
 {
 	ShowPickupWidget(false);
-	GetAreaSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	FlagMesh->SetSimulatePhysics(false);
-	FlagMesh->SetEnableGravity(false);
-	FlagMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	GetAreaSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision);	// 设置区域球体关闭碰撞
+	FlagMesh->SetSimulatePhysics(false);		// 关闭FlagMesh的物理模拟
+	FlagMesh->SetEnableGravity(false);		// 关闭FlagMesh的重力
+	FlagMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);	// 设置FlagMesh的碰撞为查询
 	FlagMesh->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);	// 设置对动态物体的碰撞响应为重叠
+
+	UKismetSystemLibrary::PrintString(this, TEXT("Flag OnEquipped"), true, true, FLinearColor::Red, 5.0f);
 	
 	EnableCustomDepth(false);
 
