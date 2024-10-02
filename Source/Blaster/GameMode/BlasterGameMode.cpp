@@ -17,7 +17,7 @@ namespace MatchState
 
 ABlasterGameMode::ABlasterGameMode()
 {
-	// ½«ÆäÉèÖÃÎªtrueÊ±£¬ÓÎÏ·Ä£Ê½½«»áÍ£ÁôÔÚµÈ´ı¿ªÊ¼µÄ×´Ì¬£¬Ëü»áÎªËùÓĞÍæ¼ÒÉú³ÉÒ»¸öÄ¬ÈÏÉèÖÃ£¬ËûÃÇ¿ÉÒÔÊ¹ÓÃËüÔÚµØÍ¼ÖĞ·ÉĞĞ£¬Ã»ÓĞÍø¸ñ
+	// å°†å…¶è®¾ç½®ä¸ºtrueæ—¶ï¼Œæ¸¸æˆæ¨¡å¼å°†ä¼šåœç•™åœ¨ç­‰å¾…å¼€å§‹çš„çŠ¶æ€ï¼Œå®ƒä¼šä¸ºæ‰€æœ‰ç©å®¶ç”Ÿæˆä¸€ä¸ªé»˜è®¤è®¾ç½®ï¼Œä»–ä»¬å¯ä»¥ä½¿ç”¨å®ƒåœ¨åœ°å›¾ä¸­é£è¡Œï¼Œæ²¡æœ‰ç½‘æ ¼
 	bDelayedStart = true;
 
 }
@@ -26,7 +26,7 @@ void ABlasterGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	// Èç¹ûÓÎÏ·×´Ì¬ÎªµÈ´ı¿ªÊ¼
+	// å¦‚æœæ¸¸æˆçŠ¶æ€ä¸ºç­‰å¾…å¼€å§‹
 	if (MatchState == MatchState::WaitingToStart)
 	{
 		CountdownTime = WarmupTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
@@ -101,18 +101,18 @@ void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* ElimmedCharacter, ABl
 			ABlasterCharacter* WinnerCharacter = Cast<ABlasterCharacter>(AttackPlayerState->GetPawn());
 			if (WinnerCharacter)
 			{
-				WinnerCharacter->MulticastGainedTheCrown();	// »ñµÃÍõ¹Ú
+				WinnerCharacter->MulticastGainedTheCrown();	// è·å¾—ç‹å† 
 			}
 		}
 
 		for (int32 i = 0; i < PlayersCurrentlyInTheLead.Num(); i++)
 		{
-			if (!BlasterGameState->TopScoringPlayers.Contains(PlayersCurrentlyInTheLead[i]))	// Èç¹û²»°üº¬
+			if (!BlasterGameState->TopScoringPlayers.Contains(PlayersCurrentlyInTheLead[i]))	// å¦‚æœä¸åŒ…å«
 			{
 				ABlasterCharacter* LoserCharacter = Cast<ABlasterCharacter>(PlayersCurrentlyInTheLead[i]->GetPawn());
 				if (LoserCharacter)
 				{
-					LoserCharacter->MulticastLostTheCrown();	// Ê§È¥Íõ¹Ú
+					LoserCharacter->MulticastLostTheCrown();	// å¤±å»ç‹å† 
 				}
 			}
 		}
@@ -128,7 +128,7 @@ void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* ElimmedCharacter, ABl
 		ElimmedCharacter->Elim(false);
 	}
 
-	// Í¨ÖªËùÓĞÍæ¼Ò£¬Ë­»÷É±ÁËË­
+	// é€šçŸ¥æ‰€æœ‰ç©å®¶ï¼Œè°å‡»æ€äº†è°
 	if (AttackPlayerState && VictimPlayerState)
 	{
 		for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
@@ -144,32 +144,32 @@ void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* ElimmedCharacter, ABl
 
 void ABlasterGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AController* ElimmedController)
 {
-	// Ïú»ÙÍæ¼ÒÊµÌå
+	// é”€æ¯ç©å®¶å®ä½“
 	if (ElimmedCharacter)
 	{
 		ElimmedCharacter->Reset();
 		ElimmedCharacter->Destroy();
 	}
 
-	// ÖØÉèÍæ¼ÒµÄÓÎÏ·×´Ì¬
+	// é‡è®¾ç©å®¶çš„æ¸¸æˆçŠ¶æ€
 	if (ElimmedController)
 	{
-		// Ëû»áÔÚÆğÊ¼µãÎ»ÖÃÉú³ÉÒ»¸öĞÂ½ÇÉ«
+		// ä»–ä¼šåœ¨èµ·å§‹ç‚¹ä½ç½®ç”Ÿæˆä¸€ä¸ªæ–°è§’è‰²
 		TArray<AActor*> PlayerStarts;
 		UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
 		int32 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
 		// RestartPlayerAtPlayerStart(ElimmedController, PlayerStarts[Selection]);
 
-		// ÍÆ¿ªÖÜÎ§µÄÍæ¼Ò
+		// æ¨å¼€å‘¨å›´çš„ç©å®¶
 
-		// ÏÈ»ñÈ¡³öÉúµãµÄÎ»ÖÃ
+		// å…ˆè·å–å‡ºç”Ÿç‚¹çš„ä½ç½®
 		FVector PlayerStartLocation = PlayerStarts[Selection]->GetActorLocation();
 
-		// »ñÈ¡³öµãÒÑ¾­´æÔÚµÄÍæ¼ÒÁĞ±í
+		// è·å–å‡ºç‚¹å·²ç»å­˜åœ¨çš„ç©å®¶åˆ—è¡¨
 		TArray<FOverlapResult> OverlappingActors;
 		if (UWorld* World = GetWorld())
 		{
-			// »ñÈ¡³öÉúµãÖÜÎ§µÄÍæ¼Ò
+			// è·å–å‡ºç”Ÿç‚¹å‘¨å›´çš„ç©å®¶
 			World->OverlapMultiByObjectType(
 				OverlappingActors, 
 				PlayerStartLocation, 
@@ -177,7 +177,7 @@ void ABlasterGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AController*
 				FCollisionObjectQueryParams(FCollisionObjectQueryParams::AllDynamicObjects),
 				FCollisionShape::MakeSphere(100.f));
 
-			// ±éÀúÍæ¼ÒÁĞ±í£¬È»ºóÍÆ¿ªËûÃÇ
+			// éå†ç©å®¶åˆ—è¡¨ï¼Œç„¶åæ¨å¼€ä»–ä»¬
 			for (auto OverlappingActor : OverlappingActors)
 			{
 				if (ACharacter* OverlappingCharacter = Cast<ACharacter>(OverlappingActor.GetActor()))
@@ -199,7 +199,7 @@ void ABlasterGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AController*
 void ABlasterGameMode::PlayerLeftGame(ABlasterPlayerState* PlayerLeaving)
 {
 	if (!PlayerLeaving) return;
-	ABlasterGameState* BlasterGameState = GetGameState<ABlasterGameState>();	// »ñÈ¡ÓÎÏ·×´Ì¬
+	ABlasterGameState* BlasterGameState = GetGameState<ABlasterGameState>();	// è·å–æ¸¸æˆçŠ¶æ€
 	if (BlasterGameState && BlasterGameState->TopScoringPlayers.Contains(PlayerLeaving))
 	{
 		BlasterGameState->TopScoringPlayers.Remove(PlayerLeaving);
@@ -212,6 +212,38 @@ void ABlasterGameMode::PlayerLeftGame(ABlasterPlayerState* PlayerLeaving)
 
 float ABlasterGameMode::CalculateDamage(AController* VictimController, AController* AttackerController, float Damage)
 {
+	//if (AttackPlayerState && AttackPlayerState != VictimPlayerState && BlasterGameState)
+	//{
+	//	TArray<ABlasterPlayerState*> PlayersCurrentlyInTheLead;
+	//	for (auto LeadPlayer : BlasterGameState->TopScoringPlayers)
+	//	{
+	//		PlayersCurrentlyInTheLead.Add(LeadPlayer);
+	//	}
+
+	//	AttackPlayerState->AddToScore(1.f);
+	//	BlasterGameState->UpdateTopScore(AttackPlayerState);
+
+	//	if (BlasterGameState->TopScoringPlayers.Contains(AttackPlayerState))
+	//	{
+	//		ABlasterCharacter* WinnerCharacter = Cast<ABlasterCharacter>(AttackPlayerState->GetPawn());
+	//		if (WinnerCharacter)
+	//		{
+	//			WinnerCharacter->MulticastGainedTheCrown();	// è·å¾—ç‹å† 
+	//		}
+	//	}
+
+	//	for (int32 i = 0; i < PlayersCurrentlyInTheLead.Num(); i++)
+	//	{
+	//		if (!BlasterGameState->TopScoringPlayers.Contains(PlayersCurrentlyInTheLead[i]))	// å¦‚æœä¸åŒ…å«
+	//		{
+	//			ABlasterCharacter* LoserCharacter = Cast<ABlasterCharacter>(PlayersCurrentlyInTheLead[i]->GetPawn());
+	//			if (LoserCharacter)
+	//			{
+	//				LoserCharacter->MulticastLostTheCrown();	// å¤±å»ç‹å† 
+	//			}
+	//		}
+	//	}
+	//}
 	return Damage;
 }
 
