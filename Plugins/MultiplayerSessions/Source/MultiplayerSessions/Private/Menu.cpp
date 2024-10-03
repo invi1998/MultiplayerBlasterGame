@@ -5,14 +5,14 @@
 #include "Components/Button.h"
 #include "MultiplayerSessionsSubsystem.h"
 #include "OnlineSessionSettings.h"
-#include "OnlineSubsystem.h"	// ´Ó 5.2 °æ±¾¿ªÊ¼£¬ OnlineSessionSettings.h µÄ°üº¬ÒÑ±»ÆúÓÃ
+#include "OnlineSubsystem.h"	// ä» 5.2 ç‰ˆæœ¬å¼€å§‹ï¼Œ OnlineSessionSettings.h çš„åŒ…å«å·²è¢«å¼ƒç”¨
 // #include "Online/OnlineSessionNames.h"
 
 void UMenu::MenuSetup(int32 NumberOfPublicConnections, FString TypeOfMatch, FString LobbyPath)
 {
-	PathToLobby = FString::Printf(TEXT("%s?listen"), *LobbyPath);	// ÉèÖÃÂ·¾¶
-	NumPublicConnections = NumberOfPublicConnections;	// ÉèÖÃ¹«¹²Á¬½ÓÊı
-	MatchType = TypeOfMatch;	// ÉèÖÃ±ÈÈüÀàĞÍ
+	PathToLobby = FString::Printf(TEXT("%s?listen"), *LobbyPath);	// è®¾ç½®è·¯å¾„
+	NumPublicConnections = NumberOfPublicConnections;	// è®¾ç½®å…¬å…±è¿æ¥æ•°
+	MatchType = TypeOfMatch;	// è®¾ç½®æ¯”èµ›ç±»å‹
 	AddToViewport();
 	SetVisibility(ESlateVisibility::Visible);
 	bIsFocusable = true;
@@ -39,11 +39,12 @@ void UMenu::MenuSetup(int32 NumberOfPublicConnections, FString TypeOfMatch, FStr
 
 	if (MultiplayerSessionsSubsystem)
 	{
-		MultiplayerSessionsSubsystem->MultiplayerOnCreateSessionComplete.AddDynamic(this, &ThisClass::OnCreateSession);
-		MultiplayerSessionsSubsystem->MultiplayerOnFindSessionsComplete.AddUObject(this, &ThisClass::OnFindSessions);
-		MultiplayerSessionsSubsystem->MultiplayerOnJoinSessionComplete.AddUObject(this, &ThisClass::OnJoinSession);
-		MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.AddDynamic(this, &ThisClass::OnDestroySession);
-		MultiplayerSessionsSubsystem->MultiplayerOnStartSessionComplete.AddDynamic(this, &ThisClass::OnStartSession);
+		// ç»™å¤šäººæ¸¸æˆä¼šè¯å­ç³»ç»Ÿæ·»åŠ å§”æ‰˜
+		MultiplayerSessionsSubsystem->MultiplayerOnCreateSessionComplete.AddDynamic(this, &ThisClass::OnCreateSession);		// æ·»åŠ å§”æ‰˜,åˆ›å»ºä¼šè¯å®Œæˆ
+		MultiplayerSessionsSubsystem->MultiplayerOnFindSessionsComplete.AddUObject(this, &ThisClass::OnFindSessions);		// æ·»åŠ å§”æ‰˜,æŸ¥æ‰¾ä¼šè¯å®Œæˆ
+		MultiplayerSessionsSubsystem->MultiplayerOnJoinSessionComplete.AddUObject(this, &ThisClass::OnJoinSession);		// æ·»åŠ å§”æ‰˜,åŠ å…¥ä¼šè¯å®Œæˆ
+		MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.AddDynamic(this, &ThisClass::OnDestroySession);	// æ·»åŠ å§”æ‰˜,é”€æ¯ä¼šè¯å®Œæˆ
+		MultiplayerSessionsSubsystem->MultiplayerOnStartSessionComplete.AddDynamic(this, &ThisClass::OnStartSession);		// æ·»åŠ å§”æ‰˜,å¼€å§‹ä¼šè¯å®Œæˆ
 	}
 }
 
@@ -72,7 +73,7 @@ void UMenu::NativeDestruct()
 	Super::NativeDestruct();
 }
 
-// UE5.1Ö®ºó¸Ã·½·¨±»ÆúÓÃ£¬¸ÄÎªÊ¹ÓÃNativeDestruct·½·¨´úÌæ
+// UE5.1ä¹‹åè¯¥æ–¹æ³•è¢«å¼ƒç”¨ï¼Œæ”¹ä¸ºä½¿ç”¨NativeDestructæ–¹æ³•ä»£æ›¿
 //void UMenu::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)
 //{
 //	MenuTearDown();
