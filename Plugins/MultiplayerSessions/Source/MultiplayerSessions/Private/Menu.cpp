@@ -181,10 +181,9 @@ void UMenu::MenuTearDown()
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		APlayerController* PlayerController = World->GetFirstPlayerController();
-		if (PlayerController)
+		if (APlayerController* PlayerController = World->GetFirstPlayerController())		// 获取第一个玩家控制器
 		{
-			FInputModeGameOnly InputModeData;
+			const FInputModeGameOnly InputModeData;
 			PlayerController->SetInputMode(InputModeData);
 			PlayerController->SetShowMouseCursor(false);
 		}
