@@ -84,16 +84,6 @@ void ABlasterGameState::OnRepBlueTeamScore()
 
 void ABlasterGameState::OnRepGreenTeamScore()
 {
-	//DOREPLIFETIME(ABlasterGameState, TopScoringPlayers);
-	//DOREPLIFETIME(ABlasterGameState, RedTeamScore);
-	//DOREPLIFETIME(ABlasterGameState, BlueTeamScore);
-	//DOREPLIFETIME(ABlasterGameState, GreenTeamScore);
-	//DOREPLIFETIME(ABlasterGameState, YellowTeamScore);
-	//DOREPLIFETIME(ABlasterGameState, PurpleTeamScore);
-	//DOREPLIFETIME(ABlasterGameState, OrangeTeamScore);
-	//DOREPLIFETIME(ABlasterGameState, PinkTeamScore);
-	//DOREPLIFETIME(ABlasterGameState, BlackTeamScore);
-	//DOREPLIFETIME(ABlasterGameState, WhiteTeamScore);
 }
 
 void ABlasterGameState::OnRepYellowTeamScore()
