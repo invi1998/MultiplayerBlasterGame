@@ -118,6 +118,7 @@ void UMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResu
 		Result.Session.SessionSettings.Get(FName("MatchType"), SettingsValue);
 		if (SettingsValue == MatchType)
 		{
+			// 如果找到了匹配的会话，就加入会话
 			MultiplayerSessionsSubsystem->JoinSession(Result);
 			return;
 		}
