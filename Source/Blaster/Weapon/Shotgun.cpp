@@ -26,21 +26,20 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 		const FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
 		FVector Start = SocketTransform.GetLocation();
 
-		// ¼ÆËãö±µ¯Ç¹×Óµ¯ÃüÖĞ¸öÊı
+		// è®¡ç®—éœ°å¼¹æªå­å¼¹å‘½ä¸­ä¸ªæ•°
 
-		// ÒòÎªö±µ¯Ç¹×Óµ¯É¢ÉäµÄÔµ¹Ê£¬ËüÓĞ¿ÉÄÜÍ¬Ê±ÃüÖĞ¶à¸ö½ÇÉ«£¬ÎÒÃÇÒ²ĞèÒª´¦ÀíÕâÖÖÇé¿ö
-		// ÕâÀï²ÉÓÃÒ»¸ömap½á¹¹´¦Àí£¬¼üÎª½ÇÉ«Ö¸Õë£¬ÖµÎª×Óµ¯ÃüÖĞÊıÁ¿
-		// »÷ÖĞ½ÇÉ«ºÍ¶ÔÓ¦ÊıÁ¿µÄmapÓ³Éä
-		TMap<ABlasterCharacter*, uint32> HitMap;			// ÓÃÓÚ´æ´¢»÷ÖĞ½ÇÉ«ºÍ¶ÔÓ¦ÊıÁ¿µÄmapÓ³Éä
-		TMap<ABlasterCharacter*, uint32> HeadShotHitMap;	// ÓÃÓÚ´æ´¢»÷ÖĞ½ÇÉ«ºÍ¶ÔÓ¦ÊıÁ¿µÄmapÓ³Éä (Í·²¿»÷ÖĞ)
+		// å› ä¸ºéœ°å¼¹æªå­å¼¹æ•£å°„çš„ç¼˜æ•…ï¼Œå®ƒæœ‰å¯èƒ½åŒæ—¶å‘½ä¸­å¤šä¸ªè§’è‰²ï¼Œæˆ‘ä»¬ä¹Ÿéœ€è¦å¤„ç†è¿™ç§æƒ…å†µ
+		// è¿™é‡Œé‡‡ç”¨ä¸€ä¸ªmapç»“æ„å¤„ç†ï¼Œé”®ä¸ºè§’è‰²æŒ‡é’ˆï¼Œå€¼ä¸ºå­å¼¹å‘½ä¸­æ•°é‡
+		// å‡»ä¸­è§’è‰²å’Œå¯¹åº”æ•°é‡çš„mapæ˜ å°„
+		TMap<ABlasterCharacter*, uint32> HitMap;			// ç”¨äºå­˜å‚¨å‡»ä¸­è§’è‰²å’Œå¯¹åº”æ•°é‡çš„mapæ˜ å°„
+		TMap<ABlasterCharacter*, uint32> HeadShotHitMap;	// ç”¨äºå­˜å‚¨å‡»ä¸­è§’è‰²å’Œå¯¹åº”æ•°é‡çš„mapæ˜ å°„ (å¤´éƒ¨å‡»ä¸­)
 
 		for (FVector_NetQuantize HitTarget : HitTargets)
 		{
 			FHitResult FireHit;
 			WeaponTraceHit(Start, HitTarget, FireHit);
 
-			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());
-			if (BlasterCharacter)
+			if (ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor()))
 			{
 				const bool bIsHeadShot = FireHit.BoneName.ToString() == "head";
 
@@ -96,7 +95,7 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 		TArray<ABlasterCharacter*> HitCharacters;
 		TMap<ABlasterCharacter*, float> HitDamageMap;
 
-		// ¼ÆËãÉËº¦²¢Ó¦ÓÃÔÚ½ÇÉ«ÉíÉÏ
+		// è®¡ç®—ä¼¤å®³å¹¶åº”ç”¨åœ¨è§’è‰²èº«ä¸Š
 		for (auto HitPair : HitMap)
 		{
 			if (HitPair.Key)
@@ -114,7 +113,7 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 			}
 		}
 
-		// ¼ÆËã±¬Í·ÉËº¦²¢Ó¦ÓÃÔÚ½ÇÉ«ÉíÉÏ
+		// è®¡ç®—çˆ†å¤´ä¼¤å®³å¹¶åº”ç”¨åœ¨è§’è‰²èº«ä¸Š
 		for (auto HitHeadPair : HeadShotHitMap)
 		{
 			if (HitHeadPair.Key)
@@ -132,15 +131,15 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 			}
 		}
 
-		bool bCauseAuthDamage = !bUseServerSideRewind || OwnerPawn->IsLocallyControlled();	// ÊÇ·ñÔì³ÉÉËº¦£¬Èç¹û²»Ê¹ÓÃ·şÎñÆ÷µ¹´ø£¬»òÕßÊÇ±¾µØ¿ØÖÆ£¬ÄÇÃ´¾ÍÔì³ÉÉËº¦
+		bool bCauseAuthDamage = !bUseServerSideRewind || OwnerPawn->IsLocallyControlled();	// æ˜¯å¦é€ æˆä¼¤å®³ï¼Œå¦‚æœä¸ä½¿ç”¨æœåŠ¡å™¨å€’å¸¦ï¼Œæˆ–è€…æ˜¯æœ¬åœ°æ§åˆ¶ï¼Œé‚£ä¹ˆå°±é€ æˆä¼¤å®³
 
 		for (auto DamagePair : HitDamageMap)
 		{
 			if (DamagePair.Key && HasAuthority() && bCauseAuthDamage && InstigatorController)
 			{
 				UGameplayStatics::ApplyDamage(
-					DamagePair.Key,			// ±»»÷ÖĞµÄ½ÇÉ«
-					DamagePair.Value,		// ÉËº¦
+					DamagePair.Key,			// è¢«å‡»ä¸­çš„è§’è‰²
+					DamagePair.Value,		// ä¼¤å®³
 					InstigatorController,
 					this,
 					UDamageType::StaticClass()
@@ -169,7 +168,7 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 
 void AShotgun::ShotgunTraceHitWithScatter(const FVector& HitTarget, TArray<FVector_NetQuantize>& HitTargets)
 {
-	// ´ÓÎäÆ÷µÄÇ¹¿ÚÎ»ÖÃ¿ªÊ¼×·×Ù
+	// ä»æ­¦å™¨çš„æªå£ä½ç½®å¼€å§‹è¿½è¸ª
 	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash");
 
 	if (MuzzleFlashSocket == nullptr) return;
@@ -177,9 +176,9 @@ void AShotgun::ShotgunTraceHitWithScatter(const FVector& HitTarget, TArray<FVect
 	const FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
 	const FVector TraceStart = SocketTransform.GetLocation();
 
-	// Ò»¸ö´Ó¸ú×ÙÆğÊ¼Î»ÖÃÖ¸ÏòÃüÖĞÄ¿±êµÄÏòÁ¿£¨¹éÒ»»¯µÄÏòÁ¿£©
+	// ä¸€ä¸ªä»è·Ÿè¸ªèµ·å§‹ä½ç½®æŒ‡å‘å‘½ä¸­ç›®æ ‡çš„å‘é‡ï¼ˆå½’ä¸€åŒ–çš„å‘é‡ï¼‰
 	const FVector ToTargetNormalized = (HitTarget - TraceStart).GetSafeNormal();
-	// ´Ó¹ì¼£Æğµãµ½Í·²¿Ä¿±êµÄÄ³¸öÎ»ÖÃ
+	// ä»è½¨è¿¹èµ·ç‚¹åˆ°å¤´éƒ¨ç›®æ ‡çš„æŸä¸ªä½ç½®
 	const FVector SphereCenter = TraceStart + ToTargetNormalized * DistanceToSphere;
 	
 	for (uint32 i = 0; i < NumberOfPellets; i++)
