@@ -41,9 +41,7 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 
 			if (ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor()))
 			{
-				const bool bIsHeadShot = FireHit.BoneName.ToString() == "head";
-
-				if (bIsHeadShot)
+				if (FireHit.BoneName.ToString() == "head")
 				{
 					if (HeadShotHitMap.Contains(BlasterCharacter))
 					{
