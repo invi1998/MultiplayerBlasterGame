@@ -598,9 +598,7 @@ void UCombatComponent::AttachFlagToLeftHand(AWeapon* Flag)
 {
 	if (Character == nullptr || Character->GetMesh() == nullptr || Flag == nullptr) return;
 
-	const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("FlagSocket"));
-
-	if (HandSocket)
+	if (const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("FlagSocket")))
 	{
 		HandSocket->AttachActor(Flag, Character->GetMesh());
 	}
@@ -610,9 +608,7 @@ void UCombatComponent::AttachActorToBack(AActor* ActorToAttach)
 {
 	if (Character == nullptr || Character->GetMesh() == nullptr || ActorToAttach == nullptr) return;
 
-	const USkeletalMeshSocket* BackpackSocket = Character->GetMesh()->GetSocketByName(FName("BackpackSocket"));
-
-	if (BackpackSocket)
+	if (const USkeletalMeshSocket* BackpackSocket = Character->GetMesh()->GetSocketByName(FName("BackpackSocket")))
 	{
 		BackpackSocket->AttachActor(ActorToAttach, Character->GetMesh());
 	}
