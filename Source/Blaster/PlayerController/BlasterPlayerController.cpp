@@ -33,7 +33,7 @@ void ABlasterPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
-	// °ó¶¨Esc¼ü
+	// ç»‘å®šEscé”®
 	if (InputComponent)
 	{
 		InputComponent->BindAction("Quit", IE_Pressed, this, &ABlasterPlayerController::ShowReturnToMainMenu);
@@ -442,7 +442,7 @@ FString ABlasterPlayerController::GetInfoText(const TArray<ABlasterPlayerState*>
 	}
 	else if (TopPlayers.Num() == 1)
 	{
-		InfoTextString = FString::Printf(TEXT("»ñÊ¤Õß: \n%s"), *TopPlayers[0]->GetPlayerName());
+		InfoTextString = FString::Printf(TEXT("èŽ·èƒœè€…: \n%s"), *TopPlayers[0]->GetPlayerName());
 	}
 	else if (TopPlayers.Num() > 1)
 	{
@@ -510,7 +510,7 @@ void ABlasterPlayerController::ClientJoinMidGame_Implementation(FName StateOfMat
 
 	OnMatchStateSet(MatchState);
 
-	// Ö»ÓÐÔÚHUD×é¼þ¹¹½¨³É¹¦£¬²¢ÇÒÓÎÏ·×´Ì¬´¦ÓÚµÈ´ý¿ªÊ¼µÄ½×¶Î£¬²Å½øÐÐ¹«¸æUIÕ¹Ê¾
+	// åªæœ‰åœ¨HUDç»„ä»¶æž„å»ºæˆåŠŸï¼Œå¹¶ä¸”æ¸¸æˆçŠ¶æ€å¤„äºŽç­‰å¾…å¼€å§‹çš„é˜¶æ®µï¼Œæ‰è¿›è¡Œå…¬å‘ŠUIå±•ç¤º
 	if (BlasterHUD && MatchState == MatchState::WaitingToStart)
 	{
 		BlasterHUD->AddAnnouncement();
@@ -536,10 +536,10 @@ void ABlasterPlayerController::ServerCheckMatchState_Implementation()
 
 void ABlasterPlayerController::ClientReportServerTime_Implementation(float TimeOfClientRequest, float TimeServerReceivedClientRequest)
 {
-	// Í¨ÐÅÍù·µÊ±¼ä
+	// é€šä¿¡å¾€è¿”æ—¶é—´
 	const float RoundTripTime = GetWorld()->GetTimeSeconds() - TimeOfClientRequest;
 	SingleTripTime = RoundTripTime * 0.5f;
-	// ¼ÆËã·þÎñÆ÷µ±Ç°Ê±¼ä
+	// è®¡ç®—æœåŠ¡å™¨å½“å‰æ—¶é—´
 	const float CurrentServerTime = TimeServerReceivedClientRequest + SingleTripTime;
 
 	ClientServerDelta = CurrentServerTime - GetWorld()->GetTimeSeconds();
@@ -593,7 +593,7 @@ void ABlasterPlayerController::SetHUDHealthNative(float Health, float MaxHealth,
 			HealthBarMaterial->SetScalarParameterValue(FName("Before"), BeforeHealthPercent);
 			HealthBarMaterial->SetScalarParameterValue(FName("Current"), HealthPercent);
 			HealthBarMaterial->SetScalarParameterValue(FName("After"), AfterHealHealthPercent);
-			// ÉèÖÃ²¥·Å¶¯»­Ê±¼ä·¶Î§
+			// è®¾ç½®æ’­æ”¾åŠ¨ç”»æ—¶é—´èŒƒå›´
 		}
 		
 	}
@@ -635,34 +635,34 @@ void ABlasterPlayerController::SetHUDShield(float Shield, float MaxShield)
 {
 	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 
-	bool bHUDValid = BlasterHUD &&	// HUD´æÔÚ
-			BlasterHUD->CharacterOverlay &&	// HUDµÄ½ÇÉ«ÐÅÏ¢UI´æÔÚ
-			BlasterHUD->CharacterOverlay->ShieldBar_R2L &&	// HUDµÄ½ÇÉ«ÐÅÏ¢UIµÄ»¤¶ÜÌõ´æÔÚ(´ÓÓÒµ½×ó)
-			BlasterHUD->CharacterOverlay->ShieldBar_L2R &&	// HUDµÄ½ÇÉ«ÐÅÏ¢UIµÄ»¤¶ÜÌõ´æÔÚ(´Ó×óµ½ÓÒ)
-			BlasterHUD->CharacterOverlay->ShieldText;	// HUDµÄ½ÇÉ«ÐÅÏ¢UIµÄ»¤¶ÜÖµÎÄ±¾´æÔÚ
+	bool bHUDValid = BlasterHUD &&	// HUDå­˜åœ¨
+			BlasterHUD->CharacterOverlay &&	// HUDçš„è§’è‰²ä¿¡æ¯UIå­˜åœ¨
+			BlasterHUD->CharacterOverlay->ShieldBar_R2L &&	// HUDçš„è§’è‰²ä¿¡æ¯UIçš„æŠ¤ç›¾æ¡å­˜åœ¨(ä»Žå³åˆ°å·¦)
+			BlasterHUD->CharacterOverlay->ShieldBar_L2R &&	// HUDçš„è§’è‰²ä¿¡æ¯UIçš„æŠ¤ç›¾æ¡å­˜åœ¨(ä»Žå·¦åˆ°å³)
+			BlasterHUD->CharacterOverlay->ShieldText;	// HUDçš„è§’è‰²ä¿¡æ¯UIçš„æŠ¤ç›¾å€¼æ–‡æœ¬å­˜åœ¨
 
 	if (bHUDValid)
 	{
 		float ShieldPercent = Shield / MaxShield;
 		
-		// Èç¹ûÎÒÃÇµÄ»¤¶ÜÖµÐ¡ÓÚµÈÓÚµ±Ç°ÑªÌõµÄ·´ÏòÖµ£¬ÄÇÃ´»¤¶ÜÖµµÄÆðÊ¼µã¾ÍÊÇÑªÌõµÄÖÕµã£¨ÎªÁËÊµÏÖÕâÖÖÐ§¹û£¬ÎÒ½«»¤¶ÜµÄ°Ù·Ö±È¼ÓÉÏÑªÌõ°Ù·Ö±È£©
+		// å¦‚æžœæˆ‘ä»¬çš„æŠ¤ç›¾å€¼å°äºŽç­‰äºŽå½“å‰è¡€æ¡çš„åå‘å€¼ï¼Œé‚£ä¹ˆæŠ¤ç›¾å€¼çš„èµ·å§‹ç‚¹å°±æ˜¯è¡€æ¡çš„ç»ˆç‚¹ï¼ˆä¸ºäº†å®žçŽ°è¿™ç§æ•ˆæžœï¼Œæˆ‘å°†æŠ¤ç›¾çš„ç™¾åˆ†æ¯”åŠ ä¸Šè¡€æ¡ç™¾åˆ†æ¯”ï¼‰
 		if (BlasterHUD->CharacterOverlay->HealthBar->Percent < 1.f && ShieldPercent > 0 && ShieldPercent <= 1.f - BlasterHUD->CharacterOverlay->HealthBar->Percent)
 		{
 			ShieldPercent += BlasterHUD->CharacterOverlay->HealthBar->Percent;
-			// È»ºóÎÒÃÇÊ¹ÓÃ´Ó×óµ½ÓÒµÄ½ø¶ÈÌõÌî³äÀàÐÍ
+			// ç„¶åŽæˆ‘ä»¬ä½¿ç”¨ä»Žå·¦åˆ°å³çš„è¿›åº¦æ¡å¡«å……ç±»åž‹
 			BlasterHUD->CharacterOverlay->ShieldBar_R2L->SetPercent(0);
 			BlasterHUD->CharacterOverlay->ShieldBar_L2R->SetPercent(ShieldPercent);
 		}
 		else if (BlasterHUD->CharacterOverlay->HealthBar->Percent < 1.f && ShieldPercent > 0 && ShieldPercent > 1.f - BlasterHUD->CharacterOverlay->HealthBar->Percent)
 		{
-			// È»ºóÎÒÃÇÊ¹ÓÃ´ÓÓÒµ½×óµÄ½ø¶ÈÌõÌî³äÀàÐÍ
+			// ç„¶åŽæˆ‘ä»¬ä½¿ç”¨ä»Žå³åˆ°å·¦çš„è¿›åº¦æ¡å¡«å……ç±»åž‹
 			BlasterHUD->CharacterOverlay->ShieldBar_R2L->SetPercent(ShieldPercent);
 			BlasterHUD->CharacterOverlay->ShieldBar_L2R->SetPercent(0);
 
 		}
 		else if (BlasterHUD->CharacterOverlay->HealthBar->Percent == 1.f)
 		{
-			// Èç¹ûÎÒÃÇµÄÑªÌõÊÇÂúµÄ£¬ÄÇÃ´»¤¶ÜµÄ½ø¶ÈÌõµÄÌî³äÀàÐÍ¾ÍÊÇ´ÓÓÒµ½×ó
+			// å¦‚æžœæˆ‘ä»¬çš„è¡€æ¡æ˜¯æ»¡çš„ï¼Œé‚£ä¹ˆæŠ¤ç›¾çš„è¿›åº¦æ¡çš„å¡«å……ç±»åž‹å°±æ˜¯ä»Žå³åˆ°å·¦
 			BlasterHUD->CharacterOverlay->ShieldBar_R2L->SetPercent(ShieldPercent);
 			BlasterHUD->CharacterOverlay->ShieldBar_L2R->SetPercent(0);
 		}
@@ -776,9 +776,7 @@ void ABlasterPlayerController::SetHUDAnnouncementCountdown(float CountdownTime)
 {
 	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 
-	bool bHUDValid = BlasterHUD && BlasterHUD->Announcement && BlasterHUD->Announcement->WarmupTime;
-
-	if (bHUDValid)
+	if (BlasterHUD && BlasterHUD->Announcement && BlasterHUD->Announcement->WarmupTime)
 	{
 		if (CountdownTime < 0.f)
 		{
