@@ -4,6 +4,10 @@
 
 [![Bilibili](https://img.shields.io/badge/Bilibili-invi1998-brightgreen?logo=bilibili&logoColor=blue)](https://www.bilibili.com/video/BV15AYyexED6)
 
+[![JetBrains Logo](https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.png)](https://jb.gg/OpenSourceSupport)
+
+
+
 ---
 
 <img src="data:image/svg+xml,%3Csvg%20width%3D%22300%22%20height%3D%22300%22%20viewBox%3D%220%200%20300%20300%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22grad1%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%220%25%22%3E%3Cstop%20offset%3D%220%25%22%20style%3D%22stop-color%3A%231a237e%3Bstop-opacity%3A1%22%20%2F%3E%3Cstop%20offset%3D%22100%25%22%20style%3D%22stop-color%3A%2300c853%3Bstop-opacity%3A1%22%20%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M150%2050%20C%20200%2050%2C%20200%20150%2C%20150%20150%20S%20100%2050%2C%20150%2050%20Z%22%20fill%3D%22url(%23grad1)%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20%2F%3E%3Ctext%20x%3D%22150%22%20y%3D%22150%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2260%22%20fill%3D%22white%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22central%22%3Einvi%3C%2Ftext%3E%3Ctext%20x%3D%22150%22%20y%3D%22250%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2220%22%20fill%3D%22white%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22central%22%3Einvi1998%3C%2Ftext%3E%3C%2Fsvg%3E" alt="invi Logo" />
